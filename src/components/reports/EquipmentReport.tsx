@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { ReportHeader } from './templates/ReportHeader';
+import { ReportFooter } from './templates/ReportFooter';
 import { EquipmentTable } from './templates/EquipmentTable';
 import { SignatureBlock } from './templates/SignatureBlock';
 import { JobReportData } from '@/hooks/useReportData';
@@ -24,13 +25,19 @@ export const EquipmentReport = forwardRef<HTMLDivElement, EquipmentReportProps>(
           reportTitle="Equipment Usage Summary"
           companyName={tenant?.name}
           companyLogo={tenant?.logo_url || undefined}
+          headerTagline={tenant?.report_header_text || undefined}
         />
 
         <EquipmentTable assignments={equipmentAssignments} />
 
         {includeSignature && (
-          <SignatureBlock title="Equipment Manager Signature" />
+          <SignatureBlock 
+            title="Equipment Manager Signature"
+            certificationText={tenant?.report_certification_text || undefined}
+          />
         )}
+
+        <ReportFooter footerText={tenant?.report_footer_text || undefined} />
       </div>
     );
   }

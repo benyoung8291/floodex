@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { ReportHeader } from './templates/ReportHeader';
+import { ReportFooter } from './templates/ReportFooter';
 import { DryingLogTable, DryingLogSummaryTable } from './templates/DryingLogTable';
 import { EquipmentTable } from './templates/EquipmentTable';
 import { SignatureBlock } from './templates/SignatureBlock';
@@ -28,6 +29,7 @@ export const DryingLogReport = forwardRef<HTMLDivElement, DryingLogReportProps>(
           reportTitle="Drying Log Report"
           companyName={tenant?.name}
           companyLogo={tenant?.logo_url || undefined}
+          headerTagline={tenant?.report_header_text || undefined}
           dateRange={dateRange}
         />
 
@@ -65,8 +67,15 @@ export const DryingLogReport = forwardRef<HTMLDivElement, DryingLogReportProps>(
         )}
 
         {includeSignature && (
-          <SignatureBlock includeCustomerSignature />
+          <SignatureBlock 
+            includeCustomerSignature
+            technicianLabel={tenant?.report_technician_label || undefined}
+            customerLabel={tenant?.report_customer_label || undefined}
+            certificationText={tenant?.report_certification_text || undefined}
+          />
         )}
+
+        <ReportFooter footerText={tenant?.report_footer_text || undefined} />
       </div>
     );
   }
