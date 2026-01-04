@@ -282,14 +282,18 @@ export const createEquipmentMarker = (
 };
 
 /**
- * Create a moisture reading marker
+ * Create a moisture reading marker with unique ID for linking
  */
 export const createReadingMarker = (
   canvas: FabricCanvas,
   left: number,
   top: number,
-  readingNumber: number
+  readingNumber: number,
+  markerId?: string,
+  linkedReadingId?: string | null
 ): Group => {
+  const id = markerId || crypto.randomUUID();
+  
   const diamond = new Polygon(
     [
       { x: 0, y: -18 },
@@ -298,7 +302,7 @@ export const createReadingMarker = (
       { x: -15, y: 0 },
     ],
     {
-      fill: '#f59e0b',
+      fill: linkedReadingId ? '#22c55e' : '#f59e0b', // Green if linked, amber if not
       stroke: '#fff',
       strokeWidth: 2,
     }
@@ -322,14 +326,52 @@ export const createReadingMarker = (
     originY: 'center',
   });
 
-  // @ts-ignore
+  // @ts-ignore - custom properties for linking
   group.objectType = 'reading';
   // @ts-ignore
   group.readingNumber = readingNumber;
+  // @ts-ignore
+  group.markerId = id;
+  // @ts-ignore
+  group.linkedReadingId = linkedReadingId || null;
 
   canvas.add(group);
   canvas.setActiveObject(group);
   return group;
+};
+
+/**
+ * Update reading marker visual state based on link status
+ */
+export const updateReadingMarkerStyle = (
+  marker: Group,
+  isLinked: boolean
+): void => {
+  const diamond = marker.getObjects()[0] as Polygon;
+  if (diamond) {
+    diamond.set('fill', isLinked ? '#22c55e' : '#f59e0b');
+  }
+};
+
+/**
+ * Get all reading markers from canvas
+ */
+export const getReadingMarkers = (canvas: FabricCanvas): Group[] => {
+  return canvas.getObjects().filter((obj) => {
+    // @ts-ignore
+    return obj.objectType === 'reading';
+  }) as Group[];
+};
+
+/**
+ * Find reading marker by markerId
+ */
+export const findMarkerById = (canvas: FabricCanvas, markerId: string): Group | null => {
+  const markers = getReadingMarkers(canvas);
+  return markers.find((m) => {
+    // @ts-ignore
+    return m.markerId === markerId;
+  }) || null;
 };
 
 /**

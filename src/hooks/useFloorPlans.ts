@@ -188,6 +188,111 @@ export const useDeleteFloorPlan = () => {
   });
 };
 
+// Link a reading to a floor plan marker
+export const useLinkReadingToMarker = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      readingId,
+      floorPlanId,
+      markerId,
+      jobId,
+    }: {
+      readingId: string;
+      floorPlanId: string;
+      markerId: string;
+      jobId: string;
+    }) => {
+      const { error } = await supabase
+        .from('moisture_readings')
+        .update({
+          floor_plan_id: floorPlanId,
+          marker_id: markerId,
+        })
+        .eq('id', readingId);
+
+      if (error) throw error;
+      return { readingId, floorPlanId, markerId, jobId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['floor-plan-readings', data.floorPlanId] });
+      queryClient.invalidateQueries({ queryKey: ['readings'] });
+    },
+  });
+};
+
+// Unlink a reading from a floor plan marker
+export const useUnlinkReadingFromMarker = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      readingId,
+      floorPlanId,
+      jobId,
+    }: {
+      readingId: string;
+      floorPlanId: string;
+      jobId: string;
+    }) => {
+      const { error } = await supabase
+        .from('moisture_readings')
+        .update({
+          floor_plan_id: null,
+          marker_id: null,
+        })
+        .eq('id', readingId);
+
+      if (error) throw error;
+      return { readingId, floorPlanId, jobId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['floor-plan-readings', data.floorPlanId] });
+      queryClient.invalidateQueries({ queryKey: ['readings'] });
+    },
+  });
+};
+
+// Get readings linked to a specific floor plan
+export const useFloorPlanReadings = (floorPlanId: string | undefined) => {
+  return useQuery({
+    queryKey: ['floor-plan-readings', floorPlanId],
+    queryFn: async () => {
+      if (!floorPlanId) return [];
+      
+      const { data, error } = await supabase
+        .from('moisture_readings')
+        .select('*')
+        .eq('floor_plan_id', floorPlanId);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!floorPlanId,
+  });
+};
+
+// Get all readings for a job (for linking dialog)
+export const useJobReadingsForLinking = (jobId: string | undefined) => {
+  return useQuery({
+    queryKey: ['job-readings-linking', jobId],
+    queryFn: async () => {
+      if (!jobId) return [];
+      
+      const { data, error } = await supabase
+        .from('moisture_readings')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('logged_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!jobId,
+  });
+};
+
 export const getFloorPlanThumbnailUrl = (path: string | null): string | null => {
   if (!path) return null;
   const { data } = supabase.storage.from('floor-plans').getPublicUrl(path);

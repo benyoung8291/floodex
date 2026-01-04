@@ -570,11 +570,13 @@ export type Database = {
         Row: {
           chamber_id: string
           created_at: string
+          floor_plan_id: string | null
           gpp: number | null
           id: string
           job_id: string
           logged_at: string
           logged_by: string
+          marker_id: string | null
           material_type: string | null
           moisture_content: number | null
           reading_type: string
@@ -585,11 +587,13 @@ export type Database = {
         Insert: {
           chamber_id: string
           created_at?: string
+          floor_plan_id?: string | null
           gpp?: number | null
           id?: string
           job_id: string
           logged_at?: string
           logged_by: string
+          marker_id?: string | null
           material_type?: string | null
           moisture_content?: number | null
           reading_type: string
@@ -600,11 +604,13 @@ export type Database = {
         Update: {
           chamber_id?: string
           created_at?: string
+          floor_plan_id?: string | null
           gpp?: number | null
           id?: string
           job_id?: string
           logged_at?: string
           logged_by?: string
+          marker_id?: string | null
           material_type?: string | null
           moisture_content?: number | null
           reading_type?: string
@@ -618,6 +624,13 @@ export type Database = {
             columns: ["chamber_id"]
             isOneToOne: false
             referencedRelation: "drying_chambers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moisture_readings_floor_plan_id_fkey"
+            columns: ["floor_plan_id"]
+            isOneToOne: false
+            referencedRelation: "floor_plans"
             referencedColumns: ["id"]
           },
           {
