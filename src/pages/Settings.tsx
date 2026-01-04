@@ -28,6 +28,7 @@ const settingsSchema = z.object({
   contact_phone: z.string().max(20).optional().or(z.literal('')),
   address: z.string().max(255).optional().or(z.literal('')),
   temperature_unit: z.enum(['F', 'C']),
+  humidity_ratio_unit: z.enum(['GPP', 'g/kg']),
   supervisor_override_code: z.string().min(4, 'Code must be at least 4 characters').optional().or(z.literal('')),
 });
 
@@ -47,6 +48,7 @@ export default function Settings() {
       contact_phone: '',
       address: '',
       temperature_unit: 'F',
+      humidity_ratio_unit: 'GPP',
       supervisor_override_code: '',
     },
   });
@@ -59,6 +61,7 @@ export default function Settings() {
         contact_phone: tenant.contact_phone || '',
         address: tenant.address || '',
         temperature_unit: (tenant.temperature_unit as 'F' | 'C') || 'F',
+        humidity_ratio_unit: (tenant.humidity_ratio_unit as 'GPP' | 'g/kg') || 'GPP',
         supervisor_override_code: tenant.supervisor_override_code || '',
       });
     }
@@ -71,6 +74,7 @@ export default function Settings() {
       contact_phone: data.contact_phone || null,
       address: data.address || null,
       temperature_unit: data.temperature_unit,
+      humidity_ratio_unit: data.humidity_ratio_unit,
       supervisor_override_code: data.supervisor_override_code || null,
     });
   };
@@ -201,7 +205,7 @@ export default function Settings() {
                 Configure display preferences for your team
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="temperature_unit"
@@ -229,13 +233,46 @@ export default function Settings() {
                         </div>
                       </RadioGroup>
                     </FormControl>
-                    <FormDescription>
-                      This affects how temperatures are displayed throughout the app
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="humidity_ratio_unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Humidity Ratio Unit</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex gap-4"
+                        disabled={!isTenantAdmin || isPending}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="GPP" id="gpp" />
+                          <Label htmlFor="gpp" className="font-normal cursor-pointer">
+                            Grains per Pound (GPP)
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="g/kg" id="gkg" />
+                          <Label htmlFor="gkg" className="font-normal cursor-pointer">
+                            Grams per Kilogram (g/kg)
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <p className="text-sm text-muted-foreground">
+                These settings affect how readings are displayed throughout the app
+              </p>
             </CardContent>
           </Card>
 
