@@ -1,1 +1,4 @@
 project_id = "jubmzgidbhjbyxovnyob"
+
+[functions.get-shared-job]
+verify_jwt = false
