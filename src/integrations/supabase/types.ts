@@ -517,6 +517,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          humidity_ratio_unit: string
           id: string
           logo_url: string | null
           name: string
@@ -534,6 +535,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          humidity_ratio_unit?: string
           id?: string
           logo_url?: string | null
           name: string
@@ -551,6 +553,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          humidity_ratio_unit?: string
           id?: string
           logo_url?: string | null
           name?: string
