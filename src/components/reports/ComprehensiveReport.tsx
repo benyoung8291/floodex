@@ -8,6 +8,8 @@ import { DryingLogTable, DryingLogSummaryTable } from './templates/DryingLogTabl
 import { EquipmentTable } from './templates/EquipmentTable';
 import { PhotoGrid } from './templates/PhotoGrid';
 import { FloorPlanSection } from './templates/FloorPlanSection';
+import { ThermalReadingsSection } from './templates/ThermalReadingsSection';
+import { OverviewPhotosSection } from './templates/OverviewPhotosSection';
 import { SignatureBlock } from './templates/SignatureBlock';
 import { ReportFooter } from './templates/ReportFooter';
 
@@ -20,6 +22,8 @@ interface ComprehensiveReportProps {
   includePhotos?: boolean;
   includeFloorPlans?: boolean;
   includeSignature?: boolean;
+  includeThermal?: boolean;
+  includeOverview?: boolean;
   photoSize?: 'small' | 'medium' | 'large';
 }
 
@@ -33,10 +37,17 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
     includePhotos = true,
     includeFloorPlans = true,
     includeSignature = true,
+    includeThermal = true,
+    includeOverview = true,
     photoSize = 'medium',
   }, ref) => {
     const chamberReadings = groupReadingsByChamber(data.readings);
     const logoUrl = data.tenant?.logo_url || undefined;
+    
+    // Filter photos by category
+    const thermalPhotos = data.photos.filter(p => p.tag === 'thermal');
+    const overviewPhotos = data.photos.filter(p => p.tag === 'overview');
+    const standardPhotos = data.photos.filter(p => p.tag !== 'thermal' && p.tag !== 'overview');
 
     return (
       <div ref={ref} className="bg-white p-8 text-black print:p-4" style={{ fontFamily: 'Arial, sans-serif' }}>
@@ -60,6 +71,16 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
         {/* Damage Assessment */}
         {includeDamage && data.damageAssessments.length > 0 && (
           <DamageAssessmentSection damageAssessments={data.damageAssessments} />
+        )}
+
+        {/* Overview Photos */}
+        {includeOverview && overviewPhotos.length > 0 && (
+          <OverviewPhotosSection photos={overviewPhotos} />
+        )}
+
+        {/* Thermal Camera Readings */}
+        {includeThermal && thermalPhotos.length > 0 && (
+          <ThermalReadingsSection photos={thermalPhotos} />
         )}
 
         {/* Floor Plans */}
@@ -95,12 +116,12 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
         )}
 
         {/* Photos */}
-        {includePhotos && data.photos.length > 0 && (
+        {includePhotos && standardPhotos.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
               Photo Documentation
             </h2>
-            <PhotoGrid photos={data.photos} showFullSize={photoSize === 'large'} />
+            <PhotoGrid photos={standardPhotos} showFullSize={photoSize === 'large'} />
           </div>
         )}
 

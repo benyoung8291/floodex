@@ -54,6 +54,8 @@ export function ReportPreviewDialog({
   const [includeEquipment, setIncludeEquipment] = useState(true);
   const [includeSignature, setIncludeSignature] = useState(true);
   const [includeFloorPlans, setIncludeFloorPlans] = useState(true);
+  const [includeThermal, setIncludeThermal] = useState(true);
+  const [includeOverview, setIncludeOverview] = useState(true);
   const [showFullSizePhotos, setShowFullSizePhotos] = useState(false);
   const [includeDetailedReadings, setIncludeDetailedReadings] = useState(true);
   
@@ -107,6 +109,8 @@ export function ReportPreviewDialog({
             includePhotos={true}
             includeFloorPlans={includeFloorPlans}
             includeSignature={includeSignature}
+            includeThermal={includeThermal}
+            includeOverview={includeOverview}
           />
         );
       case 'drying-log-3day':
@@ -282,16 +286,38 @@ export function ReportPreviewDialog({
 
             {/* Floor plan options for comprehensive report */}
             {reportType === 'comprehensive' && (
-              <div className="flex items-center justify-between">
-                <Label htmlFor="include-floor-plans" className="text-sm">
-                  Include Floor Plans
-                </Label>
-                <Switch
-                  id="include-floor-plans"
-                  checked={includeFloorPlans}
-                  onCheckedChange={setIncludeFloorPlans}
-                />
-              </div>
+              <>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="include-floor-plans" className="text-sm">
+                    Include Floor Plans
+                  </Label>
+                  <Switch
+                    id="include-floor-plans"
+                    checked={includeFloorPlans}
+                    onCheckedChange={setIncludeFloorPlans}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="include-thermal" className="text-sm">
+                    Include Thermal Images
+                  </Label>
+                  <Switch
+                    id="include-thermal"
+                    checked={includeThermal}
+                    onCheckedChange={setIncludeThermal}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="include-overview" className="text-sm">
+                    Include Overview Photos
+                  </Label>
+                  <Switch
+                    id="include-overview"
+                    checked={includeOverview}
+                    onCheckedChange={setIncludeOverview}
+                  />
+                </div>
+              </>
             )}
 
             {/* Common options */}

@@ -13,6 +13,10 @@ const TAG_LABELS: Record<string, string> = {
   damage: 'Damage',
   moisture: 'Moisture Reading',
   equipment: 'Equipment',
+  safety: 'Safety',
+  thermal: 'Thermal',
+  overview: 'Overview',
+  mud_map: 'Mud Map',
   other: 'Other',
 };
 
@@ -34,7 +38,7 @@ export function PhotoGrid({ photos, showFullSize = false }: PhotoGridProps) {
     return acc;
   }, {} as Record<string, ReportPhoto[]>);
 
-  const tagOrder = ['before', 'damage', 'during', 'moisture', 'equipment', 'after', 'other'];
+  const tagOrder = ['overview', 'before', 'damage', 'thermal', 'mud_map', 'during', 'moisture', 'equipment', 'safety', 'after', 'other'];
 
   return (
     <div className="mb-6">

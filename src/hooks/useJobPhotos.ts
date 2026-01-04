@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
 
-export type PhotoTag = 'before' | 'during' | 'after' | 'damage' | 'equipment' | 'moisture' | 'safety' | 'other';
+export type PhotoTag = 'before' | 'during' | 'after' | 'damage' | 'equipment' | 'moisture' | 'safety' | 'thermal' | 'overview' | 'mud_map' | 'other';
 
 export interface JobPhoto {
   id: string;
@@ -198,5 +198,8 @@ export const PHOTO_TAGS: Record<PhotoTag, { label: string; color: string; icon: 
   equipment: { label: 'Equipment', color: 'bg-purple-500', icon: 'Wrench' },
   moisture: { label: 'Moisture', color: 'bg-cyan-500', icon: 'Droplet' },
   safety: { label: 'Safety', color: 'bg-orange-500', icon: 'Shield' },
+  thermal: { label: 'Thermal', color: 'bg-pink-500', icon: 'Thermometer' },
+  overview: { label: 'Overview', color: 'bg-indigo-500', icon: 'Eye' },
+  mud_map: { label: 'Mud Map', color: 'bg-amber-600', icon: 'Map' },
   other: { label: 'Other', color: 'bg-gray-500', icon: 'Image' },
 };
