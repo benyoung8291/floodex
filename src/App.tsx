@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
 import AdminTiers from "./pages/admin/AdminTiers";
+import ShareJob from "./pages/ShareJob";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Routes>
             {/* Public routes */}
             <Route path="/auth" element={<Auth />} />
+            <Route path="/share/:token" element={<ShareJob />} />
             
             {/* Protected routes with layout */}
             <Route

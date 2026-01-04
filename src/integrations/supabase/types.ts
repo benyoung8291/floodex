@@ -585,6 +585,125 @@ export type Database = {
           },
         ]
       }
+      job_share_links: {
+        Row: {
+          access_type: string
+          can_view_documents: boolean
+          can_view_equipment: boolean
+          can_view_floor_plans: boolean
+          can_view_photos: boolean
+          can_view_readings: boolean
+          can_view_work_logs: boolean
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          job_id: string
+          last_viewed_at: string | null
+          pin_hash: string | null
+          recipient_email: string | null
+          recipient_name: string | null
+          revoked_at: string | null
+          tenant_id: string
+          token: string
+          view_count: number
+        }
+        Insert: {
+          access_type?: string
+          can_view_documents?: boolean
+          can_view_equipment?: boolean
+          can_view_floor_plans?: boolean
+          can_view_photos?: boolean
+          can_view_readings?: boolean
+          can_view_work_logs?: boolean
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          job_id: string
+          last_viewed_at?: string | null
+          pin_hash?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          revoked_at?: string | null
+          tenant_id: string
+          token: string
+          view_count?: number
+        }
+        Update: {
+          access_type?: string
+          can_view_documents?: boolean
+          can_view_equipment?: boolean
+          can_view_floor_plans?: boolean
+          can_view_photos?: boolean
+          can_view_readings?: boolean
+          can_view_work_logs?: boolean
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          job_id?: string
+          last_viewed_at?: string | null
+          pin_hash?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          revoked_at?: string | null
+          tenant_id?: string
+          token?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_share_links_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_share_links_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_share_views: {
+        Row: {
+          id: string
+          ip_address: string | null
+          sections_viewed: string[] | null
+          share_link_id: string
+          user_agent: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: string | null
+          sections_viewed?: string[] | null
+          share_link_id: string
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          ip_address?: string | null
+          sections_viewed?: string[] | null
+          share_link_id?: string
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_share_views_share_link_id_fkey"
+            columns: ["share_link_id"]
+            isOneToOne: false
+            referencedRelation: "job_share_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_work_logs: {
         Row: {
           attendance_date: string

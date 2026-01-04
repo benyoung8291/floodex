@@ -23,6 +23,7 @@ import {
   FileWarning,
   FileText,
   FileSignature,
+  Share2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -72,6 +73,7 @@ import { DamageAssessmentCard } from '@/components/jobs/DamageAssessmentCard';
 import { DamageAssessmentDialog } from '@/components/jobs/DamageAssessmentDialog';
 import { FloorPlanGallery } from '@/components/floorplan/FloorPlanGallery';
 import { FormsList } from '@/components/forms/FormsList';
+import { ShareJobDialog } from '@/components/sharing/ShareJobDialog';
 import { useJobForms } from '@/hooks/useJobForms';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
@@ -125,6 +127,9 @@ export default function JobDetail() {
   // Damage assessment state
   const [damageDialogOpen, setDamageDialogOpen] = useState(false);
   const [editingDamage, setEditingDamage] = useState<DamageAssessment | null>(null);
+  
+  // Share dialog state
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   
   // Queries
   const { data: job, isLoading: jobLoading } = useJob(id);
@@ -369,6 +374,10 @@ export default function JobDetail() {
           </h1>
           <p className="text-sm text-muted-foreground truncate">{job.address}</p>
         </div>
+        <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}>
+          <Share2 className="h-4 w-4 mr-2" />
+          Share
+        </Button>
         <Badge className={statusColors[job.status]}>
           {job.status}
         </Badge>
@@ -889,6 +898,14 @@ export default function JobDetail() {
         onSubmit={handleSubmitDamage}
         editingAssessment={editingDamage}
         isLoading={createDamageAssessment.isPending || updateDamageAssessment.isPending}
+      />
+
+      {/* Share Job Dialog */}
+      <ShareJobDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        jobId={id || ''}
+        jobName={job.customer_name}
       />
     </div>
   );
