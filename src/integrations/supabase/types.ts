@@ -167,8 +167,10 @@ export type Database = {
       }
       job_photos: {
         Row: {
+          annotation_data: Json | null
           caption: string | null
           created_at: string
+          has_annotations: boolean | null
           id: string
           job_id: string
           latitude: number | null
@@ -180,8 +182,10 @@ export type Database = {
           tenant_id: string
         }
         Insert: {
+          annotation_data?: Json | null
           caption?: string | null
           created_at?: string
+          has_annotations?: boolean | null
           id?: string
           job_id: string
           latitude?: number | null
@@ -193,8 +197,10 @@ export type Database = {
           tenant_id: string
         }
         Update: {
+          annotation_data?: Json | null
           caption?: string | null
           created_at?: string
+          has_annotations?: boolean | null
           id?: string
           job_id?: string
           latitude?: number | null
