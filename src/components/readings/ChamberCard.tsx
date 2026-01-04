@@ -1,7 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Droplets, Plus, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Droplets, Plus, Clock, Fan, Wind, Package } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { 
@@ -15,14 +16,18 @@ import { cn } from '@/lib/utils';
 
 type DryingChamber = Tables<'drying_chambers'>;
 type MoistureReading = Tables<'moisture_readings'>;
+type Equipment = Tables<'equipment'>;
+type EquipmentAssignment = Tables<'equipment_assignments'>;
 
 interface ChamberCardProps {
   chamber: DryingChamber;
   latestReading?: MoistureReading;
   units: UnitSystem;
   temperatureUnit?: 'F' | 'C';
+  equipmentAssignments?: (EquipmentAssignment & { equipment: Equipment })[];
   onAddReading: (chamberId: string) => void;
   onViewHistory: (chamberId: string) => void;
+  onManageEquipment?: (chamberId: string) => void;
 }
 
 export function ChamberCard({
@@ -30,8 +35,10 @@ export function ChamberCard({
   latestReading,
   units,
   temperatureUnit = 'F',
+  equipmentAssignments = [],
   onAddReading,
   onViewHistory,
+  onManageEquipment,
 }: ChamberCardProps) {
   const currentGpp = latestReading?.gpp ?? null;
   const targetGpp = chamber.target_gpp;
@@ -126,6 +133,45 @@ export function ChamberCard({
           <p className="text-sm text-muted-foreground italic">
             No readings yet
           </p>
+        )}
+
+        {/* Equipment Summary */}
+        {equipmentAssignments.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex flex-wrap gap-1.5">
+              {(() => {
+                const counts = equipmentAssignments.reduce((acc, a) => {
+                  acc[a.equipment.type] = (acc[a.equipment.type] || 0) + 1;
+                  return acc;
+                }, {} as Record<string, number>);
+
+                return Object.entries(counts).map(([type, count]) => (
+                  <Badge key={type} variant="secondary" className="gap-1 text-xs">
+                    {type === 'air_mover' && <Fan className="h-3 w-3" />}
+                    {type === 'dehumidifier' && <Droplets className="h-3 w-3" />}
+                    {type === 'hepa_unit' && <Wind className="h-3 w-3" />}
+                    {count}
+                  </Badge>
+                ));
+              })()}
+            </div>
+          </div>
+        )}
+
+        {/* Manage Equipment Button */}
+        {onManageEquipment && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-3 gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              onManageEquipment(chamber.id);
+            }}
+          >
+            <Package className="h-4 w-4" />
+            Manage Equipment
+          </Button>
         )}
       </CardContent>
     </Card>
