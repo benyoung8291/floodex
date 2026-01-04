@@ -1,12 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2, Droplets, TrendingUp, Gauge } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useJobs } from '@/hooks/useJobs';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
+import { useReadingsStats } from '@/hooks/useAllReadings';
+import { useTenant } from '@/hooks/useTenant';
+import { formatHumidityRatio, getHumidityRatioStatus, type UnitSystem } from '@/lib/psychrometrics';
 
 const getLossTypeLabel = (type: string) => {
   switch (type) {
@@ -28,6 +32,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { data: jobs, isLoading } = useJobs();
   const { isOnboardingComplete, isLoading: onboardingLoading } = useOnboarding();
+  const { data: readingsStats, isLoading: statsLoading } = useReadingsStats();
+  const { data: tenant } = useTenant();
+
+  const units: UnitSystem = tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial';
 
   const stats = useMemo(() => {
     if (!jobs) return [
@@ -46,6 +54,27 @@ export default function Dashboard() {
       { label: 'Ready', value: ready, icon: CheckCircle2, color: 'text-success' },
     ];
   }, [jobs]);
+
+  const readingStatsCards = useMemo(() => [
+    { 
+      label: 'Readings Today', 
+      value: readingsStats?.todayCount ?? 0, 
+      icon: Droplets, 
+      color: 'text-primary' 
+    },
+    { 
+      label: 'Avg GPP', 
+      value: readingsStats?.avgGpp ? formatHumidityRatio(readingsStats.avgGpp, units) : '-', 
+      icon: Gauge, 
+      color: 'text-warning' 
+    },
+    { 
+      label: 'Near Target', 
+      value: readingsStats?.jobsNearTarget ?? 0, 
+      icon: TrendingUp, 
+      color: 'text-success' 
+    },
+  ], [readingsStats, units]);
 
   const recentJobs = useMemo(() => {
     if (!jobs) return [];
@@ -86,7 +115,7 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {/* Stats Cards */}
+        {/* Job Status Stats */}
         <div className="grid grid-cols-3 gap-4">
           {isLoading ? (
             <>
@@ -113,6 +142,42 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Drying Status Section */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-primary" />
+              Drying Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              {statsLoading ? (
+                <>
+                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16" />
+                </>
+              ) : (
+                readingStatsCards.map(({ label, value, icon: Icon, color }) => (
+                  <div key={label} className="text-center p-3 rounded-lg bg-muted/50">
+                    <Icon className={`w-5 h-5 mx-auto mb-1 ${color}`} />
+                    <p className="text-lg font-bold">{value}</p>
+                    <p className="text-[10px] text-muted-foreground">{label}</p>
+                  </div>
+                ))
+              )}
+            </div>
+            <Button 
+              variant="outline" 
+              className="w-full mt-4" 
+              onClick={() => navigate('/readings')}
+            >
+              View All Readings
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Map Placeholder */}
         <Card className="overflow-hidden">
           <CardHeader className="pb-2">
@@ -122,11 +187,10 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-64 bg-secondary/50 flex items-center justify-center border-t border-border">
+            <div className="h-48 bg-secondary/50 flex items-center justify-center border-t border-border">
               <div className="text-center text-muted-foreground">
-                <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>Map will appear here</p>
-                <p className="text-sm">Mapbox integration coming soon</p>
+                <MapPin className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Map coming soon</p>
               </div>
             </div>
           </CardContent>
