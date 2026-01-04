@@ -28,6 +28,7 @@ import {
   useChamberReadings,
   useJobSafetyChecks,
 } from '@/hooks/useJobReadings';
+import { useTenant } from '@/hooks/useTenant';
 import { ChamberList } from '@/components/readings/ChamberList';
 import { ChamberCreateDialog } from '@/components/readings/ChamberCreateDialog';
 import { ReadingEntryForm } from '@/components/readings/ReadingEntryForm';
@@ -55,8 +56,10 @@ export default function JobDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // TODO: Get from tenant settings
-  const units: UnitSystem = 'imperial';
+  // Get unit preferences from tenant settings
+  const { data: tenant } = useTenant();
+  const units: UnitSystem = tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial';
+  const temperatureUnit = (tenant?.temperature_unit || 'F') as 'F' | 'C';
   
   // State
   const [activeTab, setActiveTab] = useState('overview');
@@ -273,6 +276,7 @@ export default function JobDetail() {
             chambers={chambers}
             latestReadings={latestReadings}
             units={units}
+            temperatureUnit={temperatureUnit}
             onAddChamber={handleAddChamber}
             onAddReading={handleAddReading}
             onViewHistory={handleViewHistory}
@@ -309,6 +313,7 @@ export default function JobDetail() {
                 readings={chamberReadings}
                 targetGpp={viewingChamber.target_gpp}
                 units={units}
+                temperatureUnit={temperatureUnit}
               />
 
               <Button 
@@ -394,6 +399,7 @@ export default function JobDetail() {
           chamberName={selectedChamber.name}
           targetGpp={selectedChamber.target_gpp}
           units={units}
+          temperatureUnit={temperatureUnit}
           onSubmit={handleSubmitReading}
           isLoading={createReading.isPending}
         />

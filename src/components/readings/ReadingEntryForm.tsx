@@ -23,6 +23,7 @@ import {
   formatHumidityRatio, 
   getHumidityRatioStatus,
   getHumidityRatioUnit,
+  celsiusToFahrenheit,
   type UnitSystem 
 } from '@/lib/psychrometrics';
 import { cn } from '@/lib/utils';
@@ -44,6 +45,7 @@ interface ReadingEntryFormProps {
   chamberName: string;
   targetGpp?: number | null;
   units: UnitSystem;
+  temperatureUnit?: 'F' | 'C';
   onSubmit: (data: {
     readingType: 'ambient' | 'material';
     temperature: number;
@@ -61,33 +63,43 @@ export function ReadingEntryForm({
   chamberName,
   targetGpp,
   units,
+  temperatureUnit = 'F',
   onSubmit,
   isLoading,
 }: ReadingEntryFormProps) {
+  // Temperature defaults based on unit
+  const defaultTemp = temperatureUnit === 'C' ? 22 : 72;
+  const tempMin = temperatureUnit === 'C' ? 0 : 32;
+  const tempMax = temperatureUnit === 'C' ? 50 : 120;
+  
   const [readingType, setReadingType] = useState<'ambient' | 'material'>('ambient');
-  const [temperature, setTemperature] = useState(72);
+  const [temperature, setTemperature] = useState(defaultTemp);
   const [relativeHumidity, setRelativeHumidity] = useState(50);
   const [materialType, setMaterialType] = useState('');
   const [moistureContent, setMoistureContent] = useState<string>('');
 
-  // Calculate GPP in real-time
-  const gpp = calculateGPP(temperature, relativeHumidity);
+  // Calculate GPP in real-time (always in Fahrenheit for calculation)
+  const tempForCalc = temperatureUnit === 'C' ? celsiusToFahrenheit(temperature) : temperature;
+  const gpp = calculateGPP(tempForCalc, relativeHumidity);
   const status = targetGpp ? getHumidityRatioStatus(gpp, targetGpp) : null;
 
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
-      setTemperature(72);
+      setTemperature(defaultTemp);
       setRelativeHumidity(50);
       setMaterialType('');
       setMoistureContent('');
     }
-  }, [open]);
+  }, [open, defaultTemp]);
 
   const handleSubmit = () => {
+    // Convert temperature to Fahrenheit for storage if entered in Celsius
+    const tempToStore = temperatureUnit === 'C' ? celsiusToFahrenheit(temperature) : temperature;
+    
     onSubmit({
       readingType,
-      temperature,
+      temperature: tempToStore,
       relativeHumidity,
       gpp,
       materialType: readingType === 'material' ? materialType : undefined,
@@ -121,12 +133,12 @@ export function ReadingEntryForm({
             <StepperInput
               value={temperature}
               onChange={setTemperature}
-              min={32}
-              max={120}
+              min={tempMin}
+              max={tempMax}
               step={1}
               fastStep={10}
               label="Temperature"
-              unit="°F"
+              unit={`°${temperatureUnit}`}
             />
 
             {/* Relative Humidity Stepper */}
