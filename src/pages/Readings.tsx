@@ -21,6 +21,7 @@ import { GPPTrendChart } from '@/components/readings/GPPTrendChart';
 import { ChamberCreateDialog } from '@/components/readings/ChamberCreateDialog';
 import { ReadingEntryForm } from '@/components/readings/ReadingEntryForm';
 import { EquipmentAssignDialog } from '@/components/readings/EquipmentAssignDialog';
+import { QuickLogDialog } from '@/components/readings/QuickLogDialog';
 
 import { 
   useJobsWithChambers,
@@ -52,6 +53,7 @@ export default function Readings() {
   const [readingDialogOpen, setReadingDialogOpen] = useState(false);
   const [selectedChamberId, setSelectedChamberId] = useState<string | null>(null);
   const [equipmentDialogOpen, setEquipmentDialogOpen] = useState(false);
+  const [quickLogDialogOpen, setQuickLogDialogOpen] = useState(false);
 
   // Hooks
   const { data: jobsWithChambers, isLoading: jobsLoading } = useJobsWithChambers();
@@ -107,6 +109,26 @@ export default function Readings() {
   const handleManageEquipment = (chamberId: string) => {
     setSelectedChamberId(chamberId);
     setEquipmentDialogOpen(true);
+  };
+
+  const handleQuickLog = () => {
+    setQuickLogDialogOpen(true);
+  };
+
+  const handleQuickLogSubmit = async (chamberId: string, data: {
+    readingType: 'ambient' | 'material';
+    temperature: number;
+    relativeHumidity: number;
+    gpp: number;
+    materialType?: string;
+    moistureContent?: number;
+  }) => {
+    if (!selectedJobId) return;
+    await createReading.mutateAsync({
+      chamberId,
+      jobId: selectedJobId,
+      ...data,
+    });
   };
 
   const handleCreateChamber = async (data: { name: string; targetGpp?: number; dryStandardPercent?: number }) => {
@@ -256,6 +278,7 @@ export default function Readings() {
               onViewHistory={handleViewHistory}
               onManageEquipment={handleManageEquipment}
               onUpdateOutdoorReading={handleUpdateOutdoor}
+              onQuickLog={handleQuickLog}
               isUpdatingOutdoor={updateOutdoorReading.isPending}
               isLoading={chambersLoading}
             />
@@ -389,6 +412,20 @@ export default function Readings() {
             unassignEquipment.mutate({ assignmentId, equipmentId, jobId: selectedJobId });
           }}
           isLoading={assignEquipment.isPending || unassignEquipment.isPending}
+        />
+      )}
+
+      {/* Quick Log Dialog */}
+      {selectedJobId && chambers && chambers.length > 0 && (
+        <QuickLogDialog
+          open={quickLogDialogOpen}
+          onOpenChange={setQuickLogDialogOpen}
+          chambers={chambers}
+          latestReadings={latestReadings || new Map()}
+          units={units}
+          temperatureUnit={temperatureUnit}
+          onSubmitReading={handleQuickLogSubmit}
+          isLoading={createReading.isPending}
         />
       )}
     </div>
