@@ -11,6 +11,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
+import JobCreate from "./pages/JobCreate";
+import JobDetail from "./pages/JobDetail";
 import Readings from "./pages/Readings";
 import Equipment from "./pages/Equipment";
 import Photos from "./pages/Photos";
@@ -48,11 +50,29 @@ const App = () => (
               }
             />
             <Route
-              path="/jobs/*"
+              path="/jobs"
               element={
                 <ProtectedRoute>
                   <AppLayout>
                     <Jobs />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobs/new"
+              element={
+                <ProtectedRoute>
+                  <JobCreate />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobs/:id"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <JobDetail />
                   </AppLayout>
                 </ProtectedRoute>
               }
