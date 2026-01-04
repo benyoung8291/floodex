@@ -17,6 +17,8 @@ import {
   User,
   CheckCircle,
   XCircle,
+  Camera,
+  Plus,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -36,12 +38,16 @@ import {
   useUnassignEquipment,
 } from '@/hooks/useEquipment';
 import { useTenant } from '@/hooks/useTenant';
+import { useAuth } from '@/contexts/AuthContext';
+import { useJobPhotos } from '@/hooks/useJobPhotos';
 import { ChamberList } from '@/components/readings/ChamberList';
 import { ChamberCreateDialog } from '@/components/readings/ChamberCreateDialog';
 import { ReadingEntryForm } from '@/components/readings/ReadingEntryForm';
 import { ReadingsList } from '@/components/readings/ReadingsList';
 import { GPPTrendChart } from '@/components/readings/GPPTrendChart';
 import { EquipmentAssignDialog } from '@/components/readings/EquipmentAssignDialog';
+import { PhotoGallery } from '@/components/photos/PhotoGallery';
+import { PhotoCaptureDialog } from '@/components/photos/PhotoCaptureDialog';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -63,6 +69,7 @@ const lossTypeLabels: Record<string, string> = {
 export default function JobDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { tenantId } = useAuth();
   
   // Get unit preferences from tenant settings
   const { data: tenant } = useTenant();
@@ -77,6 +84,7 @@ export default function JobDetail() {
   const [viewingChamberId, setViewingChamberId] = useState<string | null>(null);
   const [equipmentDialogOpen, setEquipmentDialogOpen] = useState(false);
   const [equipmentChamberId, setEquipmentChamberId] = useState<string | null>(null);
+  const [photoCaptureOpen, setPhotoCaptureOpen] = useState(false);
   
   // Queries
   const { data: job, isLoading: jobLoading } = useJob(id);
@@ -86,6 +94,7 @@ export default function JobDetail() {
   const { data: chamberReadings = [] } = useChamberReadings(viewingChamberId ?? undefined);
   const { data: allEquipment = [] } = useEquipment();
   const { data: equipmentAssignments = [] } = useEquipmentAssignments(id);
+  const { data: jobPhotos = [] } = useJobPhotos(id || '');
   
   // Mutations
   const createChamber = useCreateChamber();
@@ -213,11 +222,19 @@ export default function JobDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="chambers">Chambers</TabsTrigger>
           <TabsTrigger value="readings">Readings</TabsTrigger>
           <TabsTrigger value="safety">Safety</TabsTrigger>
+          <TabsTrigger value="photos" className="relative">
+            Photos
+            {jobPhotos.length > 0 && (
+              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
+                {jobPhotos.length}
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -430,7 +447,26 @@ export default function JobDetail() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Photos Tab */}
+        <TabsContent value="photos" className="mt-4">
+          <PhotoGallery
+            photos={jobPhotos}
+            onAddPhoto={() => setPhotoCaptureOpen(true)}
+            showAddButton={true}
+          />
+        </TabsContent>
       </Tabs>
+
+      {/* Floating Action Button for Photos */}
+      {activeTab === 'photos' && (
+        <Button
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-50"
+          onClick={() => setPhotoCaptureOpen(true)}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      )}
 
       {/* Dialogs */}
       <ChamberCreateDialog
@@ -468,6 +504,16 @@ export default function JobDetail() {
           onAssign={handleAssignEquipment}
           onUnassign={handleUnassignEquipment}
           isLoading={assignEquipment.isPending || unassignEquipment.isPending}
+        />
+      )}
+
+      {/* Photo Capture Dialog */}
+      {id && tenantId && (
+        <PhotoCaptureDialog
+          open={photoCaptureOpen}
+          onOpenChange={setPhotoCaptureOpen}
+          jobId={id}
+          tenantId={tenantId}
         />
       )}
     </div>
