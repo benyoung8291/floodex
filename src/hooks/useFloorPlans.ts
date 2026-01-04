@@ -298,3 +298,31 @@ export const getFloorPlanThumbnailUrl = (path: string | null): string | null => 
   const { data } = supabase.storage.from('floor-plans').getPublicUrl(path);
   return data.publicUrl;
 };
+
+/**
+ * Upload a background image for a floor plan
+ */
+export const uploadBackgroundImage = async (
+  blob: Blob,
+  tenantId: string,
+  jobId: string
+): Promise<string> => {
+  const filename = `bg_${Date.now()}_${crypto.randomUUID().slice(0, 8)}.jpg`;
+  const storagePath = `${tenantId}/backgrounds/${jobId}/${filename}`;
+  
+  const { error } = await supabase.storage
+    .from('floor-plans')
+    .upload(storagePath, blob, { contentType: 'image/jpeg' });
+
+  if (error) throw error;
+  return storagePath;
+};
+
+/**
+ * Get public URL for a background image
+ */
+export const getBackgroundImageUrl = (path: string | null): string | null => {
+  if (!path) return null;
+  const { data } = supabase.storage.from('floor-plans').getPublicUrl(path);
+  return data.publicUrl;
+};

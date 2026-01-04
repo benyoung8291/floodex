@@ -231,6 +231,7 @@ export type Database = {
       }
       floor_plans: {
         Row: {
+          background_image_path: string | null
           canvas_data: Json
           created_at: string
           created_by: string
@@ -243,6 +244,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          background_image_path?: string | null
           canvas_data: Json
           created_at?: string
           created_by: string
@@ -255,6 +257,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          background_image_path?: string | null
           canvas_data?: Json
           created_at?: string
           created_by?: string
