@@ -3,12 +3,48 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { getPhotoUrl } from '@/hooks/useJobPhotos';
 
-export type Job = Tables<'jobs'>;
+export type Job = Tables<'jobs'> & {
+  claim_id?: string | null;
+  date_of_loss?: string | null;
+  loss_class?: string | null;
+  source_of_loss?: string | null;
+  affected_areas?: string | null;
+  affected_materials?: string | null;
+  claim_summary?: string | null;
+};
 export type Chamber = Tables<'drying_chambers'>;
 export type Reading = Tables<'moisture_readings'>;
 export type Equipment = Tables<'equipment'>;
 export type EquipmentAssignment = Tables<'equipment_assignments'>;
 export type Photo = Tables<'job_photos'>;
+
+export interface WorkLog {
+  id: string;
+  job_id: string;
+  tenant_id: string;
+  logged_by: string;
+  attendance_date: string;
+  log_type: string;
+  summary: string | null;
+  work_completed: string[] | null;
+  equipment_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DamageAssessment {
+  id: string;
+  job_id: string;
+  tenant_id: string;
+  chamber_id: string | null;
+  area_name: string;
+  material_type: string;
+  is_restorable: boolean;
+  status: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface ReportReading extends Reading {
   chamber_name: string;
@@ -29,6 +65,8 @@ export interface JobReportData {
   readings: ReportReading[];
   equipmentAssignments: ReportEquipmentAssignment[];
   photos: ReportPhoto[];
+  workLogs: WorkLog[];
+  damageAssessments: DamageAssessment[];
   tenant: Tables<'tenants'> | null;
 }
 
@@ -110,6 +148,24 @@ export function useJobReportData(jobId: string | undefined, dateRange?: { start:
         url: getPhotoUrl(p.storage_path),
       }));
 
+      // Fetch work logs
+      const { data: workLogs, error: workLogsError } = await supabase
+        .from('job_work_logs')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('attendance_date', { ascending: true });
+
+      if (workLogsError) throw workLogsError;
+
+      // Fetch damage assessments
+      const { data: damageAssessments, error: damageError } = await supabase
+        .from('damage_assessments')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('created_at', { ascending: true });
+
+      if (damageError) throw damageError;
+
       // Fetch tenant for branding
       const { data: tenant } = await supabase
         .from('tenants')
@@ -118,11 +174,13 @@ export function useJobReportData(jobId: string | undefined, dateRange?: { start:
         .maybeSingle();
 
       return {
-        job,
+        job: job as Job,
         chambers: chambers || [],
         readings: reportReadings,
         equipmentAssignments: reportAssignments,
         photos: reportPhotos,
+        workLogs: (workLogs || []) as WorkLog[],
+        damageAssessments: (damageAssessments || []) as DamageAssessment[],
         tenant,
       };
     },

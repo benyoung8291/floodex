@@ -16,6 +16,13 @@ const LOSS_TYPE_LABELS: Record<string, string> = {
   cat3: 'Category 3 - Black Water',
 };
 
+const LOSS_CLASS_LABELS: Record<string, string> = {
+  class1: 'Class 1 - Minimal Evaporation',
+  class2: 'Class 2 - Significant Evaporation',
+  class3: 'Class 3 - Greatest Evaporation',
+  class4: 'Class 4 - Specialty Drying',
+};
+
 const STATUS_LABELS: Record<string, string> = {
   emergency: 'Emergency Response',
   drying: 'Active Drying',
@@ -85,6 +92,12 @@ export function ReportHeader({
               <span className="ml-2 text-gray-900">{job.customer_email}</span>
             </div>
           )}
+          {job.claim_id && (
+            <div>
+              <span className="font-semibold text-gray-700">Claim ID:</span>
+              <span className="ml-2 text-gray-900 font-mono">{job.claim_id}</span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -92,6 +105,12 @@ export function ReportHeader({
             <span className="font-semibold text-gray-700">Loss Type:</span>
             <span className="ml-2 text-gray-900">{LOSS_TYPE_LABELS[job.loss_type] || job.loss_type}</span>
           </div>
+          {job.loss_class && (
+            <div>
+              <span className="font-semibold text-gray-700">Loss Class:</span>
+              <span className="ml-2 text-gray-900">{LOSS_CLASS_LABELS[job.loss_class] || job.loss_class}</span>
+            </div>
+          )}
           <div>
             <span className="font-semibold text-gray-700">Status:</span>
             <span className="ml-2 text-gray-900">{STATUS_LABELS[job.status] || job.status}</span>
@@ -100,6 +119,12 @@ export function ReportHeader({
             <span className="font-semibold text-gray-700">Start Date:</span>
             <span className="ml-2 text-gray-900">{formatDateForReport(job.start_date)}</span>
           </div>
+          {job.date_of_loss && (
+            <div>
+              <span className="font-semibold text-gray-700">Date of Loss:</span>
+              <span className="ml-2 text-gray-900">{formatDateForReport(job.date_of_loss)}</span>
+            </div>
+          )}
           <div>
             <span className="font-semibold text-gray-700">Days Drying:</span>
             <span className="ml-2 text-gray-900">{job.days_drying}</span>

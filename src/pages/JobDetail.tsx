@@ -19,6 +19,9 @@ import {
   XCircle,
   Camera,
   Plus,
+  ClipboardList,
+  FileWarning,
+  FileText,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -40,6 +43,20 @@ import {
 import { useTenant } from '@/hooks/useTenant';
 import { useAuth } from '@/contexts/AuthContext';
 import { useJobPhotos } from '@/hooks/useJobPhotos';
+import { 
+  useJobWorkLogs, 
+  useCreateWorkLog, 
+  useUpdateWorkLog, 
+  useDeleteWorkLog,
+  WorkLog,
+} from '@/hooks/useWorkLogs';
+import {
+  useJobDamageAssessments,
+  useCreateDamageAssessment,
+  useUpdateDamageAssessment,
+  useDeleteDamageAssessment,
+  DamageAssessment,
+} from '@/hooks/useDamageAssessments';
 import { ChamberList } from '@/components/readings/ChamberList';
 import { ChamberCreateDialog } from '@/components/readings/ChamberCreateDialog';
 import { ReadingEntryForm } from '@/components/readings/ReadingEntryForm';
@@ -48,6 +65,10 @@ import { GPPTrendChart } from '@/components/readings/GPPTrendChart';
 import { EquipmentAssignDialog } from '@/components/readings/EquipmentAssignDialog';
 import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoCaptureDialog } from '@/components/photos/PhotoCaptureDialog';
+import { WorkLogCard } from '@/components/jobs/WorkLogCard';
+import { WorkLogDialog } from '@/components/jobs/WorkLogDialog';
+import { DamageAssessmentCard } from '@/components/jobs/DamageAssessmentCard';
+import { DamageAssessmentDialog } from '@/components/jobs/DamageAssessmentDialog';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -64,6 +85,13 @@ const lossTypeLabels: Record<string, string> = {
   cat1: 'Category 1 - Clean Water',
   cat2: 'Category 2 - Gray Water',
   cat3: 'Category 3 - Black Water',
+};
+
+const lossClassLabels: Record<string, string> = {
+  class1: 'Class 1 - Minimal',
+  class2: 'Class 2 - Significant',
+  class3: 'Class 3 - Greatest',
+  class4: 'Class 4 - Specialty',
 };
 
 export default function JobDetail() {
@@ -86,6 +114,14 @@ export default function JobDetail() {
   const [equipmentChamberId, setEquipmentChamberId] = useState<string | null>(null);
   const [photoCaptureOpen, setPhotoCaptureOpen] = useState(false);
   
+  // Work log state
+  const [workLogDialogOpen, setWorkLogDialogOpen] = useState(false);
+  const [editingWorkLog, setEditingWorkLog] = useState<WorkLog | null>(null);
+  
+  // Damage assessment state
+  const [damageDialogOpen, setDamageDialogOpen] = useState(false);
+  const [editingDamage, setEditingDamage] = useState<DamageAssessment | null>(null);
+  
   // Queries
   const { data: job, isLoading: jobLoading } = useJob(id);
   const { data: chambers = [], isLoading: chambersLoading } = useJobChambers(id);
@@ -95,6 +131,8 @@ export default function JobDetail() {
   const { data: allEquipment = [] } = useEquipment();
   const { data: equipmentAssignments = [] } = useEquipmentAssignments(id);
   const { data: jobPhotos = [] } = useJobPhotos(id || '');
+  const { data: workLogs = [] } = useJobWorkLogs(id);
+  const { data: damageAssessments = [] } = useJobDamageAssessments(id);
   
   // Mutations
   const createChamber = useCreateChamber();
@@ -102,6 +140,12 @@ export default function JobDetail() {
   const updateOutdoorReading = useUpdateOutdoorReading();
   const assignEquipment = useAssignEquipment();
   const unassignEquipment = useUnassignEquipment();
+  const createWorkLog = useCreateWorkLog();
+  const updateWorkLog = useUpdateWorkLog();
+  const deleteWorkLog = useDeleteWorkLog();
+  const createDamageAssessment = useCreateDamageAssessment();
+  const updateDamageAssessment = useUpdateDamageAssessment();
+  const deleteDamageAssessment = useDeleteDamageAssessment();
 
   // Filter available equipment
   const availableEquipment = allEquipment.filter(e => e.is_available);
@@ -174,6 +218,100 @@ export default function JobDetail() {
     });
   };
 
+  // Work log handlers
+  const handleAddWorkLog = () => {
+    setEditingWorkLog(null);
+    setWorkLogDialogOpen(true);
+  };
+
+  const handleEditWorkLog = (workLog: WorkLog) => {
+    setEditingWorkLog(workLog);
+    setWorkLogDialogOpen(true);
+  };
+
+  const handleDeleteWorkLog = (workLogId: string) => {
+    if (!id) return;
+    deleteWorkLog.mutate({ id: workLogId, jobId: id });
+  };
+
+  const handleSubmitWorkLog = (data: {
+    attendanceDate: Date;
+    logType: string;
+    summary?: string;
+    workCompleted?: string[];
+    equipmentNotes?: string;
+  }) => {
+    if (!id) return;
+    
+    if (editingWorkLog) {
+      updateWorkLog.mutate({
+        id: editingWorkLog.id,
+        ...data,
+      }, {
+        onSuccess: () => {
+          setWorkLogDialogOpen(false);
+          setEditingWorkLog(null);
+        },
+      });
+    } else {
+      createWorkLog.mutate({
+        jobId: id,
+        ...data,
+      }, {
+        onSuccess: () => {
+          setWorkLogDialogOpen(false);
+        },
+      });
+    }
+  };
+
+  // Damage assessment handlers
+  const handleAddDamage = () => {
+    setEditingDamage(null);
+    setDamageDialogOpen(true);
+  };
+
+  const handleEditDamage = (assessment: DamageAssessment) => {
+    setEditingDamage(assessment);
+    setDamageDialogOpen(true);
+  };
+
+  const handleDeleteDamage = (assessmentId: string) => {
+    if (!id) return;
+    deleteDamageAssessment.mutate({ id: assessmentId, jobId: id });
+  };
+
+  const handleSubmitDamage = (data: {
+    areaName: string;
+    materialType: string;
+    isRestorable: boolean;
+    status?: string;
+    notes?: string;
+  }) => {
+    if (!id) return;
+    
+    if (editingDamage) {
+      updateDamageAssessment.mutate({
+        id: editingDamage.id,
+        ...data,
+      }, {
+        onSuccess: () => {
+          setDamageDialogOpen(false);
+          setEditingDamage(null);
+        },
+      });
+    } else {
+      createDamageAssessment.mutate({
+        jobId: id,
+        ...data,
+      }, {
+        onSuccess: () => {
+          setDamageDialogOpen(false);
+        },
+      });
+    }
+  };
+
   if (jobLoading) {
     return (
       <div className="p-4 space-y-6">
@@ -202,6 +340,17 @@ export default function JobDetail() {
     ? chambers.find(c => c.id === viewingChamberId) 
     : null;
 
+  // Type assertion for new job fields
+  const jobWithNewFields = job as typeof job & {
+    claim_id?: string;
+    date_of_loss?: string;
+    loss_class?: string;
+    source_of_loss?: string;
+    affected_areas?: string;
+    affected_materials?: string;
+    claim_summary?: string;
+  };
+
   return (
     <div className="p-4 space-y-4 pb-24">
       {/* Header */}
@@ -222,10 +371,26 @@ export default function JobDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="chambers">Chambers</TabsTrigger>
           <TabsTrigger value="readings">Readings</TabsTrigger>
+          <TabsTrigger value="worklogs" className="relative">
+            Logs
+            {workLogs.length > 0 && (
+              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
+                {workLogs.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="damage" className="relative">
+            Damage
+            {damageAssessments.length > 0 && (
+              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
+                {damageAssessments.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="safety">Safety</TabsTrigger>
           <TabsTrigger value="photos" className="relative">
             Photos
@@ -311,10 +476,22 @@ export default function JobDetail() {
                 <span className="text-muted-foreground">Loss Type</span>
                 <span>{lossTypeLabels[job.loss_type]}</span>
               </div>
+              {jobWithNewFields.loss_class && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Loss Class</span>
+                  <span>{lossClassLabels[jobWithNewFields.loss_class] || jobWithNewFields.loss_class}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Start Date</span>
                 <span>{format(new Date(job.start_date), 'MMM d, yyyy')}</span>
               </div>
+              {jobWithNewFields.date_of_loss && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Date of Loss</span>
+                  <span>{format(new Date(jobWithNewFields.date_of_loss), 'MMM d, yyyy')}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Safety Completed</span>
                 <span>{job.safety_completed ? 'Yes' : 'No'}</span>
@@ -327,6 +504,50 @@ export default function JobDetail() {
               )}
             </CardContent>
           </Card>
+
+          {/* Claim Info (if available) */}
+          {(jobWithNewFields.claim_id || jobWithNewFields.source_of_loss || jobWithNewFields.claim_summary) && (
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Claim Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                {jobWithNewFields.claim_id && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Claim ID</span>
+                    <span className="font-mono">{jobWithNewFields.claim_id}</span>
+                  </div>
+                )}
+                {jobWithNewFields.source_of_loss && (
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-muted-foreground block mb-1">Source of Loss</span>
+                    <p>{jobWithNewFields.source_of_loss}</p>
+                  </div>
+                )}
+                {jobWithNewFields.affected_areas && (
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-muted-foreground block mb-1">Affected Areas</span>
+                    <p>{jobWithNewFields.affected_areas}</p>
+                  </div>
+                )}
+                {jobWithNewFields.affected_materials && (
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-muted-foreground block mb-1">Affected Materials</span>
+                    <p>{jobWithNewFields.affected_materials}</p>
+                  </div>
+                )}
+                {jobWithNewFields.claim_summary && (
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-muted-foreground block mb-1">Claim Summary</span>
+                    <p className="whitespace-pre-wrap">{jobWithNewFields.claim_summary}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Chambers Tab */}
@@ -399,6 +620,94 @@ export default function JobDetail() {
                 Go to Chambers
               </Button>
             </div>
+          )}
+        </TabsContent>
+
+        {/* Work Logs Tab */}
+        <TabsContent value="worklogs" className="space-y-4 mt-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold flex items-center gap-2">
+                <ClipboardList className="h-5 w-5" />
+                Work Logs
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Track daily attendance and work completed
+              </p>
+            </div>
+            <Button onClick={handleAddWorkLog}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Log
+            </Button>
+          </div>
+
+          {workLogs.length > 0 ? (
+            <div className="space-y-3">
+              {workLogs.map((log) => (
+                <WorkLogCard
+                  key={log.id}
+                  workLog={log}
+                  onEdit={handleEditWorkLog}
+                  onDelete={handleDeleteWorkLog}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="border-dashed">
+              <CardContent className="py-8 text-center">
+                <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground mb-4">
+                  No work logs recorded yet
+                </p>
+                <Button variant="outline" onClick={handleAddWorkLog}>
+                  Add First Log
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Damage Assessments Tab */}
+        <TabsContent value="damage" className="space-y-4 mt-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold flex items-center gap-2">
+                <FileWarning className="h-5 w-5" />
+                Damage Assessments
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Track restorable and non-restorable materials
+              </p>
+            </div>
+            <Button onClick={handleAddDamage}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Assessment
+            </Button>
+          </div>
+
+          {damageAssessments.length > 0 ? (
+            <div className="space-y-3">
+              {damageAssessments.map((assessment) => (
+                <DamageAssessmentCard
+                  key={assessment.id}
+                  assessment={assessment}
+                  onEdit={handleEditDamage}
+                  onDelete={handleDeleteDamage}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="border-dashed">
+              <CardContent className="py-8 text-center">
+                <FileWarning className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground mb-4">
+                  No damage assessments recorded yet
+                </p>
+                <Button variant="outline" onClick={handleAddDamage}>
+                  Add Assessment
+                </Button>
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
 
@@ -516,6 +825,30 @@ export default function JobDetail() {
           tenantId={tenantId}
         />
       )}
+
+      {/* Work Log Dialog */}
+      <WorkLogDialog
+        open={workLogDialogOpen}
+        onOpenChange={(open) => {
+          setWorkLogDialogOpen(open);
+          if (!open) setEditingWorkLog(null);
+        }}
+        onSubmit={handleSubmitWorkLog}
+        editingLog={editingWorkLog}
+        isLoading={createWorkLog.isPending || updateWorkLog.isPending}
+      />
+
+      {/* Damage Assessment Dialog */}
+      <DamageAssessmentDialog
+        open={damageDialogOpen}
+        onOpenChange={(open) => {
+          setDamageDialogOpen(open);
+          if (!open) setEditingDamage(null);
+        }}
+        onSubmit={handleSubmitDamage}
+        editingAssessment={editingDamage}
+        isLoading={createDamageAssessment.isPending || updateDamageAssessment.isPending}
+      />
     </div>
   );
 }

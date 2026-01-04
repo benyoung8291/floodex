@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      damage_assessments: {
+        Row: {
+          area_name: string
+          chamber_id: string | null
+          created_at: string
+          id: string
+          is_restorable: boolean
+          job_id: string
+          material_type: string
+          notes: string | null
+          status: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          area_name: string
+          chamber_id?: string | null
+          created_at?: string
+          id?: string
+          is_restorable?: boolean
+          job_id: string
+          material_type: string
+          notes?: string | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          area_name?: string
+          chamber_id?: string | null
+          created_at?: string
+          id?: string
+          is_restorable?: boolean
+          job_id?: string
+          material_type?: string
+          notes?: string | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "damage_assessments_chamber_id_fkey"
+            columns: ["chamber_id"]
+            isOneToOne: false
+            referencedRelation: "drying_chambers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_assessments_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "damage_assessments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drying_chambers: {
         Row: {
           created_at: string
@@ -275,19 +339,82 @@ export type Database = {
           },
         ]
       }
+      job_work_logs: {
+        Row: {
+          attendance_date: string
+          created_at: string
+          equipment_notes: string | null
+          id: string
+          job_id: string
+          log_type: string
+          logged_by: string
+          summary: string | null
+          tenant_id: string
+          updated_at: string
+          work_completed: string[] | null
+        }
+        Insert: {
+          attendance_date: string
+          created_at?: string
+          equipment_notes?: string | null
+          id?: string
+          job_id: string
+          log_type?: string
+          logged_by: string
+          summary?: string | null
+          tenant_id: string
+          updated_at?: string
+          work_completed?: string[] | null
+        }
+        Update: {
+          attendance_date?: string
+          created_at?: string
+          equipment_notes?: string | null
+          id?: string
+          job_id?: string
+          log_type?: string
+          logged_by?: string
+          summary?: string | null
+          tenant_id?: string
+          updated_at?: string
+          work_completed?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_work_logs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_work_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           address: string
+          affected_areas: string | null
+          affected_materials: string | null
           city: string | null
+          claim_id: string | null
+          claim_summary: string | null
           created_at: string
           created_by: string
           customer_email: string | null
           customer_name: string
           customer_phone: string | null
+          date_of_loss: string | null
           days_drying: number
           id: string
           latitude: number | null
           longitude: number | null
+          loss_class: string | null
           loss_type: Database["public"]["Enums"]["water_category"]
           notes: string | null
           outdoor_gpp: number | null
@@ -297,6 +424,7 @@ export type Database = {
           safety_completed: boolean
           safety_completed_at: string | null
           safety_completed_by: string | null
+          source_of_loss: string | null
           start_date: string
           state: string | null
           status: Database["public"]["Enums"]["job_status"]
@@ -306,16 +434,22 @@ export type Database = {
         }
         Insert: {
           address: string
+          affected_areas?: string | null
+          affected_materials?: string | null
           city?: string | null
+          claim_id?: string | null
+          claim_summary?: string | null
           created_at?: string
           created_by: string
           customer_email?: string | null
           customer_name: string
           customer_phone?: string | null
+          date_of_loss?: string | null
           days_drying?: number
           id?: string
           latitude?: number | null
           longitude?: number | null
+          loss_class?: string | null
           loss_type?: Database["public"]["Enums"]["water_category"]
           notes?: string | null
           outdoor_gpp?: number | null
@@ -325,6 +459,7 @@ export type Database = {
           safety_completed?: boolean
           safety_completed_at?: string | null
           safety_completed_by?: string | null
+          source_of_loss?: string | null
           start_date?: string
           state?: string | null
           status?: Database["public"]["Enums"]["job_status"]
@@ -334,16 +469,22 @@ export type Database = {
         }
         Update: {
           address?: string
+          affected_areas?: string | null
+          affected_materials?: string | null
           city?: string | null
+          claim_id?: string | null
+          claim_summary?: string | null
           created_at?: string
           created_by?: string
           customer_email?: string | null
           customer_name?: string
           customer_phone?: string | null
+          date_of_loss?: string | null
           days_drying?: number
           id?: string
           latitude?: number | null
           longitude?: number | null
+          loss_class?: string | null
           loss_type?: Database["public"]["Enums"]["water_category"]
           notes?: string | null
           outdoor_gpp?: number | null
@@ -353,6 +494,7 @@ export type Database = {
           safety_completed?: boolean
           safety_completed_at?: string | null
           safety_completed_by?: string | null
+          source_of_loss?: string | null
           start_date?: string
           state?: string | null
           status?: Database["public"]["Enums"]["job_status"]

@@ -10,6 +10,7 @@ import { FormStepper } from '@/components/jobs/FormStepper';
 import { CustomerInfoStep } from '@/components/jobs/CustomerInfoStep';
 import { LocationStep } from '@/components/jobs/LocationStep';
 import { LossTypeStep } from '@/components/jobs/LossTypeStep';
+import { ClaimInfoStep } from '@/components/jobs/ClaimInfoStep';
 import { SafetyCheckStep } from '@/components/jobs/SafetyCheckStep';
 import { useCreateJob } from '@/hooks/useCreateJob';
 import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react';
@@ -32,17 +33,26 @@ const jobSchema = z.object({
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   lossType: z.enum(['cat1', 'cat2', 'cat3']),
+  lossClass: z.enum(['class1', 'class2', 'class3', 'class4']),
   notes: z.string().max(1000).optional(),
+  // Claim info fields (all optional)
+  claimId: z.string().max(100).optional(),
+  dateOfLoss: z.date().optional(),
+  sourceOfLoss: z.string().max(500).optional(),
+  affectedAreas: z.string().max(500).optional(),
+  affectedMaterials: z.string().max(500).optional(),
+  claimSummary: z.string().max(2000).optional(),
   safetyChecks: z.array(safetyCheckSchema).default([]),
 });
-type SafetyCheck = z.infer<typeof safetyCheckSchema>;
 
+type SafetyCheck = z.infer<typeof safetyCheckSchema>;
 type JobFormData = z.infer<typeof jobSchema>;
 
 const steps = [
   { label: 'Customer' },
   { label: 'Location' },
   { label: 'Loss Type' },
+  { label: 'Claim Info' },
   { label: 'Safety' },
 ];
 
@@ -62,7 +72,13 @@ export default function JobCreate() {
       state: '',
       zipCode: '',
       lossType: 'cat1',
+      lossClass: 'class1',
       notes: '',
+      claimId: '',
+      sourceOfLoss: '',
+      affectedAreas: '',
+      affectedMaterials: '',
+      claimSummary: '',
       safetyChecks: [],
     },
   });
@@ -78,9 +94,12 @@ export default function JobCreate() {
         fieldsToValidate = ['address', 'city', 'state', 'zipCode'];
         break;
       case 2:
-        fieldsToValidate = ['lossType'];
+        fieldsToValidate = ['lossType', 'lossClass'];
         break;
       case 3:
+        // Claim info is all optional
+        return true;
+      case 4:
         return true;
     }
 
@@ -116,7 +135,14 @@ export default function JobCreate() {
         latitude: data.latitude,
         longitude: data.longitude,
         lossType: data.lossType,
+        lossClass: data.lossClass,
         notes: data.notes,
+        claimId: data.claimId,
+        dateOfLoss: data.dateOfLoss,
+        sourceOfLoss: data.sourceOfLoss,
+        affectedAreas: data.affectedAreas,
+        affectedMaterials: data.affectedMaterials,
+        claimSummary: data.claimSummary,
         safetyChecks: data.safetyChecks.map((check) => ({
           hazardType: check.hazardType,
           isPresent: check.isPresent,
@@ -139,6 +165,8 @@ export default function JobCreate() {
       case 2:
         return <LossTypeStep form={form} />;
       case 3:
+        return <ClaimInfoStep form={form} />;
+      case 4:
         return <SafetyCheckStep form={form} />;
       default:
         return null;
