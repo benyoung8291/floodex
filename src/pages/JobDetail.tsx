@@ -27,6 +27,7 @@ import {
   useCreateReading,
   useChamberReadings,
   useJobSafetyChecks,
+  useUpdateOutdoorReading,
 } from '@/hooks/useJobReadings';
 import { useTenant } from '@/hooks/useTenant';
 import { ChamberList } from '@/components/readings/ChamberList';
@@ -78,6 +79,7 @@ export default function JobDetail() {
   // Mutations
   const createChamber = useCreateChamber();
   const createReading = useCreateReading();
+  const updateOutdoorReading = useUpdateOutdoorReading();
 
   // Handlers
   const handleAddChamber = () => setCreateChamberOpen(true);
@@ -100,6 +102,11 @@ export default function JobDetail() {
   const handleViewHistory = (chamberId: string) => {
     setViewingChamberId(chamberId);
     setActiveTab('readings');
+  };
+
+  const handleUpdateOutdoorReading = (data: { temperature: number; humidity: number; gpp: number }) => {
+    if (!id) return;
+    updateOutdoorReading.mutate({ jobId: id, ...data });
   };
 
   const handleSubmitReading = (data: {
@@ -277,9 +284,12 @@ export default function JobDetail() {
             latestReadings={latestReadings}
             units={units}
             temperatureUnit={temperatureUnit}
+            job={job}
             onAddChamber={handleAddChamber}
             onAddReading={handleAddReading}
             onViewHistory={handleViewHistory}
+            onUpdateOutdoorReading={handleUpdateOutdoorReading}
+            isUpdatingOutdoor={updateOutdoorReading.isPending}
             isLoading={chambersLoading}
           />
         </TabsContent>
@@ -306,6 +316,7 @@ export default function JobDetail() {
               <GPPTrendChart
                 readings={chamberReadings}
                 targetGpp={viewingChamber.target_gpp}
+                outdoorGpp={job.outdoor_gpp}
                 units={units}
               />
 

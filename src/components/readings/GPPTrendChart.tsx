@@ -19,12 +19,14 @@ type MoistureReading = Tables<'moisture_readings'>;
 interface GPPTrendChartProps {
   readings: MoistureReading[];
   targetGpp?: number | null;
+  outdoorGpp?: number | null;
   units: UnitSystem;
 }
 
 export function GPPTrendChart({
   readings,
   targetGpp,
+  outdoorGpp,
   units,
 }: GPPTrendChartProps) {
   const chartData = useMemo(() => {
@@ -46,6 +48,11 @@ export function GPPTrendChart({
     if (!targetGpp) return null;
     return units === 'metric' ? gppToGramsPerKg(targetGpp) : targetGpp;
   }, [targetGpp, units]);
+
+  const displayOutdoor = useMemo(() => {
+    if (!outdoorGpp) return null;
+    return units === 'metric' ? gppToGramsPerKg(outdoorGpp) : outdoorGpp;
+  }, [outdoorGpp, units]);
 
   const unitLabel = units === 'metric' ? 'g/kg' : 'GPP';
 
@@ -107,6 +114,19 @@ export function GPPTrendChart({
                   }}
                 />
               )}
+              {displayOutdoor && (
+                <ReferenceLine 
+                  y={displayOutdoor} 
+                  stroke="hsl(38, 92%, 50%)" 
+                  strokeDasharray="3 3"
+                  label={{ 
+                    value: `Outdoor: ${displayOutdoor}`, 
+                    position: 'left',
+                    fontSize: 10,
+                    fill: 'hsl(38, 92%, 50%)'
+                  }}
+                />
+              )}
               <Line
                 type="monotone"
                 dataKey="value"
@@ -117,6 +137,26 @@ export function GPPTrendChart({
               />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+        
+        {/* Legend */}
+        <div className="flex flex-wrap gap-4 mt-3 text-xs">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-0.5 bg-primary rounded" />
+            <span className="text-muted-foreground">Indoor {unitLabel}</span>
+          </div>
+          {displayTarget && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-0.5 bg-success rounded" style={{ borderStyle: 'dashed' }} />
+              <span className="text-muted-foreground">Target</span>
+            </div>
+          )}
+          {displayOutdoor && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-0.5 rounded" style={{ backgroundColor: 'hsl(38, 92%, 50%)' }} />
+              <span className="text-muted-foreground">Outdoor</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
