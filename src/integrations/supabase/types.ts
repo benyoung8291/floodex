@@ -286,6 +286,195 @@ export type Database = {
           },
         ]
       }
+      form_signatures: {
+        Row: {
+          form_id: string
+          id: string
+          ip_address: string | null
+          latitude: number | null
+          longitude: number | null
+          signature_image_path: string
+          signed_at: string
+          signer_email: string | null
+          signer_name: string
+          signer_type: string
+          tenant_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          form_id: string
+          id?: string
+          ip_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          signature_image_path: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name: string
+          signer_type: string
+          tenant_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          form_id?: string
+          id?: string
+          ip_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          signature_image_path?: string
+          signed_at?: string
+          signer_email?: string | null
+          signer_name?: string
+          signer_type?: string
+          tenant_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_signatures_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "job_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_signatures_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      form_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          fields: Json
+          form_type: string
+          id: string
+          is_active: boolean
+          is_system_template: boolean
+          name: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          fields?: Json
+          form_type: string
+          id?: string
+          is_active?: boolean
+          is_system_template?: boolean
+          name: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          fields?: Json
+          form_type?: string
+          id?: string
+          is_active?: boolean
+          is_system_template?: boolean
+          name?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_forms: {
+        Row: {
+          created_at: string
+          created_by: string
+          field_values: Json
+          form_type: string
+          id: string
+          job_id: string
+          signed_at: string | null
+          signed_document_path: string | null
+          status: string
+          template_id: string | null
+          tenant_id: string
+          title: string
+          updated_at: string
+          voided_at: string | null
+          voided_by: string | null
+          voided_reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          field_values?: Json
+          form_type: string
+          id?: string
+          job_id: string
+          signed_at?: string | null
+          signed_document_path?: string | null
+          status?: string
+          template_id?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          field_values?: Json
+          form_type?: string
+          id?: string
+          job_id?: string
+          signed_at?: string | null
+          signed_document_path?: string | null
+          status?: string
+          template_id?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string
+          voided_at?: string | null
+          voided_by?: string | null
+          voided_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_forms_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_forms_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "form_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_forms_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_photos: {
         Row: {
           annotation_data: Json | null

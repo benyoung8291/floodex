@@ -22,6 +22,7 @@ import {
   ClipboardList,
   FileWarning,
   FileText,
+  FileSignature,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -70,6 +71,8 @@ import { WorkLogDialog } from '@/components/jobs/WorkLogDialog';
 import { DamageAssessmentCard } from '@/components/jobs/DamageAssessmentCard';
 import { DamageAssessmentDialog } from '@/components/jobs/DamageAssessmentDialog';
 import { FloorPlanGallery } from '@/components/floorplan/FloorPlanGallery';
+import { FormsList } from '@/components/forms/FormsList';
+import { useJobForms } from '@/hooks/useJobForms';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -134,6 +137,7 @@ export default function JobDetail() {
   const { data: jobPhotos = [] } = useJobPhotos(id || '');
   const { data: workLogs = [] } = useJobWorkLogs(id);
   const { data: damageAssessments = [] } = useJobDamageAssessments(id);
+  const { data: jobForms = [] } = useJobForms(id || '');
   
   // Mutations
   const createChamber = useCreateChamber();
@@ -372,7 +376,7 @@ export default function JobDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="chambers">Chambers</TabsTrigger>
           <TabsTrigger value="readings">Readings</TabsTrigger>
@@ -389,6 +393,14 @@ export default function JobDetail() {
             {damageAssessments.length > 0 && (
               <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
                 {damageAssessments.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="forms" className="relative">
+            Forms
+            {jobForms.length > 0 && (
+              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
+                {jobForms.length}
               </span>
             )}
           </TabsTrigger>
@@ -757,6 +769,28 @@ export default function JobDetail() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Forms Tab */}
+        <TabsContent value="forms" className="mt-4">
+          <FormsList 
+            jobId={id || ''} 
+            jobData={{
+              customer_name: job.customer_name,
+              customer_phone: job.customer_phone,
+              customer_email: job.customer_email,
+              address: job.address,
+              city: job.city,
+              state: job.state,
+              zip_code: job.zip_code,
+              claim_id: jobWithNewFields.claim_id,
+              date_of_loss: jobWithNewFields.date_of_loss,
+              loss_type: job.loss_type,
+              loss_class: jobWithNewFields.loss_class,
+              start_date: job.start_date,
+              days_drying: job.days_drying,
+            }}
+          />
         </TabsContent>
 
         {/* Plans Tab */}
