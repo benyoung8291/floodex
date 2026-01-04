@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Zap } from 'lucide-react';
 import { ChamberCard } from './ChamberCard';
 import { OutdoorReadingCard } from './OutdoorReadingCard';
 import type { Tables } from '@/integrations/supabase/types';
@@ -23,6 +23,7 @@ interface ChamberListProps {
   onViewHistory: (chamberId: string) => void;
   onManageEquipment?: (chamberId: string) => void;
   onUpdateOutdoorReading?: (data: { temperature: number; humidity: number; gpp: number }) => void;
+  onQuickLog?: () => void;
   isUpdatingOutdoor?: boolean;
   isLoading?: boolean;
 }
@@ -39,6 +40,7 @@ export function ChamberList({
   onViewHistory,
   onManageEquipment,
   onUpdateOutdoorReading,
+  onQuickLog,
   isUpdatingOutdoor,
   isLoading,
 }: ChamberListProps) {
@@ -96,6 +98,14 @@ export function ChamberList({
           onUpdate={onUpdateOutdoorReading}
           isUpdating={isUpdatingOutdoor}
         />
+      )}
+
+      {/* Quick Log Button - show when 2+ chambers */}
+      {chambers.length >= 2 && onQuickLog && (
+        <Button onClick={onQuickLog} className="w-full gap-2" variant="default">
+          <Zap className="h-4 w-4" />
+          Quick Log All Chambers
+        </Button>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
