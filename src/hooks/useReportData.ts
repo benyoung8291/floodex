@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { getPhotoUrl } from '@/hooks/useJobPhotos';
+import { FloorPlan, getFloorPlanThumbnailUrl } from '@/hooks/useFloorPlans';
 
 export type Job = Tables<'jobs'> & {
   claim_id?: string | null;
@@ -59,6 +60,10 @@ export interface ReportPhoto extends Photo {
   url: string;
 }
 
+export interface ReportFloorPlan extends FloorPlan {
+  thumbnail_url: string | null;
+}
+
 export interface JobReportData {
   job: Job;
   chambers: Chamber[];
@@ -67,6 +72,7 @@ export interface JobReportData {
   photos: ReportPhoto[];
   workLogs: WorkLog[];
   damageAssessments: DamageAssessment[];
+  floorPlans: ReportFloorPlan[];
   tenant: Tables<'tenants'> | null;
 }
 
@@ -166,6 +172,20 @@ export function useJobReportData(jobId: string | undefined, dateRange?: { start:
 
       if (damageError) throw damageError;
 
+      // Fetch floor plans
+      const { data: floorPlans, error: floorPlansError } = await supabase
+        .from('floor_plans')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('floor_number', { ascending: true });
+
+      if (floorPlansError) throw floorPlansError;
+
+      const reportFloorPlans: ReportFloorPlan[] = (floorPlans || []).map(fp => ({
+        ...fp,
+        thumbnail_url: getFloorPlanThumbnailUrl(fp.thumbnail_path),
+      }));
+
       // Fetch tenant for branding
       const { data: tenant } = await supabase
         .from('tenants')
@@ -181,6 +201,7 @@ export function useJobReportData(jobId: string | undefined, dateRange?: { start:
         photos: reportPhotos,
         workLogs: (workLogs || []) as WorkLog[],
         damageAssessments: (damageAssessments || []) as DamageAssessment[],
+        floorPlans: reportFloorPlans,
         tenant,
       };
     },

@@ -7,6 +7,7 @@ import { DamageAssessmentSection } from './templates/DamageAssessmentSection';
 import { DryingLogTable, DryingLogSummaryTable } from './templates/DryingLogTable';
 import { EquipmentTable } from './templates/EquipmentTable';
 import { PhotoGrid } from './templates/PhotoGrid';
+import { FloorPlanSection } from './templates/FloorPlanSection';
 import { SignatureBlock } from './templates/SignatureBlock';
 import { ReportFooter } from './templates/ReportFooter';
 
@@ -17,6 +18,7 @@ interface ComprehensiveReportProps {
   includeDamage?: boolean;
   includeEquipment?: boolean;
   includePhotos?: boolean;
+  includeFloorPlans?: boolean;
   includeSignature?: boolean;
   photoSize?: 'small' | 'medium' | 'large';
 }
@@ -29,6 +31,7 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
     includeDamage = true,
     includeEquipment = true,
     includePhotos = true,
+    includeFloorPlans = true,
     includeSignature = true,
     photoSize = 'medium',
   }, ref) => {
@@ -57,6 +60,11 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
         {/* Damage Assessment */}
         {includeDamage && data.damageAssessments.length > 0 && (
           <DamageAssessmentSection damageAssessments={data.damageAssessments} />
+        )}
+
+        {/* Floor Plans */}
+        {includeFloorPlans && data.floorPlans && data.floorPlans.length > 0 && (
+          <FloorPlanSection floorPlans={data.floorPlans} />
         )}
 
         {/* Moisture Readings */}

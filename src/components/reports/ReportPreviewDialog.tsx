@@ -53,6 +53,7 @@ export function ReportPreviewDialog({
   // Options
   const [includeEquipment, setIncludeEquipment] = useState(true);
   const [includeSignature, setIncludeSignature] = useState(true);
+  const [includeFloorPlans, setIncludeFloorPlans] = useState(true);
   const [showFullSizePhotos, setShowFullSizePhotos] = useState(false);
   const [includeDetailedReadings, setIncludeDetailedReadings] = useState(true);
   
@@ -104,6 +105,7 @@ export function ReportPreviewDialog({
             includeDamage={true}
             includeEquipment={includeEquipment}
             includePhotos={true}
+            includeFloorPlans={includeFloorPlans}
             includeSignature={includeSignature}
           />
         );
@@ -278,6 +280,20 @@ export function ReportPreviewDialog({
               </div>
             )}
 
+            {/* Floor plan options for comprehensive report */}
+            {reportType === 'comprehensive' && (
+              <div className="flex items-center justify-between">
+                <Label htmlFor="include-floor-plans" className="text-sm">
+                  Include Floor Plans
+                </Label>
+                <Switch
+                  id="include-floor-plans"
+                  checked={includeFloorPlans}
+                  onCheckedChange={setIncludeFloorPlans}
+                />
+              </div>
+            )}
+
             {/* Common options */}
             <div className="flex items-center justify-between">
               <Label htmlFor="include-signature" className="text-sm">
@@ -308,6 +324,10 @@ export function ReportPreviewDialog({
                 <div className="flex justify-between">
                   <span>Photos:</span>
                   <span className="font-medium text-foreground">{data.photos.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Floor Plans:</span>
+                  <span className="font-medium text-foreground">{data.floorPlans?.length || 0}</span>
                 </div>
               </div>
             )}
