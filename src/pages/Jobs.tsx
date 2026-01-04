@@ -1,14 +1,20 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Filter, Briefcase } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Filter, Briefcase, Layers, Droplets } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useJobs } from '@/hooks/useJobs';
+import { useJobsWithChambers } from '@/hooks/useAllReadings';
+import { useTenant } from '@/hooks/useTenant';
+import { formatHumidityRatio, type UnitSystem } from '@/lib/psychrometrics';
 import { differenceInDays } from 'date-fns';
 
 export default function Jobs() {
   const navigate = useNavigate();
-  const { data: jobs, isLoading, error } = useJobs();
+  const { data: jobs, isLoading, error } = useJobsWithChambers();
+  const { data: tenant } = useTenant();
+
+  const units: UnitSystem = tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial';
 
   const getStatusStyles = (status: string) => {
     switch (status) {
@@ -28,11 +34,11 @@ export default function Jobs() {
   const getLossTypeLabel = (type: string) => {
     switch (type) {
       case 'cat1':
-        return 'Cat 1 - Clean';
+        return 'Cat 1';
       case 'cat2':
-        return 'Cat 2 - Gray';
+        return 'Cat 2';
       case 'cat3':
-        return 'Cat 3 - Black';
+        return 'Cat 3';
       default:
         return type;
     }
@@ -152,6 +158,19 @@ export default function Jobs() {
                         {job.city && `, ${job.city}`}
                         {job.state && `, ${job.state}`}
                       </p>
+                      {/* Reading indicators */}
+                      <div className="flex items-center gap-3 mt-2">
+                        <Badge variant="secondary" className="gap-1 text-xs">
+                          <Layers className="h-3 w-3" />
+                          {job.chamber_count} chamber{job.chamber_count !== 1 ? 's' : ''}
+                        </Badge>
+                        {job.latest_gpp && (
+                          <Badge variant="outline" className="gap-1 text-xs">
+                            <Droplets className="h-3 w-3" />
+                            {formatHumidityRatio(job.latest_gpp, units)}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-sm font-medium">{getLossTypeLabel(job.loss_type)}</p>
