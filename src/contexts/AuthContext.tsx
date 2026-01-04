@@ -92,51 +92,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string, companyName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName,
+          company_name: companyName, // Trigger handles tenant/role creation
         },
       },
     });
 
-    if (error) return { error: error as Error };
-
-    // If signup successful and company name provided, create tenant
-    if (data.user && companyName) {
-      // Create tenant
-      const { data: tenantData, error: tenantError } = await supabase
-        .from('tenants')
-        .insert({
-          name: companyName,
-          contact_email: email,
-          trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days trial
-        })
-        .select()
-        .single();
-
-      if (tenantError) return { error: tenantError as Error };
-
-      // Update profile with tenant_id
-      await supabase
-        .from('profiles')
-        .update({ tenant_id: tenantData.id })
-        .eq('id', data.user.id);
-
-      // Assign tenant_admin role
-      await supabase
-        .from('user_roles')
-        .insert({
-          user_id: data.user.id,
-          tenant_id: tenantData.id,
-          role: 'tenant_admin',
-        });
-    }
-
-    return { error: null };
+    return { error: error ? (error as Error) : null };
   };
 
   const signOut = async () => {
