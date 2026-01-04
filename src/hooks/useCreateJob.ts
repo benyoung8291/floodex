@@ -21,7 +21,15 @@ interface CreateJobData {
   latitude?: number;
   longitude?: number;
   lossType: 'cat1' | 'cat2' | 'cat3';
+  lossClass?: 'class1' | 'class2' | 'class3' | 'class4';
   notes?: string;
+  // Claim info fields
+  claimId?: string;
+  dateOfLoss?: Date;
+  sourceOfLoss?: string;
+  affectedAreas?: string;
+  affectedMaterials?: string;
+  claimSummary?: string;
   safetyChecks: SafetyCheck[];
 }
 
@@ -56,7 +64,15 @@ export function useCreateJob() {
           latitude: data.latitude || null,
           longitude: data.longitude || null,
           loss_type: data.lossType,
+          loss_class: data.lossClass || 'class1',
           notes: data.notes || null,
+          // Claim info fields
+          claim_id: data.claimId || null,
+          date_of_loss: data.dateOfLoss ? data.dateOfLoss.toISOString().split('T')[0] : null,
+          source_of_loss: data.sourceOfLoss || null,
+          affected_areas: data.affectedAreas || null,
+          affected_materials: data.affectedMaterials || null,
+          claim_summary: data.claimSummary || null,
           status: 'emergency',
           safety_completed: !requiresStopWork,
           safety_completed_at: !requiresStopWork ? new Date().toISOString() : null,

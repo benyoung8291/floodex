@@ -20,9 +20,10 @@ import { DryingLogReport } from './DryingLogReport';
 import { EquipmentReport } from './EquipmentReport';
 import { PhotoReport } from './PhotoReport';
 import { PsychrometricReport } from './PsychrometricReport';
+import { ComprehensiveReport } from './ComprehensiveReport';
 import { cn } from '@/lib/utils';
 
-export type ReportType = 'drying-log-3day' | 'drying-log-custom' | 'equipment' | 'photos' | 'psychrometric';
+export type ReportType = 'comprehensive' | 'drying-log-3day' | 'drying-log-custom' | 'equipment' | 'photos' | 'psychrometric';
 
 interface ReportPreviewDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ interface ReportPreviewDialogProps {
 }
 
 const REPORT_TITLES: Record<ReportType, string> = {
+  'comprehensive': 'Comprehensive Water Damage Report',
   'drying-log-3day': '3-Day Drying Log',
   'drying-log-custom': 'Custom Period Drying Log',
   'equipment': 'Equipment Usage Summary',
@@ -92,6 +94,19 @@ export function ReportPreviewDialog({
 
   const renderReport = (data: JobReportData) => {
     switch (reportType) {
+      case 'comprehensive':
+        return (
+          <ComprehensiveReport
+            ref={reportRef}
+            data={data}
+            dateRange={dateRange}
+            includeWorkLogs={true}
+            includeDamage={true}
+            includeEquipment={includeEquipment}
+            includePhotos={true}
+            includeSignature={includeSignature}
+          />
+        );
       case 'drying-log-3day':
       case 'drying-log-custom':
         return (

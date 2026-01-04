@@ -96,6 +96,13 @@ export default function Reports() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <ReportCard
+            title="Comprehensive Report"
+            description="Full water damage documentation with claim info, work logs, damage assessments, and photos."
+            icon={FileText}
+            onClick={() => handleReportClick('comprehensive')}
+          />
+          
+          <ReportCard
             title="3-Day Drying Log"
             description="Standard IICRC-compliant daily documentation for the last 3 days of drying."
             icon={FileText}

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { Droplets, AlertTriangle, Skull } from 'lucide-react';
+import { Droplets, AlertTriangle, Skull, Layers } from 'lucide-react';
 
 interface LossTypeStepProps {
   form: UseFormReturn<any>;
@@ -44,21 +44,47 @@ const lossTypes = [
   },
 ];
 
+const lossClasses = [
+  {
+    value: 'class1',
+    label: 'Class 1',
+    description: 'Minimal water absorption, small affected area',
+  },
+  {
+    value: 'class2',
+    label: 'Class 2',
+    description: 'Significant water, entire room, walls <24"',
+  },
+  {
+    value: 'class3',
+    label: 'Class 3',
+    description: 'Greatest amount, saturated walls/ceilings',
+  },
+  {
+    value: 'class4',
+    label: 'Class 4',
+    description: 'Specialty drying (hardwood, stone, concrete)',
+  },
+];
+
 export function LossTypeStep({ form }: LossTypeStepProps) {
   const selectedType = form.watch('lossType');
+  const selectedClass = form.watch('lossClass');
 
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className="text-xl font-semibold text-foreground">Loss Classification</h2>
-        <p className="text-muted-foreground mt-1">Select the water damage category</p>
+        <p className="text-muted-foreground mt-1">Select the water damage category and class</p>
       </div>
 
+      {/* Water Category */}
       <FormField
         control={form.control}
         name="lossType"
         render={({ field }) => (
           <FormItem>
+            <FormLabel className="text-base font-medium">Water Category (IICRC S500)</FormLabel>
             <FormControl>
               <div className="space-y-3">
                 {lossTypes.map((type) => {
@@ -90,6 +116,46 @@ export function LossTypeStep({ form }: LossTypeStepProps) {
                           </p>
                         </div>
                       </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Loss Class */}
+      <FormField
+        control={form.control}
+        name="lossClass"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-base font-medium flex items-center gap-2">
+              <Layers className="h-4 w-4" />
+              Loss Class (Drying Difficulty)
+            </FormLabel>
+            <FormControl>
+              <div className="grid grid-cols-2 gap-2">
+                {lossClasses.map((lossClass) => {
+                  const isSelected = field.value === lossClass.value;
+
+                  return (
+                    <button
+                      key={lossClass.value}
+                      type="button"
+                      onClick={() => field.onChange(lossClass.value)}
+                      className={cn(
+                        'p-3 rounded-lg border text-left transition-all',
+                        'border-border bg-card hover:bg-accent',
+                        isSelected && 'ring-2 ring-primary border-primary bg-primary/10'
+                      )}
+                    >
+                      <span className="font-semibold text-foreground block">{lossClass.label}</span>
+                      <span className="text-xs text-muted-foreground line-clamp-2">
+                        {lossClass.description}
+                      </span>
                     </button>
                   );
                 })}
