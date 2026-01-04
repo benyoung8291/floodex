@@ -69,6 +69,7 @@ import { WorkLogCard } from '@/components/jobs/WorkLogCard';
 import { WorkLogDialog } from '@/components/jobs/WorkLogDialog';
 import { DamageAssessmentCard } from '@/components/jobs/DamageAssessmentCard';
 import { DamageAssessmentDialog } from '@/components/jobs/DamageAssessmentDialog';
+import { FloorPlanGallery } from '@/components/floorplan/FloorPlanGallery';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -371,7 +372,7 @@ export default function JobDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="chambers">Chambers</TabsTrigger>
           <TabsTrigger value="readings">Readings</TabsTrigger>
@@ -391,6 +392,7 @@ export default function JobDetail() {
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="plans">Plans</TabsTrigger>
           <TabsTrigger value="safety">Safety</TabsTrigger>
           <TabsTrigger value="photos" className="relative">
             Photos
@@ -755,6 +757,11 @@ export default function JobDetail() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Plans Tab */}
+        <TabsContent value="plans" className="mt-4">
+          <FloorPlanGallery jobId={id || ''} />
         </TabsContent>
 
         {/* Photos Tab */}

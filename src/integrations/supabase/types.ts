@@ -229,6 +229,60 @@ export type Database = {
           },
         ]
       }
+      floor_plans: {
+        Row: {
+          canvas_data: Json
+          created_at: string
+          created_by: string
+          floor_number: number | null
+          id: string
+          job_id: string
+          name: string
+          tenant_id: string
+          thumbnail_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          canvas_data: Json
+          created_at?: string
+          created_by: string
+          floor_number?: number | null
+          id?: string
+          job_id: string
+          name?: string
+          tenant_id: string
+          thumbnail_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canvas_data?: Json
+          created_at?: string
+          created_by?: string
+          floor_number?: number | null
+          id?: string
+          job_id?: string
+          name?: string
+          tenant_id?: string
+          thumbnail_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "floor_plans_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floor_plans_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_photos: {
         Row: {
           annotation_data: Json | null
