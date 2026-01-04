@@ -1,4 +1,4 @@
-import { Canvas as FabricCanvas, Rect, Circle, Line, IText, Group, Path, Polygon } from 'fabric';
+import { Canvas as FabricCanvas, Rect, Circle, Line, IText, Group, Path, Polygon, FabricImage } from 'fabric';
 
 export type FloorPlanTool = 
   | 'select'
@@ -499,10 +499,30 @@ export const clearGrid = (canvas: FabricCanvas): void => {
 };
 
 /**
- * Serialize canvas to JSON
+ * Serialize canvas to JSON (includes custom properties)
  */
 export const serializeFloorPlan = (canvas: FabricCanvas): string => {
-  return JSON.stringify(canvas.toJSON());
+  const jsonData = canvas.toJSON();
+  // Manually add custom properties to each object
+  const objects = canvas.getObjects();
+  if (jsonData.objects) {
+    jsonData.objects.forEach((objData: any, index: number) => {
+      const obj = objects[index] as any;
+      if (obj) {
+        if (obj.objectType) objData.objectType = obj.objectType;
+        if (obj.roomName) objData.roomName = obj.roomName;
+        if (obj.damageType) objData.damageType = obj.damageType;
+        if (obj.equipmentType) objData.equipmentType = obj.equipmentType;
+        if (obj.readingNumber) objData.readingNumber = obj.readingNumber;
+        if (obj.markerId) objData.markerId = obj.markerId;
+        if (obj.linkedReadingId) objData.linkedReadingId = obj.linkedReadingId;
+        if (obj.backgroundImageUrl) objData.backgroundImageUrl = obj.backgroundImageUrl;
+        if (obj.backgroundOpacity !== undefined) objData.backgroundOpacity = obj.backgroundOpacity;
+        if (obj.backgroundFitMode) objData.backgroundFitMode = obj.backgroundFitMode;
+      }
+    });
+  }
+  return JSON.stringify(jsonData);
 };
 
 /**
@@ -536,4 +556,149 @@ export const exportFloorPlanAsImage = (canvas: FabricCanvas): Promise<Blob> => {
       .then(resolve)
       .catch(reject);
   });
+};
+
+/**
+ * Add background image to canvas
+ */
+export const addBackgroundImage = async (
+  canvas: FabricCanvas,
+  imageUrl: string,
+  options: {
+    opacity: number;
+    fitMode: 'contain' | 'cover' | 'original';
+  }
+): Promise<void> => {
+  // First remove any existing background
+  removeBackgroundImage(canvas);
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvasWidth = canvas.getWidth();
+      const canvasHeight = canvas.getHeight();
+
+      let scaleX = 1;
+      let scaleY = 1;
+      let left = 0;
+      let top = 0;
+
+      if (options.fitMode === 'contain') {
+        const scale = Math.min(canvasWidth / img.width, canvasHeight / img.height);
+        scaleX = scale;
+        scaleY = scale;
+        left = (canvasWidth - img.width * scale) / 2;
+        top = (canvasHeight - img.height * scale) / 2;
+      } else if (options.fitMode === 'cover') {
+        const scale = Math.max(canvasWidth / img.width, canvasHeight / img.height);
+        scaleX = scale;
+        scaleY = scale;
+        left = (canvasWidth - img.width * scale) / 2;
+        top = (canvasHeight - img.height * scale) / 2;
+      } else {
+        // Original size, centered
+        left = (canvasWidth - img.width) / 2;
+        top = (canvasHeight - img.height) / 2;
+      }
+
+      const fabricImg = new FabricImage(img, {
+        left,
+        top,
+        scaleX,
+        scaleY,
+        opacity: options.opacity,
+        selectable: false,
+        evented: false,
+        hasControls: false,
+        hasBorders: false,
+        lockMovementX: true,
+        lockMovementY: true,
+      });
+
+      // @ts-ignore - custom properties
+      fabricImg.objectType = 'background';
+      // @ts-ignore
+      fabricImg.backgroundImageUrl = imageUrl;
+      // @ts-ignore
+      fabricImg.backgroundOpacity = options.opacity;
+      // @ts-ignore
+      fabricImg.backgroundFitMode = options.fitMode;
+
+      canvas.add(fabricImg);
+      canvas.sendObjectToBack(fabricImg);
+      canvas.renderAll();
+      resolve();
+    };
+    img.src = imageUrl;
+  });
+};
+
+/**
+ * Remove background image from canvas
+ */
+export const removeBackgroundImage = (canvas: FabricCanvas): void => {
+  const objects = canvas.getObjects();
+  const bgObjects = objects.filter((obj) => {
+    // @ts-ignore
+    return obj.objectType === 'background';
+  });
+  bgObjects.forEach((obj) => canvas.remove(obj));
+  canvas.renderAll();
+};
+
+/**
+ * Toggle background image visibility
+ */
+export const toggleBackgroundVisibility = (canvas: FabricCanvas): boolean => {
+  const bg = getBackgroundImage(canvas);
+  if (!bg) return false;
+  
+  const newOpacity = bg.opacity === 0 ? ((bg as any).backgroundOpacity || 0.7) : 0;
+  bg.set('opacity', newOpacity);
+  canvas.renderAll();
+  return newOpacity > 0;
+};
+
+/**
+ * Update background image opacity
+ */
+export const updateBackgroundOpacity = (canvas: FabricCanvas, opacity: number): void => {
+  const bg = getBackgroundImage(canvas);
+  if (!bg) return;
+  
+  bg.set('opacity', opacity);
+  // @ts-ignore
+  bg.backgroundOpacity = opacity;
+  canvas.renderAll();
+};
+
+/**
+ * Get background image if exists
+ */
+export const getBackgroundImage = (canvas: FabricCanvas): FabricImage | null => {
+  const objects = canvas.getObjects();
+  return objects.find((obj) => {
+    // @ts-ignore
+    return obj.objectType === 'background';
+  }) as FabricImage | null;
+};
+
+/**
+ * Reload background image from URL (for when loading from JSON)
+ */
+export const reloadBackgroundImage = async (canvas: FabricCanvas): Promise<void> => {
+  const bg = getBackgroundImage(canvas);
+  if (!bg) return;
+
+  // @ts-ignore
+  const url = bg.backgroundImageUrl;
+  // @ts-ignore
+  const opacity = bg.backgroundOpacity || 0.7;
+  // @ts-ignore
+  const fitMode = bg.backgroundFitMode || 'contain';
+
+  if (url) {
+    await addBackgroundImage(canvas, url, { opacity, fitMode });
+  }
 };

@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -29,6 +30,10 @@ import {
   Wrench,
   ChevronDown,
   Link2,
+  ImageIcon,
+  Eye,
+  EyeOff,
+  Trash2,
 } from 'lucide-react';
 import { FloorPlanTool, EQUIPMENT_TYPES, EquipmentType } from '@/lib/floorPlanTools';
 
@@ -47,6 +52,11 @@ interface FloorPlanToolbarProps {
   readingMode?: boolean;
   onToggleReadingMode?: () => void;
   canLinkReadings?: boolean;
+  hasBackground?: boolean;
+  backgroundVisible?: boolean;
+  onOpenBackgroundDialog?: () => void;
+  onToggleBackground?: () => void;
+  onRemoveBackground?: () => void;
 }
 
 const tools: { id: FloorPlanTool; icon: React.ReactNode; label: string }[] = [
@@ -77,6 +87,11 @@ export const FloorPlanToolbar = ({
   readingMode,
   onToggleReadingMode,
   canLinkReadings,
+  hasBackground,
+  backgroundVisible,
+  onOpenBackgroundDialog,
+  onToggleBackground,
+  onRemoveBackground,
 }: FloorPlanToolbarProps) => {
   return (
     <TooltipProvider delayDuration={300}>
@@ -170,6 +185,61 @@ export const FloorPlanToolbar = ({
             <div className="w-px h-6 bg-border mx-1" />
           </>
         )}
+
+        {/* Background Image dropdown */}
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={hasBackground ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-8 gap-1"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Background Image</p>
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={onOpenBackgroundDialog}>
+              <ImageIcon className="h-4 w-4 mr-2" />
+              {hasBackground ? 'Replace Background' : 'Add Background'}
+            </DropdownMenuItem>
+            {hasBackground && (
+              <>
+                <DropdownMenuItem onClick={onToggleBackground}>
+                  {backgroundVisible ? (
+                    <>
+                      <EyeOff className="h-4 w-4 mr-2" />
+                      Hide Background
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4 mr-2" />
+                      Show Background
+                    </>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={onRemoveBackground}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Remove Background
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Divider */}
+        <div className="w-px h-6 bg-border mx-1" />
 
         {/* Grid toggle */}
         <Tooltip>

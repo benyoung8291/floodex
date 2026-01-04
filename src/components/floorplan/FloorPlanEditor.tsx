@@ -14,6 +14,7 @@ import { FloorPlanToolbar } from './FloorPlanToolbar';
 import { ReadingMarkerPopover } from './ReadingMarkerPopover';
 import { ReadingLinkDialog } from './ReadingLinkDialog';
 import { FloorPlanReadingDialog } from './FloorPlanReadingDialog';
+import { FloorPlanBackgroundUpload, BackgroundImageData } from './FloorPlanBackgroundUpload';
 import {
   FloorPlanTool,
   EquipmentType,
@@ -34,6 +35,11 @@ import {
   exportFloorPlanAsImage,
   getReadingMarkers,
   updateReadingMarkerStyle,
+  addBackgroundImage,
+  removeBackgroundImage,
+  toggleBackgroundVisibility,
+  getBackgroundImage,
+  reloadBackgroundImage,
 } from '@/lib/floorPlanTools';
 import {
   useFloorPlanReadings,
@@ -43,6 +49,7 @@ import {
 } from '@/hooks/useFloorPlans';
 import { useJobChambers, useCreateAndLinkReading } from '@/hooks/useJobReadings';
 import { useTenant } from '@/hooks/useTenant';
+import { uploadBackgroundImage, getBackgroundImageUrl } from '@/hooks/useFloorPlans';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -83,6 +90,12 @@ export const FloorPlanEditor = ({
   const [floorNumber, setFloorNumber] = useState(existingPlan?.floor_number || 1);
   const [isSaving, setIsSaving] = useState(false);
   const [readingCounter, setReadingCounter] = useState(1);
+  
+  // Background image state
+  const [backgroundDialogOpen, setBackgroundDialogOpen] = useState(false);
+  const [backgroundVisible, setBackgroundVisible] = useState(true);
+  const [hasBackground, setHasBackground] = useState(false);
+  const [isUploadingBackground, setIsUploadingBackground] = useState(false);
   
   // Reading linking state
   const [readingMode, setReadingMode] = useState(false);
@@ -157,7 +170,7 @@ export const FloorPlanEditor = ({
 
     // Load existing plan if editing
     if (existingPlan?.canvas_data) {
-      loadFloorPlan(canvas, JSON.stringify(existingPlan.canvas_data)).then(() => {
+      loadFloorPlan(canvas, JSON.stringify(existingPlan.canvas_data)).then(async () => {
         // Update marker colors based on linked status
         updateMarkerColors(canvas);
         // Find highest reading number for counter
@@ -167,6 +180,14 @@ export const FloorPlanEditor = ({
             ...markers.map((m) => (m as any).readingNumber || 0)
           );
           setReadingCounter(maxNumber + 1);
+        }
+        // Check for and reload background image
+        const bg = getBackgroundImage(canvas);
+        if (bg) {
+          setHasBackground(true);
+          setBackgroundVisible(bg.opacity !== 0);
+          // Reload the image from URL since Fabric.js doesn't serialize image data
+          await reloadBackgroundImage(canvas);
         }
         saveToHistory(canvas);
       });
@@ -466,6 +487,52 @@ export const FloorPlanEditor = ({
     );
   };
 
+  // Handle background image selection
+  const handleBackgroundSelect = async (imageData: BackgroundImageData) => {
+    if (!fabricCanvas || !tenant) return;
+    
+    setIsUploadingBackground(true);
+    try {
+      // Upload image to storage
+      const storagePath = await uploadBackgroundImage(imageData.blob, tenant.id, jobId);
+      
+      // Get public URL and add to canvas
+      const publicUrl = getBackgroundImageUrl(storagePath);
+      if (publicUrl) {
+        await addBackgroundImage(fabricCanvas, publicUrl, {
+          opacity: imageData.opacity,
+          fitMode: imageData.fitMode,
+        });
+        setHasBackground(true);
+        setBackgroundVisible(true);
+        saveToHistory(fabricCanvas);
+        toast.success('Background image added');
+      }
+    } catch (error) {
+      console.error('Failed to add background:', error);
+      toast.error('Failed to add background image');
+    } finally {
+      setIsUploadingBackground(false);
+      setBackgroundDialogOpen(false);
+    }
+  };
+
+  // Toggle background visibility
+  const handleToggleBackground = () => {
+    if (!fabricCanvas) return;
+    const isVisible = toggleBackgroundVisibility(fabricCanvas);
+    setBackgroundVisible(isVisible);
+  };
+
+  // Remove background
+  const handleRemoveBackground = () => {
+    if (!fabricCanvas) return;
+    removeBackgroundImage(fabricCanvas);
+    setHasBackground(false);
+    saveToHistory(fabricCanvas);
+    toast.success('Background removed');
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     if (!open) return;
@@ -550,6 +617,11 @@ export const FloorPlanEditor = ({
             readingMode={readingMode}
             onToggleReadingMode={() => setReadingMode(!readingMode)}
             canLinkReadings={!!existingPlan?.id}
+            hasBackground={hasBackground}
+            backgroundVisible={backgroundVisible}
+            onOpenBackgroundDialog={() => setBackgroundDialogOpen(true)}
+            onToggleBackground={handleToggleBackground}
+            onRemoveBackground={handleRemoveBackground}
           />
           <div className="flex-1 overflow-auto bg-muted relative">
             <canvas ref={canvasRef} className="block" />
@@ -620,6 +692,14 @@ export const FloorPlanEditor = ({
             }}
           />
         )}
+
+        {/* Background Upload Dialog */}
+        <FloorPlanBackgroundUpload
+          open={backgroundDialogOpen}
+          onOpenChange={setBackgroundDialogOpen}
+          onImageSelect={handleBackgroundSelect}
+          isUploading={isUploadingBackground}
+        />
       </DialogContent>
     </Dialog>
   );
