@@ -13,6 +13,7 @@ import { Save, X } from 'lucide-react';
 import { FloorPlanToolbar } from './FloorPlanToolbar';
 import { ReadingMarkerPopover } from './ReadingMarkerPopover';
 import { ReadingLinkDialog } from './ReadingLinkDialog';
+import { FloorPlanReadingDialog } from './FloorPlanReadingDialog';
 import {
   FloorPlanTool,
   EquipmentType,
@@ -40,7 +41,8 @@ import {
   useLinkReadingToMarker,
   useUnlinkReadingFromMarker,
 } from '@/hooks/useFloorPlans';
-import { useJobChambers } from '@/hooks/useJobReadings';
+import { useJobChambers, useCreateAndLinkReading } from '@/hooks/useJobReadings';
+import { useTenant } from '@/hooks/useTenant';
 import { toast } from 'sonner';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -91,6 +93,7 @@ export const FloorPlanEditor = ({
   } | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [addReadingDialogOpen, setAddReadingDialogOpen] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
 
   // Undo/Redo history
@@ -105,8 +108,14 @@ export const FloorPlanEditor = ({
   const { data: floorPlanReadings = [] } = useFloorPlanReadings(existingPlan?.id);
   const { data: allJobReadings = [] } = useJobReadingsForLinking(jobId);
   const { data: chambers = [] } = useJobChambers(jobId);
+  const { data: tenant } = useTenant();
   const linkMutation = useLinkReadingToMarker();
   const unlinkMutation = useUnlinkReadingFromMarker();
+  const createAndLinkMutation = useCreateAndLinkReading();
+
+  // Get unit settings from tenant
+  const temperatureUnit = (tenant?.temperature_unit || 'F') as 'F' | 'C';
+  const units = (tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial') as 'imperial' | 'metric';
 
   // Build map of linked readings
   const linkedReadingsMap = new Map<string, MoistureReading>();
@@ -553,6 +562,10 @@ export const FloorPlanEditor = ({
                 markerNumber={selectedMarker.readingNumber}
                 linkedReading={linkedReading}
                 onLinkClick={() => setLinkDialogOpen(true)}
+                onAddNewReading={() => {
+                  setPopoverOpen(false);
+                  setAddReadingDialogOpen(true);
+                }}
                 onUnlink={handleUnlinkReading}
                 onViewReading={() => {
                   // Navigate to readings tab - for now just close
@@ -583,6 +596,28 @@ export const FloorPlanEditor = ({
             chambers={chambers}
             linkedReadingIds={linkedReadingIds}
             onLink={handleLinkReading}
+          />
+        )}
+
+        {/* Add New Reading Dialog */}
+        {selectedMarker && existingPlan?.id && (
+          <FloorPlanReadingDialog
+            open={addReadingDialogOpen}
+            onOpenChange={setAddReadingDialogOpen}
+            markerNumber={selectedMarker.readingNumber}
+            chambers={chambers}
+            units={units}
+            temperatureUnit={temperatureUnit}
+            isLoading={createAndLinkMutation.isPending}
+            onSubmit={async (data) => {
+              await createAndLinkMutation.mutateAsync({
+                ...data,
+                jobId,
+                floorPlanId: existingPlan.id,
+                markerId: selectedMarker.markerId,
+              });
+              setAddReadingDialogOpen(false);
+            }}
           />
         )}
       </DialogContent>

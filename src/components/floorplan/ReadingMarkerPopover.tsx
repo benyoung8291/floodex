@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Link2, Unlink, ExternalLink, Thermometer, Droplets } from 'lucide-react';
+import { Link2, Unlink, ExternalLink, Thermometer, Droplets, Plus } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import { formatHumidityRatio, getHumidityRatioStatus } from '@/lib/psychrometrics';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ interface ReadingMarkerPopoverProps {
   markerNumber: number;
   linkedReading: MoistureReading | null;
   onLinkClick: () => void;
+  onAddNewReading: () => void;
   onUnlink: () => void;
   onViewReading: () => void;
 }
@@ -31,6 +32,7 @@ export const ReadingMarkerPopover = ({
   markerNumber,
   linkedReading,
   onLinkClick,
+  onAddNewReading,
   onUnlink,
   onViewReading,
 }: ReadingMarkerPopoverProps) => {
@@ -118,15 +120,25 @@ export const ReadingMarkerPopover = ({
               <p className="text-sm text-muted-foreground">
                 No reading linked to this marker.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={onLinkClick}
-              >
-                <Link2 className="h-4 w-4 mr-2" />
-                Link Reading
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={onLinkClick}
+                >
+                  <Link2 className="h-4 w-4 mr-1" />
+                  Link
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={onAddNewReading}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add New
+                </Button>
+              </div>
             </div>
           )}
         </div>
