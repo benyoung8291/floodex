@@ -218,6 +218,87 @@ export function useCreateReading() {
   });
 }
 
+// Create a new moisture reading and link it to a floor plan marker
+export function useCreateAndLinkReading() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { user, tenantId } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: {
+      chamberId: string;
+      jobId: string;
+      floorPlanId: string;
+      markerId: string;
+      readingType: 'ambient' | 'material';
+      temperature: number;
+      relativeHumidity: number;
+      gpp: number;
+      materialType?: string;
+      moistureContent?: number;
+    }) => {
+      if (!user || !tenantId) throw new Error('Not authenticated');
+
+      const reading: TablesInsert<'moisture_readings'> = {
+        chamber_id: data.chamberId,
+        job_id: data.jobId,
+        tenant_id: tenantId,
+        reading_type: data.readingType,
+        temperature: data.temperature,
+        relative_humidity: data.relativeHumidity,
+        gpp: data.gpp,
+        material_type: data.materialType || null,
+        moisture_content: data.moistureContent || null,
+        logged_by: user.id,
+        floor_plan_id: data.floorPlanId,
+        marker_id: data.markerId,
+      };
+
+      const { data: result, error } = await supabase
+        .from('moisture_readings')
+        .insert(reading)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log usage for billing
+      const now = new Date();
+      const billingPeriodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const billingPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+      await supabase.from('usage_logs').insert({
+        tenant_id: tenantId,
+        event_type: 'reading_logged',
+        job_id: data.jobId,
+        user_id: user.id,
+        billing_period_start: billingPeriodStart,
+        billing_period_end: billingPeriodEnd,
+      });
+
+      return result;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['readings', variables.chamberId] });
+      queryClient.invalidateQueries({ queryKey: ['latest-readings', variables.jobId] });
+      queryClient.invalidateQueries({ queryKey: ['floor-plan-readings', variables.floorPlanId] });
+      queryClient.invalidateQueries({ queryKey: ['all-readings', variables.jobId] });
+      toast({
+        title: 'Reading saved & linked',
+        description: 'Reading created and linked to marker',
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to create and link reading:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save reading',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
 // Update outdoor ambient reading on a job
 export function useUpdateOutdoorReading() {
   const queryClient = useQueryClient();
