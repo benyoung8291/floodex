@@ -6,6 +6,7 @@ import type { Tables } from '@/integrations/supabase/types';
 import { 
   formatHumidityRatio, 
   getHumidityRatioStatus,
+  fahrenheitToCelsius,
   type UnitSystem 
 } from '@/lib/psychrometrics';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,7 @@ interface ReadingsListProps {
   readings: MoistureReading[];
   targetGpp?: number | null;
   units: UnitSystem;
+  temperatureUnit?: 'F' | 'C';
   isLoading?: boolean;
 }
 
@@ -23,6 +25,7 @@ export function ReadingsList({
   readings,
   targetGpp,
   units,
+  temperatureUnit = 'F',
   isLoading,
 }: ReadingsListProps) {
   if (isLoading) {
@@ -106,7 +109,9 @@ export function ReadingsList({
                     <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <ThermometerSun className="h-3 w-3" />
-                        {reading.temperature}°F
+                        {temperatureUnit === 'C' 
+                          ? Math.round(fahrenheitToCelsius(reading.temperature)) 
+                          : reading.temperature}°{temperatureUnit}
                       </span>
                       <span className="flex items-center gap-1">
                         <Droplets className="h-3 w-3" />

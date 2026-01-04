@@ -11,6 +11,7 @@ interface ChamberListProps {
   chambers: DryingChamber[];
   latestReadings: Map<string, MoistureReading>;
   units: UnitSystem;
+  temperatureUnit?: 'F' | 'C';
   onAddChamber: () => void;
   onAddReading: (chamberId: string) => void;
   onViewHistory: (chamberId: string) => void;
@@ -21,6 +22,7 @@ export function ChamberList({
   chambers,
   latestReadings,
   units,
+  temperatureUnit = 'F',
   onAddChamber,
   onAddReading,
   onViewHistory,
@@ -59,6 +61,7 @@ export function ChamberList({
             chamber={chamber}
             latestReading={latestReadings.get(chamber.id)}
             units={units}
+            temperatureUnit={temperatureUnit}
             onAddReading={onAddReading}
             onViewHistory={onViewHistory}
           />

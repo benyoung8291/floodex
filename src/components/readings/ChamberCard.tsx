@@ -8,6 +8,7 @@ import {
   formatHumidityRatio, 
   getHumidityRatioStatus, 
   calculateDryingProgress,
+  fahrenheitToCelsius,
   type UnitSystem 
 } from '@/lib/psychrometrics';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ interface ChamberCardProps {
   chamber: DryingChamber;
   latestReading?: MoistureReading;
   units: UnitSystem;
+  temperatureUnit?: 'F' | 'C';
   onAddReading: (chamberId: string) => void;
   onViewHistory: (chamberId: string) => void;
 }
@@ -27,6 +29,7 @@ export function ChamberCard({
   chamber,
   latestReading,
   units,
+  temperatureUnit = 'F',
   onAddReading,
   onViewHistory,
 }: ChamberCardProps) {
@@ -113,7 +116,9 @@ export function ChamberCard({
             )}
             
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Temp: {latestReading.temperature}°F</span>
+              <span>Temp: {temperatureUnit === 'C' 
+                ? Math.round(fahrenheitToCelsius(latestReading.temperature)) 
+                : latestReading.temperature}°{temperatureUnit}</span>
               <span>RH: {latestReading.relative_humidity}%</span>
             </div>
           </div>
