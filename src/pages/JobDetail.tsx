@@ -29,12 +29,19 @@ import {
   useJobSafetyChecks,
   useUpdateOutdoorReading,
 } from '@/hooks/useJobReadings';
+import {
+  useEquipment,
+  useEquipmentAssignments,
+  useAssignEquipment,
+  useUnassignEquipment,
+} from '@/hooks/useEquipment';
 import { useTenant } from '@/hooks/useTenant';
 import { ChamberList } from '@/components/readings/ChamberList';
 import { ChamberCreateDialog } from '@/components/readings/ChamberCreateDialog';
 import { ReadingEntryForm } from '@/components/readings/ReadingEntryForm';
 import { ReadingsList } from '@/components/readings/ReadingsList';
 import { GPPTrendChart } from '@/components/readings/GPPTrendChart';
+import { EquipmentAssignDialog } from '@/components/readings/EquipmentAssignDialog';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -68,6 +75,8 @@ export default function JobDetail() {
   const [readingFormOpen, setReadingFormOpen] = useState(false);
   const [selectedChamber, setSelectedChamber] = useState<DryingChamber | null>(null);
   const [viewingChamberId, setViewingChamberId] = useState<string | null>(null);
+  const [equipmentDialogOpen, setEquipmentDialogOpen] = useState(false);
+  const [equipmentChamberId, setEquipmentChamberId] = useState<string | null>(null);
   
   // Queries
   const { data: job, isLoading: jobLoading } = useJob(id);
@@ -75,11 +84,18 @@ export default function JobDetail() {
   const { data: latestReadings = new Map() } = useLatestReadings(id);
   const { data: safetyChecks = [] } = useJobSafetyChecks(id);
   const { data: chamberReadings = [] } = useChamberReadings(viewingChamberId ?? undefined);
+  const { data: allEquipment = [] } = useEquipment();
+  const { data: equipmentAssignments = [] } = useEquipmentAssignments(id);
   
   // Mutations
   const createChamber = useCreateChamber();
   const createReading = useCreateReading();
   const updateOutdoorReading = useUpdateOutdoorReading();
+  const assignEquipment = useAssignEquipment();
+  const unassignEquipment = useUnassignEquipment();
+
+  // Filter available equipment
+  const availableEquipment = allEquipment.filter(e => e.is_available);
 
   // Handlers
   const handleAddChamber = () => setCreateChamberOpen(true);
@@ -107,6 +123,25 @@ export default function JobDetail() {
   const handleUpdateOutdoorReading = (data: { temperature: number; humidity: number; gpp: number }) => {
     if (!id) return;
     updateOutdoorReading.mutate({ jobId: id, ...data });
+  };
+
+  const handleManageEquipment = (chamberId: string) => {
+    setEquipmentChamberId(chamberId);
+    setEquipmentDialogOpen(true);
+  };
+
+  const handleAssignEquipment = (equipmentId: string) => {
+    if (!id || !equipmentChamberId) return;
+    assignEquipment.mutate({ 
+      equipmentId, 
+      chamberId: equipmentChamberId, 
+      jobId: id 
+    });
+  };
+
+  const handleUnassignEquipment = (assignmentId: string, equipmentId: string) => {
+    if (!id) return;
+    unassignEquipment.mutate({ assignmentId, equipmentId, jobId: id });
   };
 
   const handleSubmitReading = (data: {
@@ -285,9 +320,11 @@ export default function JobDetail() {
             units={units}
             temperatureUnit={temperatureUnit}
             job={job}
+            equipmentAssignments={equipmentAssignments}
             onAddChamber={handleAddChamber}
             onAddReading={handleAddReading}
             onViewHistory={handleViewHistory}
+            onManageEquipment={handleManageEquipment}
             onUpdateOutdoorReading={handleUpdateOutdoorReading}
             isUpdatingOutdoor={updateOutdoorReading.isPending}
             isLoading={chambersLoading}
@@ -413,6 +450,24 @@ export default function JobDetail() {
           temperatureUnit={temperatureUnit}
           onSubmit={handleSubmitReading}
           isLoading={createReading.isPending}
+        />
+      )}
+
+      {equipmentChamberId && (
+        <EquipmentAssignDialog
+          open={equipmentDialogOpen}
+          onOpenChange={(open) => {
+            setEquipmentDialogOpen(open);
+            if (!open) setEquipmentChamberId(null);
+          }}
+          chamberName={chambers.find(c => c.id === equipmentChamberId)?.name || ''}
+          chamberId={equipmentChamberId}
+          jobId={id || ''}
+          availableEquipment={availableEquipment}
+          currentAssignments={equipmentAssignments}
+          onAssign={handleAssignEquipment}
+          onUnassign={handleUnassignEquipment}
+          isLoading={assignEquipment.isPending || unassignEquipment.isPending}
         />
       )}
     </div>

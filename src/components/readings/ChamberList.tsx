@@ -8,6 +8,8 @@ import type { UnitSystem } from '@/lib/psychrometrics';
 type DryingChamber = Tables<'drying_chambers'>;
 type MoistureReading = Tables<'moisture_readings'>;
 type Job = Tables<'jobs'>;
+type Equipment = Tables<'equipment'>;
+type EquipmentAssignment = Tables<'equipment_assignments'>;
 
 interface ChamberListProps {
   chambers: DryingChamber[];
@@ -15,9 +17,11 @@ interface ChamberListProps {
   units: UnitSystem;
   temperatureUnit?: 'F' | 'C';
   job?: Job | null;
+  equipmentAssignments?: (EquipmentAssignment & { equipment: Equipment })[];
   onAddChamber: () => void;
   onAddReading: (chamberId: string) => void;
   onViewHistory: (chamberId: string) => void;
+  onManageEquipment?: (chamberId: string) => void;
   onUpdateOutdoorReading?: (data: { temperature: number; humidity: number; gpp: number }) => void;
   isUpdatingOutdoor?: boolean;
   isLoading?: boolean;
@@ -29,9 +33,11 @@ export function ChamberList({
   units,
   temperatureUnit = 'F',
   job,
+  equipmentAssignments = [],
   onAddChamber,
   onAddReading,
   onViewHistory,
+  onManageEquipment,
   onUpdateOutdoorReading,
   isUpdatingOutdoor,
   isLoading,
@@ -100,8 +106,10 @@ export function ChamberList({
             latestReading={latestReadings.get(chamber.id)}
             units={units}
             temperatureUnit={temperatureUnit}
+            equipmentAssignments={equipmentAssignments.filter(a => a.chamber_id === chamber.id)}
             onAddReading={onAddReading}
             onViewHistory={onViewHistory}
+            onManageEquipment={onManageEquipment}
           />
         ))}
       </div>
