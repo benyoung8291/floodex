@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Building2, Thermometer, Shield, Eye, EyeOff } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Building2, Thermometer, Shield, Eye, EyeOff, FileText } from 'lucide-react';
 import { useTenant, useUpdateTenant } from '@/hooks/useTenant';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
+import { LogoUpload } from '@/components/settings/LogoUpload';
 import {
   Form,
   FormControl,
@@ -30,6 +32,11 @@ const settingsSchema = z.object({
   temperature_unit: z.enum(['F', 'C']),
   humidity_ratio_unit: z.enum(['GPP', 'g/kg']),
   supervisor_override_code: z.string().min(4, 'Code must be at least 4 characters').optional().or(z.literal('')),
+  report_header_text: z.string().max(200).optional().or(z.literal('')),
+  report_footer_text: z.string().max(300).optional().or(z.literal('')),
+  report_certification_text: z.string().max(500).optional().or(z.literal('')),
+  report_technician_label: z.string().max(50).optional().or(z.literal('')),
+  report_customer_label: z.string().max(50).optional().or(z.literal('')),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
@@ -39,6 +46,7 @@ export default function Settings() {
   const { mutate: updateTenant, isPending } = useUpdateTenant();
   const { isTenantAdmin } = useAuth();
   const [showOverrideCode, setShowOverrideCode] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   const form = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
@@ -50,6 +58,11 @@ export default function Settings() {
       temperature_unit: 'F',
       humidity_ratio_unit: 'GPP',
       supervisor_override_code: '',
+      report_header_text: '',
+      report_footer_text: '',
+      report_certification_text: '',
+      report_technician_label: '',
+      report_customer_label: '',
     },
   });
 
@@ -63,7 +76,13 @@ export default function Settings() {
         temperature_unit: (tenant.temperature_unit as 'F' | 'C') || 'F',
         humidity_ratio_unit: (tenant.humidity_ratio_unit as 'GPP' | 'g/kg') || 'GPP',
         supervisor_override_code: tenant.supervisor_override_code || '',
+        report_header_text: tenant.report_header_text || '',
+        report_footer_text: tenant.report_footer_text || '',
+        report_certification_text: tenant.report_certification_text || '',
+        report_technician_label: tenant.report_technician_label || '',
+        report_customer_label: tenant.report_customer_label || '',
       });
+      setLogoUrl(tenant.logo_url);
     }
   }, [tenant, form]);
 
@@ -76,6 +95,12 @@ export default function Settings() {
       temperature_unit: data.temperature_unit,
       humidity_ratio_unit: data.humidity_ratio_unit,
       supervisor_override_code: data.supervisor_override_code || null,
+      logo_url: logoUrl,
+      report_header_text: data.report_header_text || null,
+      report_footer_text: data.report_footer_text || null,
+      report_certification_text: data.report_certification_text || null,
+      report_technician_label: data.report_technician_label || null,
+      report_customer_label: data.report_customer_label || null,
     });
   };
 
@@ -326,6 +351,133 @@ export default function Settings() {
                     </FormItem>
                   )}
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Report Branding Section - Admin Only */}
+          {isTenantAdmin && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <CardTitle>Report Branding</CardTitle>
+                </div>
+                <CardDescription>
+                  Customize how your PDF reports look
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label className="mb-3 block">Company Logo</Label>
+                  <LogoUpload
+                    currentLogoUrl={logoUrl}
+                    onLogoChange={setLogoUrl}
+                    disabled={isPending}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="report_header_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Header Tagline</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          disabled={isPending}
+                          placeholder="e.g., Licensed Water Damage Restoration"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Appears under your company name/logo on reports
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="report_footer_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Footer Text</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          disabled={isPending}
+                          placeholder="e.g., www.yourcompany.com | (555) 123-4567"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Appears at the bottom of every report page
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="report_certification_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Certification Statement</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          disabled={isPending}
+                          placeholder="Leave blank to use default certification text"
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Custom text that appears above signature blocks
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="report_technician_label"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Technician Signature Label</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            disabled={isPending}
+                            placeholder="e.g., Lead Restorer Signature"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="report_customer_label"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Signature Label</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            disabled={isPending}
+                            placeholder="e.g., Property Owner Signature"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </CardContent>
             </Card>
           )}

@@ -6,6 +6,7 @@ interface ReportHeaderProps {
   reportTitle: string;
   companyName?: string;
   companyLogo?: string;
+  headerTagline?: string;
   dateRange?: { start: Date; end: Date };
 }
 
@@ -27,6 +28,7 @@ export function ReportHeader({
   reportTitle, 
   companyName,
   companyLogo,
+  headerTagline,
   dateRange 
 }: ReportHeaderProps) {
   const address = [job.address, job.city, job.state, job.zip_code]
@@ -38,9 +40,19 @@ export function ReportHeader({
       <div className="flex justify-between items-start mb-6">
         <div>
           {companyLogo ? (
-            <img src={companyLogo} alt={companyName} className="h-12 object-contain" />
+            <div>
+              <img src={companyLogo} alt={companyName} className="h-12 object-contain" />
+              {headerTagline && (
+                <p className="text-sm text-gray-600 mt-1">{headerTagline}</p>
+              )}
+            </div>
           ) : companyName ? (
-            <h2 className="text-xl font-bold text-gray-800">{companyName}</h2>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">{companyName}</h2>
+              {headerTagline && (
+                <p className="text-sm text-gray-600 mt-1">{headerTagline}</p>
+              )}
+            </div>
           ) : null}
         </div>
         <div className="text-right">

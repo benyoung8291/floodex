@@ -539,6 +539,11 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          report_certification_text: string | null
+          report_customer_label: string | null
+          report_footer_text: string | null
+          report_header_text: string | null
+          report_technician_label: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_status: Database["public"]["Enums"]["subscription_status"]
@@ -557,6 +562,11 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          report_certification_text?: string | null
+          report_customer_label?: string | null
+          report_footer_text?: string | null
+          report_header_text?: string | null
+          report_technician_label?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
@@ -575,6 +585,11 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          report_certification_text?: string | null
+          report_customer_label?: string | null
+          report_footer_text?: string | null
+          report_header_text?: string | null
+          report_technician_label?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]

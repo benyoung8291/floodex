@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { ReportHeader } from './templates/ReportHeader';
+import { ReportFooter } from './templates/ReportFooter';
 import { PhotoGrid } from './templates/PhotoGrid';
 import { SignatureBlock } from './templates/SignatureBlock';
 import { JobReportData } from '@/hooks/useReportData';
@@ -25,13 +26,19 @@ export const PhotoReport = forwardRef<HTMLDivElement, PhotoReportProps>(
           reportTitle="Photo Documentation"
           companyName={tenant?.name}
           companyLogo={tenant?.logo_url || undefined}
+          headerTagline={tenant?.report_header_text || undefined}
         />
 
         <PhotoGrid photos={photos} showFullSize={showFullSize} />
 
         {includeSignature && (
-          <SignatureBlock title="Documenting Technician Signature" />
+          <SignatureBlock 
+            title="Documenting Technician Signature"
+            certificationText={tenant?.report_certification_text || undefined}
+          />
         )}
+
+        <ReportFooter footerText={tenant?.report_footer_text || undefined} />
       </div>
     );
   }

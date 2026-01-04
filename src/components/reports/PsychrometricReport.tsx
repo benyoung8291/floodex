@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { ReportHeader } from './templates/ReportHeader';
+import { ReportFooter } from './templates/ReportFooter';
 import { PsychrometricSummary } from './templates/PsychrometricSummary';
 import { DryingLogTable } from './templates/DryingLogTable';
 import { SignatureBlock } from './templates/SignatureBlock';
@@ -27,6 +28,7 @@ export const PsychrometricReport = forwardRef<HTMLDivElement, PsychrometricRepor
           reportTitle="Psychrometric Data Report"
           companyName={tenant?.name}
           companyLogo={tenant?.logo_url || undefined}
+          headerTagline={tenant?.report_header_text || undefined}
         />
 
         <PsychrometricSummary 
@@ -56,8 +58,13 @@ export const PsychrometricReport = forwardRef<HTMLDivElement, PsychrometricRepor
         )}
 
         {includeSignature && (
-          <SignatureBlock title="Certifying Technician Signature" />
+          <SignatureBlock 
+            title="Certifying Technician Signature"
+            certificationText={tenant?.report_certification_text || undefined}
+          />
         )}
+
+        <ReportFooter footerText={tenant?.report_footer_text || undefined} />
       </div>
     );
   }
