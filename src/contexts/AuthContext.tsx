@@ -29,25 +29,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [tenantId, setTenantId] = useState<string | null>(null);
 
   const fetchUserData = async (userId: string) => {
-    // Fetch roles
-    const { data: rolesData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
+    try {
+      // Fetch roles
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
 
-    if (rolesData) {
-      setRoles(rolesData.map(r => r.role as AppRole));
-    }
+      if (rolesData) {
+        setRoles(rolesData.map(r => r.role as AppRole));
+      }
 
-    // Fetch tenant_id from profile
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('tenant_id')
-      .eq('id', userId)
-      .maybeSingle();
+      // Fetch tenant_id from profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', userId)
+        .maybeSingle();
 
-    if (profileData) {
-      setTenantId(profileData.tenant_id);
+      if (profileData) {
+        setTenantId(profileData.tenant_id);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,16 +62,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
 
-        // Defer Supabase calls with setTimeout to avoid deadlock
         if (session?.user) {
+          // Defer Supabase calls with setTimeout to avoid deadlock
+          // fetchUserData will set loading to false when complete
           setTimeout(() => {
             fetchUserData(session.user.id);
           }, 0);
         } else {
           setRoles([]);
           setTenantId(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
@@ -77,8 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
