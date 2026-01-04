@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Canvas as FabricCanvas, PencilBrush } from 'fabric';
+import { Canvas as FabricCanvas, PencilBrush, FabricObject, Group } from 'fabric';
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Save, X } from 'lucide-react';
 import { FloorPlanToolbar } from './FloorPlanToolbar';
+import { ReadingMarkerPopover } from './ReadingMarkerPopover';
+import { ReadingLinkDialog } from './ReadingLinkDialog';
 import {
   FloorPlanTool,
   EquipmentType,
@@ -29,8 +31,20 @@ import {
   serializeFloorPlan,
   loadFloorPlan,
   exportFloorPlanAsImage,
+  getReadingMarkers,
+  updateReadingMarkerStyle,
 } from '@/lib/floorPlanTools';
+import {
+  useFloorPlanReadings,
+  useJobReadingsForLinking,
+  useLinkReadingToMarker,
+  useUnlinkReadingFromMarker,
+} from '@/hooks/useFloorPlans';
+import { useJobChambers } from '@/hooks/useJobReadings';
 import { toast } from 'sonner';
+import type { Tables } from '@/integrations/supabase/types';
+
+type MoistureReading = Tables<'moisture_readings'>;
 
 interface FloorPlanEditorProps {
   open: boolean;
@@ -68,6 +82,17 @@ export const FloorPlanEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [readingCounter, setReadingCounter] = useState(1);
   
+  // Reading linking state
+  const [readingMode, setReadingMode] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState<{
+    markerId: string;
+    readingNumber: number;
+    linkedReadingId: string | null;
+  } | null>(null);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
+
   // Undo/Redo history
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -75,6 +100,24 @@ export const FloorPlanEditor = ({
   // Drawing state
   const isDrawingRef = useRef(false);
   const startPointRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Data fetching
+  const { data: floorPlanReadings = [] } = useFloorPlanReadings(existingPlan?.id);
+  const { data: allJobReadings = [] } = useJobReadingsForLinking(jobId);
+  const { data: chambers = [] } = useJobChambers(jobId);
+  const linkMutation = useLinkReadingToMarker();
+  const unlinkMutation = useUnlinkReadingFromMarker();
+
+  // Build map of linked readings
+  const linkedReadingsMap = new Map<string, MoistureReading>();
+  floorPlanReadings.forEach((reading) => {
+    if (reading.marker_id) {
+      linkedReadingsMap.set(reading.marker_id, reading);
+    }
+  });
+
+  // Get list of already linked reading IDs
+  const linkedReadingIds = floorPlanReadings.map((r) => r.id);
 
   // Initialize canvas
   useEffect(() => {
@@ -106,6 +149,16 @@ export const FloorPlanEditor = ({
     // Load existing plan if editing
     if (existingPlan?.canvas_data) {
       loadFloorPlan(canvas, JSON.stringify(existingPlan.canvas_data)).then(() => {
+        // Update marker colors based on linked status
+        updateMarkerColors(canvas);
+        // Find highest reading number for counter
+        const markers = getReadingMarkers(canvas);
+        if (markers.length > 0) {
+          const maxNumber = Math.max(
+            ...markers.map((m) => (m as any).readingNumber || 0)
+          );
+          setReadingCounter(maxNumber + 1);
+        }
         saveToHistory(canvas);
       });
     } else {
@@ -117,6 +170,24 @@ export const FloorPlanEditor = ({
       setFabricCanvas(null);
     };
   }, [open]);
+
+  // Update marker colors when linked readings change
+  const updateMarkerColors = useCallback((canvas: FabricCanvas) => {
+    const markers = getReadingMarkers(canvas);
+    markers.forEach((marker) => {
+      const markerId = (marker as any).markerId;
+      const isLinked = linkedReadingsMap.has(markerId);
+      updateReadingMarkerStyle(marker, isLinked);
+    });
+    canvas.renderAll();
+  }, [linkedReadingsMap]);
+
+  // Update marker colors when floorPlanReadings changes
+  useEffect(() => {
+    if (fabricCanvas) {
+      updateMarkerColors(fabricCanvas);
+    }
+  }, [floorPlanReadings, fabricCanvas, updateMarkerColors]);
 
   // Handle grid toggle
   useEffect(() => {
@@ -171,6 +242,45 @@ export const FloorPlanEditor = ({
       saveToHistory(fabricCanvas);
     });
   }, [activeTool, fabricCanvas, selectedEquipment, readingCounter]);
+
+  // Handle reading mode - marker clicks
+  useEffect(() => {
+    if (!fabricCanvas) return;
+
+    const handleSelection = (opt: { selected?: FabricObject[] }) => {
+      if (!readingMode) return;
+      
+      const selected = opt.selected;
+      if (!selected || selected.length !== 1) return;
+
+      const obj = selected[0] as Group;
+      // @ts-ignore
+      if (obj.objectType === 'reading') {
+        const markerId = (obj as any).markerId;
+        const readingNumber = (obj as any).readingNumber;
+        const linkedReadingId = (obj as any).linkedReadingId;
+
+        setSelectedMarker({
+          markerId,
+          readingNumber,
+          linkedReadingId: linkedReadingsMap.get(markerId)?.id || linkedReadingId,
+        });
+        
+        // Calculate position for popover
+        const objCenter = obj.getCenterPoint();
+        setPopoverPosition({ x: objCenter.x, y: objCenter.y });
+        setPopoverOpen(true);
+      }
+    };
+
+    fabricCanvas.on('selection:created', handleSelection);
+    fabricCanvas.on('selection:updated', handleSelection);
+
+    return () => {
+      fabricCanvas.off('selection:created', handleSelection);
+      fabricCanvas.off('selection:updated', handleSelection);
+    };
+  }, [fabricCanvas, readingMode, linkedReadingsMap]);
 
   const handleToolAction = (startX: number, startY: number, endX: number, endY: number) => {
     if (!fabricCanvas) return;
@@ -301,6 +411,52 @@ export const FloorPlanEditor = ({
     saveToHistory(fabricCanvas);
   };
 
+  // Handle linking a reading to a marker
+  const handleLinkReading = (readingId: string) => {
+    if (!selectedMarker || !existingPlan?.id) return;
+
+    linkMutation.mutate(
+      {
+        readingId,
+        floorPlanId: existingPlan.id,
+        markerId: selectedMarker.markerId,
+        jobId,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Reading linked to marker');
+          setPopoverOpen(false);
+          setLinkDialogOpen(false);
+        },
+        onError: () => {
+          toast.error('Failed to link reading');
+        },
+      }
+    );
+  };
+
+  // Handle unlinking a reading from a marker
+  const handleUnlinkReading = () => {
+    if (!selectedMarker?.linkedReadingId || !existingPlan?.id) return;
+
+    unlinkMutation.mutate(
+      {
+        readingId: selectedMarker.linkedReadingId,
+        floorPlanId: existingPlan.id,
+        jobId,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Reading unlinked from marker');
+          setPopoverOpen(false);
+        },
+        onError: () => {
+          toast.error('Failed to unlink reading');
+        },
+      }
+    );
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     if (!open) return;
@@ -318,12 +474,17 @@ export const FloorPlanEditor = ({
       }
       if (e.key === 'Escape') {
         setActiveTool('select');
+        setPopoverOpen(false);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, handleUndo, handleRedo]);
+
+  const linkedReading = selectedMarker?.markerId
+    ? linkedReadingsMap.get(selectedMarker.markerId) || null
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -377,11 +538,53 @@ export const FloorPlanEditor = ({
             onRedo={handleRedo}
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
+            readingMode={readingMode}
+            onToggleReadingMode={() => setReadingMode(!readingMode)}
+            canLinkReadings={!!existingPlan?.id}
           />
-          <div className="flex-1 overflow-auto bg-muted">
+          <div className="flex-1 overflow-auto bg-muted relative">
             <canvas ref={canvasRef} className="block" />
+            
+            {/* Invisible trigger for popover positioning */}
+            {popoverOpen && selectedMarker && (
+              <ReadingMarkerPopover
+                open={popoverOpen}
+                onOpenChange={setPopoverOpen}
+                markerNumber={selectedMarker.readingNumber}
+                linkedReading={linkedReading}
+                onLinkClick={() => setLinkDialogOpen(true)}
+                onUnlink={handleUnlinkReading}
+                onViewReading={() => {
+                  // Navigate to readings tab - for now just close
+                  setPopoverOpen(false);
+                  toast.info('Navigate to Readings tab to view details');
+                }}
+              >
+                <div
+                  className="absolute w-1 h-1"
+                  style={{
+                    left: popoverPosition.x,
+                    top: popoverPosition.y,
+                    pointerEvents: 'none',
+                  }}
+                />
+              </ReadingMarkerPopover>
+            )}
           </div>
         </div>
+
+        {/* Reading Link Dialog */}
+        {selectedMarker && (
+          <ReadingLinkDialog
+            open={linkDialogOpen}
+            onOpenChange={setLinkDialogOpen}
+            markerNumber={selectedMarker.readingNumber}
+            readings={allJobReadings}
+            chambers={chambers}
+            linkedReadingIds={linkedReadingIds}
+            onLink={handleLinkReading}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

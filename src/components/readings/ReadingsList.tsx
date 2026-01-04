@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Droplets, ThermometerSun, Layers } from 'lucide-react';
+import { Droplets, ThermometerSun, Layers, MapPin } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import { 
   formatHumidityRatio, 
@@ -73,6 +73,7 @@ export function ReadingsList({
               const status = reading.gpp && targetGpp 
                 ? getHumidityRatioStatus(reading.gpp, targetGpp) 
                 : null;
+              const isLinkedToFloorPlan = !!reading.floor_plan_id;
 
               return (
                 <Card 
@@ -93,6 +94,13 @@ export function ReadingsList({
                           )}
                           {reading.reading_type}
                         </Badge>
+                        
+                        {isLinkedToFloorPlan && (
+                          <Badge variant="outline" className="text-xs gap-1">
+                            <MapPin className="h-3 w-3" />
+                            Mapped
+                          </Badge>
+                        )}
                         
                         <span className="text-sm text-muted-foreground">
                           {format(new Date(reading.logged_at), 'h:mm a')}

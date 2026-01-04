@@ -64,7 +64,7 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
 
         {/* Floor Plans */}
         {includeFloorPlans && data.floorPlans && data.floorPlans.length > 0 && (
-          <FloorPlanSection floorPlans={data.floorPlans} />
+          <FloorPlanSection floorPlans={data.floorPlans} linkedReadings={data.linkedReadings} />
         )}
 
         {/* Moisture Readings */}

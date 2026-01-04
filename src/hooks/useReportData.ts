@@ -73,6 +73,7 @@ export interface JobReportData {
   workLogs: WorkLog[];
   damageAssessments: DamageAssessment[];
   floorPlans: ReportFloorPlan[];
+  linkedReadings: Reading[]; // Readings linked to floor plan markers
   tenant: Tables<'tenants'> | null;
 }
 
@@ -186,6 +187,9 @@ export function useJobReportData(jobId: string | undefined, dateRange?: { start:
         thumbnail_url: getFloorPlanThumbnailUrl(fp.thumbnail_path),
       }));
 
+      // Get readings that are linked to floor plan markers
+      const linkedReadings = (readings || []).filter(r => r.floor_plan_id && r.marker_id);
+
       // Fetch tenant for branding
       const { data: tenant } = await supabase
         .from('tenants')
@@ -202,6 +206,7 @@ export function useJobReportData(jobId: string | undefined, dateRange?: { start:
         workLogs: (workLogs || []) as WorkLog[],
         damageAssessments: (damageAssessments || []) as DamageAssessment[],
         floorPlans: reportFloorPlans,
+        linkedReadings,
         tenant,
       };
     },

@@ -28,6 +28,7 @@ import {
   ZoomOut,
   Wrench,
   ChevronDown,
+  Link2,
 } from 'lucide-react';
 import { FloorPlanTool, EQUIPMENT_TYPES, EquipmentType } from '@/lib/floorPlanTools';
 
@@ -43,6 +44,9 @@ interface FloorPlanToolbarProps {
   onRedo: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  readingMode?: boolean;
+  onToggleReadingMode?: () => void;
+  canLinkReadings?: boolean;
 }
 
 const tools: { id: FloorPlanTool; icon: React.ReactNode; label: string }[] = [
@@ -70,6 +74,9 @@ export const FloorPlanToolbar = ({
   onRedo,
   onZoomIn,
   onZoomOut,
+  readingMode,
+  onToggleReadingMode,
+  canLinkReadings,
 }: FloorPlanToolbarProps) => {
   return (
     <TooltipProvider delayDuration={300}>
@@ -138,6 +145,31 @@ export const FloorPlanToolbar = ({
 
         {/* Divider */}
         <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Reading Mode Toggle (only when plan is saved) */}
+        {canLinkReadings && onToggleReadingMode && (
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={readingMode ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-8 gap-1"
+                  onClick={onToggleReadingMode}
+                >
+                  <Link2 className="h-4 w-4" />
+                  <span className="text-xs hidden sm:inline">Link Readings</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{readingMode ? 'Exit Reading Mode' : 'Link markers to readings'}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-border mx-1" />
+          </>
+        )}
 
         {/* Grid toggle */}
         <Tooltip>
