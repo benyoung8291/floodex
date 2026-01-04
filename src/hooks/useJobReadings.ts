@@ -218,6 +218,48 @@ export function useCreateReading() {
   });
 }
 
+// Update outdoor ambient reading on a job
+export function useUpdateOutdoorReading() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (data: {
+      jobId: string;
+      temperature: number;
+      humidity: number;
+      gpp: number;
+    }) => {
+      const { error } = await supabase
+        .from('jobs')
+        .update({
+          outdoor_temperature: data.temperature,
+          outdoor_humidity: data.humidity,
+          outdoor_gpp: data.gpp,
+          outdoor_reading_at: new Date().toISOString(),
+        })
+        .eq('id', data.jobId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['job', variables.jobId] });
+      toast({
+        title: 'Outdoor reading saved',
+        description: 'Reference conditions updated',
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to update outdoor reading:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save outdoor reading',
+        variant: 'destructive',
+      });
+    },
+  });
+}
+
 // Fetch safety checks for a job
 export function useJobSafetyChecks(jobId: string | undefined) {
   return useQuery({

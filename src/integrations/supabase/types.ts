@@ -284,6 +284,10 @@ export type Database = {
           longitude: number | null
           loss_type: Database["public"]["Enums"]["water_category"]
           notes: string | null
+          outdoor_gpp: number | null
+          outdoor_humidity: number | null
+          outdoor_reading_at: string | null
+          outdoor_temperature: number | null
           safety_completed: boolean
           safety_completed_at: string | null
           safety_completed_by: string | null
@@ -308,6 +312,10 @@ export type Database = {
           longitude?: number | null
           loss_type?: Database["public"]["Enums"]["water_category"]
           notes?: string | null
+          outdoor_gpp?: number | null
+          outdoor_humidity?: number | null
+          outdoor_reading_at?: string | null
+          outdoor_temperature?: number | null
           safety_completed?: boolean
           safety_completed_at?: string | null
           safety_completed_by?: string | null
@@ -332,6 +340,10 @@ export type Database = {
           longitude?: number | null
           loss_type?: Database["public"]["Enums"]["water_category"]
           notes?: string | null
+          outdoor_gpp?: number | null
+          outdoor_humidity?: number | null
+          outdoor_reading_at?: string | null
+          outdoor_temperature?: number | null
           safety_completed?: boolean
           safety_completed_at?: string | null
           safety_completed_by?: string | null
