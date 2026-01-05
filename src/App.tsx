@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
+import AdminLayout from "@/components/layout/AdminLayout";
 
 // Pages
 import Auth from "./pages/Auth";
@@ -22,7 +23,9 @@ import Billing from "./pages/Billing";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
+import AdminTenantDetail from "./pages/admin/AdminTenantDetail";
 import AdminTiers from "./pages/admin/AdminTiers";
+import AdminSettings from "./pages/admin/AdminSettings";
 import ShareJob from "./pages/ShareJob";
 import NotFound from "./pages/NotFound";
 
@@ -157,9 +160,9 @@ const App = () => (
               path="/admin"
               element={
                 <ProtectedRoute requiredRoles={['super_admin']}>
-                  <AppLayout>
+                  <AdminLayout>
                     <AdminDashboard />
-                  </AppLayout>
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -167,9 +170,19 @@ const App = () => (
               path="/admin/tenants"
               element={
                 <ProtectedRoute requiredRoles={['super_admin']}>
-                  <AppLayout>
+                  <AdminLayout>
                     <AdminTenants />
-                  </AppLayout>
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/tenants/:tenantId"
+              element={
+                <ProtectedRoute requiredRoles={['super_admin']}>
+                  <AdminLayout>
+                    <AdminTenantDetail />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -177,9 +190,19 @@ const App = () => (
               path="/admin/tiers"
               element={
                 <ProtectedRoute requiredRoles={['super_admin']}>
-                  <AppLayout>
+                  <AdminLayout>
                     <AdminTiers />
-                  </AppLayout>
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute requiredRoles={['super_admin']}>
+                  <AdminLayout>
+                    <AdminSettings />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
