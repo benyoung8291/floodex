@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Droplets, Loader2, UserPlus } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Droplets, Loader2, UserPlus, AlertCircle, Check, X, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { useValidateInvitation, useAcceptInvitation } from '@/hooks/useTeamInvitations';
+import { useValidateInvitation, useAcceptInvitation, AcceptInvitationError } from '@/hooks/useTeamInvitations';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -27,6 +28,26 @@ const acceptInviteSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
 });
+
+// Password strength indicator component
+function PasswordStrengthIndicator({ password }: { password: string }) {
+  const hasMinLength = password.length >= 6;
+  
+  return (
+    <div className="space-y-1 mt-2">
+      <div className="flex items-center gap-2 text-sm">
+        {hasMinLength ? (
+          <Check className="h-4 w-4 text-green-500" />
+        ) : (
+          <X className="h-4 w-4 text-muted-foreground" />
+        )}
+        <span className={hasMinLength ? 'text-green-600' : 'text-muted-foreground'}>
+          At least 6 characters
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -147,8 +168,39 @@ export default function Auth() {
       if (err instanceof z.ZodError) {
         toast.error(err.errors[0].message);
       }
+      // Other errors are handled by the mutation's onError
     }
   };
+
+  // Get error details for display
+  const getErrorDetails = (error: AcceptInvitationError | null) => {
+    if (!error) return null;
+    
+    const code = error.code;
+    
+    if (code === 'EMAIL_ALREADY_REGISTERED') {
+      return {
+        message: error.message,
+        action: 'signin',
+      };
+    }
+    
+    if (code === 'INVALID_INVITATION' || code === 'EXPIRED_INVITATION') {
+      return {
+        message: error.message,
+        action: 'contact',
+      };
+    }
+    
+    return {
+      message: error.message,
+      action: 'retry',
+    };
+  };
+
+  const errorDetails = acceptInvitation.isError 
+    ? getErrorDetails(acceptInvitation.error as AcceptInvitationError) 
+    : null;
 
   // Show invitation acceptance UI if we have a valid invite token
   if (inviteToken) {
@@ -166,17 +218,35 @@ export default function Auth() {
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center mb-4">
-                <UserPlus className="w-10 h-10 text-destructive" />
+                <AlertCircle className="w-10 h-10 text-destructive" />
               </div>
-              <CardTitle>Invalid Invitation</CardTitle>
-              <CardDescription>
-                This invitation link is invalid or has expired.
+              <CardTitle>Invitation Not Valid</CardTitle>
+              <CardDescription className="text-left mt-4">
+                This could happen if:
               </CardDescription>
+              <ul className="text-sm text-muted-foreground text-left mt-2 space-y-1">
+                <li className="flex items-start gap-2">
+                  <span className="text-muted-foreground">•</span>
+                  <span>The invitation has expired (links are valid for 7 days)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-muted-foreground">•</span>
+                  <span>The invitation was revoked by an administrator</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-muted-foreground">•</span>
+                  <span>The link was already used to create an account</span>
+                </li>
+              </ul>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <Button className="w-full" onClick={() => navigate('/auth')}>
                 Go to Sign In
               </Button>
+              <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                <span>Need access? Contact your team administrator.</span>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -243,19 +313,53 @@ export default function Auth() {
                     required
                     className="h-12"
                   />
+                  {acceptPassword.length > 0 && (
+                    <PasswordStrengthIndicator password={acceptPassword} />
+                  )}
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-12" 
-                  disabled={acceptInvitation.isPending}
-                >
-                  {acceptInvitation.isPending ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    'Accept & Create Account'
-                  )}
-                </Button>
+                {/* Error display */}
+                {acceptInvitation.isError && errorDetails && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="ml-2">
+                      {errorDetails.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Action buttons based on error type */}
+                {errorDetails?.action === 'signin' ? (
+                  <div className="space-y-2">
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      className="w-full h-12" 
+                      onClick={() => navigate('/auth')}
+                    >
+                      Go to Sign In
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12" 
+                    disabled={acceptInvitation.isPending || acceptPassword.length < 6}
+                  >
+                    {acceptInvitation.isPending ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      'Accept & Create Account'
+                    )}
+                  </Button>
+                )}
+
+                {errorDetails?.action === 'contact' && (
+                  <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>Contact your administrator for a new invitation.</span>
+                  </div>
+                )}
               </form>
             </CardContent>
           </Card>
