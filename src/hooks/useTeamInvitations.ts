@@ -17,6 +17,34 @@ export interface TeamInvitation {
   invited_by: string;
 }
 
+// Error codes returned by the edge function
+const ErrorCodes = {
+  MISSING_FIELDS: 'MISSING_FIELDS',
+  INVALID_INVITATION: 'INVALID_INVITATION',
+  EXPIRED_INVITATION: 'EXPIRED_INVITATION',
+  EMAIL_ALREADY_REGISTERED: 'EMAIL_ALREADY_REGISTERED',
+  WEAK_PASSWORD: 'WEAK_PASSWORD',
+  USER_CREATION_FAILED: 'USER_CREATION_FAILED',
+  ROLE_ASSIGNMENT_FAILED: 'ROLE_ASSIGNMENT_FAILED',
+  UNEXPECTED_ERROR: 'UNEXPECTED_ERROR',
+} as const;
+
+// Map error codes to user-friendly messages
+const errorMessages: Record<string, string> = {
+  [ErrorCodes.MISSING_FIELDS]: 'Please fill in all required fields.',
+  [ErrorCodes.INVALID_INVITATION]: 'This invitation is no longer valid. Please request a new one from your administrator.',
+  [ErrorCodes.EXPIRED_INVITATION]: 'This invitation has expired. Please ask your administrator to send a new invitation.',
+  [ErrorCodes.EMAIL_ALREADY_REGISTERED]: 'An account with this email already exists. Try signing in instead.',
+  [ErrorCodes.WEAK_PASSWORD]: 'Password is too weak. Please use at least 6 characters.',
+  [ErrorCodes.USER_CREATION_FAILED]: 'Failed to create your account. Please try again.',
+  [ErrorCodes.ROLE_ASSIGNMENT_FAILED]: 'Account created but failed to set up permissions. Please contact your administrator.',
+  [ErrorCodes.UNEXPECTED_ERROR]: 'Something went wrong. Please try again.',
+};
+
+export interface AcceptInvitationError extends Error {
+  code?: string;
+}
+
 export function useTeamInvitations() {
   const { tenantId } = useAuth();
 
@@ -188,20 +216,26 @@ export function useAcceptInvitation() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to accept invitation');
+        const error: AcceptInvitationError = new Error(response.error.message || 'Failed to accept invitation');
+        error.code = ErrorCodes.UNEXPECTED_ERROR;
+        throw error;
       }
 
       if (!response.data.success) {
-        throw new Error(response.data.error || 'Failed to accept invitation');
+        const error: AcceptInvitationError = new Error(response.data.error || 'Failed to accept invitation');
+        error.code = response.data.code || ErrorCodes.UNEXPECTED_ERROR;
+        throw error;
       }
 
       return response.data;
     },
-    onSuccess: () => {
-      toast.success('Account created! You can now sign in.');
+    onSuccess: (data) => {
+      toast.success(data.message || 'Account created! You can now sign in.');
     },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to accept invitation');
+    onError: (error: AcceptInvitationError) => {
+      // Use the mapped message if we have a code, otherwise use the error message
+      const message = error.code ? (errorMessages[error.code] || error.message) : error.message;
+      toast.error(message);
     },
   });
 }
