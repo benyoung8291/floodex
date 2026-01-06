@@ -74,10 +74,19 @@ export function useAdminTiers() {
 
       // Calculate counts and MRR for each tier
       const tiersWithStats: TierWithStats[] = tiers.map((tier) => {
-        const tenantCount = tenantCounts.filter(
-          (t) => t.subscription_tier_id === tier.id
-        ).length;
-        
+        let tenantCount: number;
+
+        if (tier.is_free_tier) {
+          // Count tenants with this tier ID OR null (unassigned = free)
+          tenantCount = tenantCounts.filter(
+            (t) => t.subscription_tier_id === tier.id || t.subscription_tier_id === null
+          ).length;
+        } else {
+          tenantCount = tenantCounts.filter(
+            (t) => t.subscription_tier_id === tier.id
+          ).length;
+        }
+
         return {
           ...tier,
           tenant_count: tenantCount,
