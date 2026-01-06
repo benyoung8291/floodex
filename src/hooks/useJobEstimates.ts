@@ -9,6 +9,7 @@ export interface EstimateLineItem {
   description?: string;
   category: string;
   quantity: number;
+  days?: number; // For per_day items: total = quantity * unit_rate * days
   unit_type: string;
   unit_rate: number;
   total_amount: number;

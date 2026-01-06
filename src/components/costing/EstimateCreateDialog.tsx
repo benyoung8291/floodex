@@ -109,9 +109,28 @@ export function EstimateCreateDialog({
       const updated = [...prev];
       const item = { ...updated[index] };
 
-      if (field === 'quantity' || field === 'unit_rate') {
-        item[field] = Number(value);
-        item.total_amount = item.quantity * item.unit_rate;
+      if (field === 'quantity' || field === 'unit_rate' || field === 'days') {
+        (item as any)[field] = Number(value);
+        // Calculate total based on unit type
+        if (item.unit_type === 'per_day' && item.days) {
+          item.total_amount = item.quantity * item.unit_rate * item.days;
+        } else {
+          item.total_amount = item.quantity * item.unit_rate;
+        }
+      } else if (field === 'unit_type') {
+        item.unit_type = value as string;
+        // Initialize or reset days based on unit type
+        if (value === 'per_day' && !item.days) {
+          item.days = 1;
+        } else if (value !== 'per_day') {
+          item.days = undefined;
+        }
+        // Recalculate total
+        if (item.unit_type === 'per_day' && item.days) {
+          item.total_amount = item.quantity * item.unit_rate * item.days;
+        } else {
+          item.total_amount = item.quantity * item.unit_rate;
+        }
       } else {
         (item as any)[field] = value;
       }
@@ -133,6 +152,7 @@ export function EstimateCreateDialog({
         name: '',
         category: 'misc',
         quantity: 1,
+        days: undefined,
         unit_type: 'flat_rate',
         unit_rate: 0,
         total_amount: 0,
@@ -268,7 +288,11 @@ export function EstimateCreateDialog({
                   <div
                     key={item.id}
                     className="grid gap-2 p-3 border rounded-lg bg-card"
-                    style={{ gridTemplateColumns: '1fr 100px 100px 100px 40px' }}
+                    style={{ 
+                      gridTemplateColumns: item.unit_type === 'per_day' 
+                        ? '1fr 80px 80px 100px 100px 40px' 
+                        : '1fr 100px 100px 100px 40px' 
+                    }}
                   >
                     <div className="space-y-1">
                       <Input
@@ -311,7 +335,9 @@ export function EstimateCreateDialog({
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Qty</Label>
+                      <Label className="text-xs text-muted-foreground">
+                        {item.unit_type === 'per_day' ? 'Units' : 'Qty'}
+                      </Label>
                       <Input
                         type="number"
                         value={item.quantity}
@@ -320,6 +346,18 @@ export function EstimateCreateDialog({
                         step={0.01}
                       />
                     </div>
+                    {item.unit_type === 'per_day' && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Days</Label>
+                        <Input
+                          type="number"
+                          value={item.days || 1}
+                          onChange={(e) => handleLineItemChange(index, 'days', e.target.value)}
+                          min={1}
+                          step={1}
+                        />
+                      </div>
+                    )}
                     <div>
                       <Label className="text-xs text-muted-foreground">Rate</Label>
                       <Input
