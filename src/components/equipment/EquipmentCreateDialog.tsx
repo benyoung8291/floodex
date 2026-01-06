@@ -23,7 +23,7 @@ type Equipment = Tables<'equipment'>;
 interface EquipmentCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: { name: string; type: string; serialNumber?: string }) => void;
+  onSubmit: (data: { name: string; type: string; serialNumber?: string; dailyRate?: number }) => void;
   isLoading?: boolean;
   editEquipment?: Equipment | null;
 }
@@ -44,16 +44,19 @@ export function EquipmentCreateDialog({
   const [name, setName] = useState('');
   const [type, setType] = useState('dehumidifier');
   const [serialNumber, setSerialNumber] = useState('');
+  const [dailyRate, setDailyRate] = useState('');
 
   useEffect(() => {
     if (editEquipment) {
       setName(editEquipment.name);
       setType(editEquipment.type);
       setSerialNumber(editEquipment.serial_number || '');
+      setDailyRate(editEquipment.daily_rate?.toString() || '');
     } else {
       setName('');
       setType('dehumidifier');
       setSerialNumber('');
+      setDailyRate('');
     }
   }, [editEquipment, open]);
 
@@ -65,6 +68,7 @@ export function EquipmentCreateDialog({
       name: name.trim(),
       type,
       serialNumber: serialNumber.trim() || undefined,
+      dailyRate: dailyRate ? parseFloat(dailyRate) : undefined,
     });
   };
 
@@ -116,6 +120,22 @@ export function EquipmentCreateDialog({
               value={serialNumber}
               onChange={(e) => setSerialNumber(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dailyRate">Daily Rate (optional)</Label>
+            <Input
+              id="dailyRate"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="e.g., 75.00"
+              value={dailyRate}
+              onChange={(e) => setDailyRate(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Used for auto-calculating equipment costs on jobs
+            </p>
           </div>
 
           <div className="flex gap-2 justify-end">

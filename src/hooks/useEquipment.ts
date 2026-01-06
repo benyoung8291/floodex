@@ -62,7 +62,7 @@ export function useCreateEquipment() {
   const { tenantId } = useAuth();
 
   return useMutation({
-    mutationFn: async (data: { name: string; type: string; serialNumber?: string }) => {
+    mutationFn: async (data: { name: string; type: string; serialNumber?: string; dailyRate?: number }) => {
       if (!tenantId) throw new Error('No tenant ID');
 
       const { error, data: equipment } = await supabase
@@ -72,6 +72,7 @@ export function useCreateEquipment() {
           name: data.name,
           type: data.type,
           serial_number: data.serialNumber || null,
+          daily_rate: data.dailyRate || 0,
           is_available: true,
         })
         .select()
@@ -95,11 +96,12 @@ export function useUpdateEquipment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { id: string; name?: string; type?: string; serialNumber?: string }) => {
+    mutationFn: async (data: { id: string; name?: string; type?: string; serialNumber?: string; dailyRate?: number }) => {
       const updates: Partial<TablesInsert<'equipment'>> = {};
       if (data.name !== undefined) updates.name = data.name;
       if (data.type !== undefined) updates.type = data.type;
       if (data.serialNumber !== undefined) updates.serial_number = data.serialNumber;
+      if (data.dailyRate !== undefined) updates.daily_rate = data.dailyRate;
 
       const { error, data: equipment } = await supabase
         .from('equipment')

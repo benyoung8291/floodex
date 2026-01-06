@@ -266,3 +266,116 @@ export function useApplyAutoTemplates() {
     },
   });
 }
+
+export interface EquipmentCostSuggestion {
+  equipment_id: string;
+  equipment_name: string;
+  equipment_type: string;
+  daily_rate: number;
+  days_deployed: number;
+  total_cost: number;
+}
+
+export function useEquipmentCostSuggestions(jobId: string | undefined) {
+  return useQuery({
+    queryKey: ['equipment-cost-suggestions', jobId],
+    queryFn: async () => {
+      if (!jobId) return [];
+
+      // Get all equipment assignments for this job (including removed ones to calculate full duration)
+      const { data: assignments, error: assignmentError } = await supabase
+        .from('equipment_assignments')
+        .select(`
+          id,
+          equipment_id,
+          assigned_at,
+          removed_at,
+          equipment:equipment_id (id, name, type, daily_rate)
+        `)
+        .eq('job_id', jobId);
+
+      if (assignmentError) throw assignmentError;
+
+      // Calculate days deployed for each piece of equipment
+      const suggestions: EquipmentCostSuggestion[] = [];
+      const equipmentDays = new Map<string, { 
+        equipment: any; 
+        totalMs: number;
+      }>();
+
+      assignments?.forEach((assignment: any) => {
+        const equipment = assignment.equipment;
+        if (!equipment || !equipment.daily_rate || Number(equipment.daily_rate) <= 0) return;
+
+        const assignedAt = new Date(assignment.assigned_at);
+        const removedAt = assignment.removed_at ? new Date(assignment.removed_at) : new Date();
+        const durationMs = removedAt.getTime() - assignedAt.getTime();
+
+        if (equipmentDays.has(equipment.id)) {
+          equipmentDays.get(equipment.id)!.totalMs += durationMs;
+        } else {
+          equipmentDays.set(equipment.id, { equipment, totalMs: durationMs });
+        }
+      });
+
+      equipmentDays.forEach(({ equipment, totalMs }) => {
+        const daysDeployed = Math.max(1, Math.ceil(totalMs / (1000 * 60 * 60 * 24)));
+        const dailyRate = Number(equipment.daily_rate);
+        
+        suggestions.push({
+          equipment_id: equipment.id,
+          equipment_name: equipment.name,
+          equipment_type: equipment.type,
+          daily_rate: dailyRate,
+          days_deployed: daysDeployed,
+          total_cost: dailyRate * daysDeployed,
+        });
+      });
+
+      return suggestions;
+    },
+    enabled: !!jobId,
+  });
+}
+
+export function useAddEquipmentCosts() {
+  const queryClient = useQueryClient();
+  const { tenantId, user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ jobId, suggestions }: { jobId: string; suggestions: EquipmentCostSuggestion[] }) => {
+      if (suggestions.length === 0) return [];
+
+      const items = suggestions.map((suggestion) => ({
+        job_id: jobId,
+        tenant_id: tenantId!,
+        name: `${suggestion.equipment_name} (${suggestion.days_deployed} days)`,
+        description: `Equipment rental: ${suggestion.equipment_type}`,
+        category: 'equipment',
+        unit_type: 'per_day',
+        quantity: suggestion.days_deployed,
+        unit_rate: suggestion.daily_rate,
+        is_billable: true,
+        added_by: user!.id,
+      }));
+
+      const { data: result, error } = await supabase
+        .from('job_cost_items')
+        .insert(items)
+        .select();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: (result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['job-cost-items', variables.jobId] });
+      if (result && result.length > 0) {
+        toast.success(`Added ${result.length} equipment cost items`);
+      }
+    },
+    onError: (error) => {
+      console.error('Error adding equipment costs:', error);
+      toast.error('Failed to add equipment costs');
+    },
+  });
+}
