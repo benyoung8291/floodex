@@ -2,6 +2,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+async function logAuditEvent(
+  action: string,
+  entityId: string | null,
+  details: Record<string, unknown> = {}
+) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  
+  await (supabase.from('admin_audit_logs') as any).insert({
+    user_id: user.id,
+    action,
+    entity_type: 'subscription_tier',
+    entity_id: entityId,
+    details,
+  });
+}
+
 export interface SubscriptionTier {
   id: string;
   name: string;
@@ -97,8 +114,9 @@ export function useCreateTier() {
       if (error) throw error;
       return tier;
     },
-    onSuccess: () => {
+    onSuccess: (tier) => {
       queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
+      logAuditEvent('tier_created', tier.id, { name: tier.name, monthly_price: tier.monthly_price });
       toast.success('Tier created successfully');
     },
     onError: (error) => {
@@ -122,8 +140,9 @@ export function useUpdateTier() {
       if (error) throw error;
       return tier;
     },
-    onSuccess: () => {
+    onSuccess: (tier, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
+      logAuditEvent('tier_updated', variables.id, { changes: variables.data });
       toast.success('Tier updated successfully');
     },
     onError: (error) => {
@@ -149,6 +168,7 @@ export function useToggleTierStatus() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
+      logAuditEvent('tier_status_changed', variables.id, { is_active: variables.is_active });
       toast.success(`Tier ${variables.is_active ? 'activated' : 'deactivated'}`);
     },
     onError: (error) => {
@@ -175,8 +195,12 @@ export function useSyncTierToStripe() {
       if (data?.error) throw new Error(data.error);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data, tier) => {
       queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
+      logAuditEvent('tier_synced_to_stripe', tier.id, { 
+        stripe_product_id: data.productId, 
+        stripe_price_id: data.priceId 
+      });
       toast.success('Tier synced to Stripe successfully');
     },
     onError: (error) => {
