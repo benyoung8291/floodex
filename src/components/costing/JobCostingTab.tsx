@@ -32,6 +32,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { JobCostItemDialog } from './JobCostItemDialog';
 import { JobCostSummaryCard } from './JobCostSummary';
+import { EstimateCreateDialog } from './EstimateCreateDialog';
+import { EstimatesList } from './EstimatesList';
 import {
   useJobCostItems,
   useJobCostSummary,
@@ -44,6 +46,8 @@ import {
   JobCostItem,
 } from '@/hooks/useJobCostItems';
 import { useActiveCostTemplates, COST_CATEGORIES, UNIT_TYPES } from '@/hooks/useCostTemplates';
+import { useJobEstimates } from '@/hooks/useJobEstimates';
+import { useJobs } from '@/hooks/useJobs';
 
 interface JobCostingTabProps {
   jobId: string;
@@ -54,6 +58,9 @@ export function JobCostingTab({ jobId }: JobCostingTabProps) {
   const summary = useJobCostSummary(jobId);
   const { data: templates } = useActiveCostTemplates();
   const { data: equipmentSuggestions } = useEquipmentCostSuggestions(jobId);
+  const { data: estimates } = useJobEstimates(jobId);
+  const { data: jobs } = useJobs();
+  const job = jobs?.find((j) => j.id === jobId);
   
   const createItem = useCreateJobCostItem();
   const updateItem = useUpdateJobCostItem();
@@ -64,6 +71,7 @@ export function JobCostingTab({ jobId }: JobCostingTabProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<JobCostItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<JobCostItem | null>(null);
+  const [estimateDialogOpen, setEstimateDialogOpen] = useState(false);
 
   const handleAddCustom = () => {
     setEditingItem(null);
@@ -186,7 +194,21 @@ export function JobCostingTab({ jobId }: JobCostingTabProps) {
             Add Equipment Costs ({formatCurrency(equipmentTotal)})
           </Button>
         )}
+
+        <Button 
+          variant="outline" 
+          onClick={() => setEstimateDialogOpen(true)}
+          disabled={!items || items.length === 0}
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          Create Estimate
+        </Button>
       </div>
+
+      {/* Estimates List */}
+      {estimates && estimates.length > 0 && (
+        <EstimatesList estimates={estimates} jobId={jobId} />
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Cost Items List */}
@@ -314,6 +336,21 @@ export function JobCostingTab({ jobId }: JobCostingTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {job && (
+        <EstimateCreateDialog
+          open={estimateDialogOpen}
+          onOpenChange={setEstimateDialogOpen}
+          jobId={jobId}
+          costItems={items || []}
+          customerName={job.customer_name}
+          customerEmail={job.customer_email || undefined}
+          customerPhone={job.customer_phone || undefined}
+          customerAddress={[job.address, job.city, job.state, job.zip_code]
+            .filter(Boolean)
+            .join(', ') || undefined}
+        />
+      )}
     </div>
   );
 }

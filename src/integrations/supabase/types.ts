@@ -558,6 +558,120 @@ export type Database = {
           },
         ]
       }
+      job_estimates: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          created_by: string
+          customer_address: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_notes: string | null
+          customer_phone: string | null
+          decline_reason: string | null
+          declined_at: string | null
+          discount_amount: number | null
+          discount_description: string | null
+          estimate_number: string
+          id: string
+          job_id: string
+          line_items: Json
+          notes: string | null
+          scope_of_work: string | null
+          sent_at: string | null
+          sent_to_email: string | null
+          status: string
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          tenant_id: string
+          terms_and_conditions: string | null
+          total_amount: number
+          updated_at: string
+          valid_until: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          created_by: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_notes?: string | null
+          customer_phone?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
+          discount_amount?: number | null
+          discount_description?: string | null
+          estimate_number: string
+          id?: string
+          job_id: string
+          line_items?: Json
+          notes?: string | null
+          scope_of_work?: string | null
+          sent_at?: string | null
+          sent_to_email?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          tenant_id: string
+          terms_and_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          valid_until?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          created_by?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_notes?: string | null
+          customer_phone?: string | null
+          decline_reason?: string | null
+          declined_at?: string | null
+          discount_amount?: number | null
+          discount_description?: string | null
+          estimate_number?: string
+          id?: string
+          job_id?: string
+          line_items?: Json
+          notes?: string | null
+          scope_of_work?: string | null
+          sent_at?: string | null
+          sent_to_email?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          tenant_id?: string
+          terms_and_conditions?: string | null
+          total_amount?: number
+          updated_at?: string
+          valid_until?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_estimates_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_estimates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_forms: {
         Row: {
           created_at: string
