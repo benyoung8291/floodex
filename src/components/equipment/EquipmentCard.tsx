@@ -71,11 +71,16 @@ export function EquipmentCard({ equipment, assignedTo, onEdit, onDelete }: Equip
           </DropdownMenu>
         </div>
 
-        {equipment.serial_number && (
-          <p className="text-xs text-muted-foreground mb-3">
-            S/N: {equipment.serial_number}
-          </p>
-        )}
+        <div className="text-xs text-muted-foreground mb-3 space-y-1">
+          {equipment.serial_number && (
+            <p>S/N: {equipment.serial_number}</p>
+          )}
+          {equipment.daily_rate && Number(equipment.daily_rate) > 0 && (
+            <p className="font-medium text-foreground">
+              ${Number(equipment.daily_rate).toFixed(2)}/day
+            </p>
+          )}
+        </div>
 
         {equipment.is_available ? (
           <Badge variant="secondary" className="bg-success/10 text-success border-success/20">

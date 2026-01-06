@@ -212,6 +212,7 @@ export type Database = {
       equipment: {
         Row: {
           created_at: string
+          daily_rate: number | null
           id: string
           is_available: boolean
           name: string
@@ -222,6 +223,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          daily_rate?: number | null
           id?: string
           is_available?: boolean
           name: string
@@ -232,6 +234,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          daily_rate?: number | null
           id?: string
           is_available?: boolean
           name?: string

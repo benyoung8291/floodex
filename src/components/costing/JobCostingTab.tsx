@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Package, FileText } from 'lucide-react';
+import { Plus, Pencil, Trash2, Package, FileText, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,6 +39,8 @@ import {
   useUpdateJobCostItem,
   useDeleteJobCostItem,
   useApplyTemplateToJob,
+  useEquipmentCostSuggestions,
+  useAddEquipmentCosts,
   JobCostItem,
 } from '@/hooks/useJobCostItems';
 import { useActiveCostTemplates, COST_CATEGORIES, UNIT_TYPES } from '@/hooks/useCostTemplates';
@@ -51,11 +53,13 @@ export function JobCostingTab({ jobId }: JobCostingTabProps) {
   const { data: items, isLoading } = useJobCostItems(jobId);
   const summary = useJobCostSummary(jobId);
   const { data: templates } = useActiveCostTemplates();
+  const { data: equipmentSuggestions } = useEquipmentCostSuggestions(jobId);
   
   const createItem = useCreateJobCostItem();
   const updateItem = useUpdateJobCostItem();
   const deleteItem = useDeleteJobCostItem();
   const applyTemplate = useApplyTemplateToJob();
+  const addEquipmentCosts = useAddEquipmentCosts();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<JobCostItem | null>(null);
@@ -98,14 +102,23 @@ export function JobCostingTab({ jobId }: JobCostingTabProps) {
     applyTemplate.mutate({ jobId, template });
   };
 
+  const handleAddEquipmentCosts = () => {
+    if (equipmentSuggestions && equipmentSuggestions.length > 0) {
+      addEquipmentCosts.mutate({ jobId, suggestions: equipmentSuggestions });
+    }
+  };
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+
   const getCategoryLabel = (value: string) =>
     COST_CATEGORIES.find((c) => c.value === value)?.label || value;
 
   const getUnitLabel = (value: string) =>
     UNIT_TYPES.find((u) => u.value === value)?.label || value;
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  const hasEquipmentSuggestions = equipmentSuggestions && equipmentSuggestions.length > 0;
+  const equipmentTotal = equipmentSuggestions?.reduce((sum, s) => sum + s.total_cost, 0) || 0;
 
   // Group items by category
   const groupedItems = items?.reduce((acc, item) => {
@@ -162,6 +175,17 @@ export function JobCostingTab({ jobId }: JobCostingTabProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {hasEquipmentSuggestions && (
+          <Button 
+            variant="outline" 
+            onClick={handleAddEquipmentCosts}
+            disabled={addEquipmentCosts.isPending}
+          >
+            <Calculator className="h-4 w-4 mr-2" />
+            Add Equipment Costs ({formatCurrency(equipmentTotal)})
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
