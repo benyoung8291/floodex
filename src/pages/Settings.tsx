@@ -9,11 +9,12 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { Building2, Thermometer, Shield, Eye, EyeOff, FileText } from 'lucide-react';
+import { Building2, Thermometer, Shield, Eye, EyeOff, FileText, Package } from 'lucide-react';
 import { useTenant, useUpdateTenant } from '@/hooks/useTenant';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { LogoUpload } from '@/components/settings/LogoUpload';
+import { CostTemplateList } from '@/components/costing/CostTemplateList';
 import {
   Form,
   FormControl,
@@ -480,6 +481,11 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Cost Item Templates Section - Admin Only */}
+          {isTenantAdmin && (
+            <CostTemplateList />
           )}
 
           {/* Save Button */}

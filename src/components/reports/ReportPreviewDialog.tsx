@@ -21,9 +21,11 @@ import { EquipmentReport } from './EquipmentReport';
 import { PhotoReport } from './PhotoReport';
 import { PsychrometricReport } from './PsychrometricReport';
 import { ComprehensiveReport } from './ComprehensiveReport';
+import { CostReport } from './CostReport';
+import { useJobCostItems, useJobCostSummary } from '@/hooks/useJobCostItems';
 import { cn } from '@/lib/utils';
 
-export type ReportType = 'comprehensive' | 'drying-log-3day' | 'drying-log-custom' | 'equipment' | 'photos' | 'psychrometric';
+export type ReportType = 'comprehensive' | 'drying-log-3day' | 'drying-log-custom' | 'equipment' | 'photos' | 'psychrometric' | 'cost-summary';
 
 interface ReportPreviewDialogProps {
   open: boolean;
@@ -39,6 +41,7 @@ const REPORT_TITLES: Record<ReportType, string> = {
   'equipment': 'Equipment Usage Summary',
   'photos': 'Photo Documentation',
   'psychrometric': 'Psychrometric Data Report',
+  'cost-summary': 'Cost Summary Report',
 };
 
 export function ReportPreviewDialog({ 
@@ -58,6 +61,7 @@ export function ReportPreviewDialog({
   const [includeOverview, setIncludeOverview] = useState(true);
   const [showFullSizePhotos, setShowFullSizePhotos] = useState(false);
   const [includeDetailedReadings, setIncludeDetailedReadings] = useState(true);
+  const [showNonBillable, setShowNonBillable] = useState(true);
   
   // Date range for custom log
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>(() => {
@@ -74,6 +78,10 @@ export function ReportPreviewDialog({
     jobId,
     useDateRange ? dateRange : undefined
   );
+
+  // Cost data for cost summary report
+  const { data: costItems = [] } = useJobCostItems(reportType === 'cost-summary' ? jobId : undefined);
+  const costSummary = useJobCostSummary(reportType === 'cost-summary' ? jobId : undefined);
 
   const handleDownload = async () => {
     if (!reportRef.current || !data) return;
@@ -147,6 +155,17 @@ export function ReportPreviewDialog({
             ref={reportRef}
             data={data}
             includeDetailedReadings={includeDetailedReadings}
+            includeSignature={includeSignature}
+          />
+        );
+      case 'cost-summary':
+        return (
+          <CostReport
+            ref={reportRef}
+            data={data}
+            costItems={costItems}
+            summary={costSummary}
+            showNonBillable={showNonBillable}
             includeSignature={includeSignature}
           />
         );
@@ -280,6 +299,20 @@ export function ReportPreviewDialog({
                   id="detailed-readings"
                   checked={includeDetailedReadings}
                   onCheckedChange={setIncludeDetailedReadings}
+                />
+              </div>
+            )}
+
+            {/* Cost summary options */}
+            {reportType === 'cost-summary' && (
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-non-billable" className="text-sm">
+                  Include Non-Billable
+                </Label>
+                <Switch
+                  id="show-non-billable"
+                  checked={showNonBillable}
+                  onCheckedChange={setShowNonBillable}
                 />
               </div>
             )}

@@ -44,6 +44,59 @@ export type Database = {
         }
         Relationships: []
       }
+      cost_line_item_templates: {
+        Row: {
+          category: string
+          created_at: string
+          default_rate: number
+          description: string | null
+          id: string
+          is_active: boolean
+          is_auto_added: boolean
+          name: string
+          sort_order: number
+          tenant_id: string
+          unit_type: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          default_rate?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_auto_added?: boolean
+          name: string
+          sort_order?: number
+          tenant_id: string
+          unit_type?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          default_rate?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_auto_added?: boolean
+          name?: string
+          sort_order?: number
+          tenant_id?: string
+          unit_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_line_item_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       damage_assessments: {
         Row: {
           area_name: string
@@ -419,6 +472,82 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "form_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_cost_items: {
+        Row: {
+          added_by: string
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_billable: boolean
+          job_id: string
+          name: string
+          quantity: number
+          template_id: string | null
+          tenant_id: string
+          total_amount: number | null
+          unit_rate: number
+          unit_type: string
+          updated_at: string
+        }
+        Insert: {
+          added_by: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_billable?: boolean
+          job_id: string
+          name: string
+          quantity?: number
+          template_id?: string | null
+          tenant_id: string
+          total_amount?: number | null
+          unit_rate?: number
+          unit_type?: string
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_billable?: boolean
+          job_id?: string
+          name?: string
+          quantity?: number
+          template_id?: string | null
+          tenant_id?: string
+          total_amount?: number | null
+          unit_rate?: number
+          unit_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_cost_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_cost_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cost_line_item_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_cost_items_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

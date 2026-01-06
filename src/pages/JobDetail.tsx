@@ -24,6 +24,7 @@ import {
   FileText,
   FileSignature,
   Share2,
+  DollarSign,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -74,6 +75,8 @@ import { DamageAssessmentDialog } from '@/components/jobs/DamageAssessmentDialog
 import { FloorPlanGallery } from '@/components/floorplan/FloorPlanGallery';
 import { FormsList } from '@/components/forms/FormsList';
 import { ShareJobDialog } from '@/components/sharing/ShareJobDialog';
+import { JobCostingTab } from '@/components/costing/JobCostingTab';
+import { useJobCostItems } from '@/hooks/useJobCostItems';
 import { useJobForms } from '@/hooks/useJobForms';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
@@ -143,6 +146,7 @@ export default function JobDetail() {
   const { data: workLogs = [] } = useJobWorkLogs(id);
   const { data: damageAssessments = [] } = useJobDamageAssessments(id);
   const { data: jobForms = [] } = useJobForms(id || '');
+  const { data: costItems = [] } = useJobCostItems(id);
   
   // Mutations
   const createChamber = useCreateChamber();
@@ -385,7 +389,7 @@ export default function JobDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="chambers">Chambers</TabsTrigger>
           <TabsTrigger value="readings">Readings</TabsTrigger>
@@ -402,6 +406,14 @@ export default function JobDetail() {
             {damageAssessments.length > 0 && (
               <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
                 {damageAssessments.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="costing" className="relative">
+            Costing
+            {costItems.length > 0 && (
+              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
+                {costItems.length}
               </span>
             )}
           </TabsTrigger>
@@ -800,6 +812,11 @@ export default function JobDetail() {
               days_drying: job.days_drying,
             }}
           />
+        </TabsContent>
+
+        {/* Costing Tab */}
+        <TabsContent value="costing" className="mt-4">
+          {id && <JobCostingTab jobId={id} />}
         </TabsContent>
 
         {/* Plans Tab */}
