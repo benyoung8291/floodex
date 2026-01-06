@@ -52,54 +52,60 @@ export const UNIT_TYPES = [
 ] as const;
 
 export function useCostTemplates() {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['cost-templates', tenantId],
+    queryKey: ['cost-templates', effectiveTenantId],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('cost_line_item_templates')
         .select('*')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', effectiveTenantId)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
       return data as CostTemplate[];
     },
-    enabled: !!tenantId,
+    enabled: !!effectiveTenantId,
   });
 }
 
 export function useActiveCostTemplates() {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['cost-templates', tenantId, 'active'],
+    queryKey: ['cost-templates', effectiveTenantId, 'active'],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('cost_line_item_templates')
         .select('*')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', effectiveTenantId)
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
       return data as CostTemplate[];
     },
-    enabled: !!tenantId,
+    enabled: !!effectiveTenantId,
   });
 }
 
 export function useAutoAddCostTemplates() {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['cost-templates', tenantId, 'auto-add'],
+    queryKey: ['cost-templates', effectiveTenantId, 'auto-add'],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('cost_line_item_templates')
         .select('*')
-        .eq('tenant_id', tenantId!)
+        .eq('tenant_id', effectiveTenantId)
         .eq('is_active', true)
         .eq('is_auto_added', true)
         .order('sort_order', { ascending: true });
@@ -107,21 +113,23 @@ export function useAutoAddCostTemplates() {
       if (error) throw error;
       return data as CostTemplate[];
     },
-    enabled: !!tenantId,
+    enabled: !!effectiveTenantId,
   });
 }
 
 export function useCreateCostTemplate() {
   const queryClient = useQueryClient();
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: CreateCostTemplateData) => {
+      if (!effectiveTenantId) throw new Error('No tenant ID');
+      
       const { data: result, error } = await supabase
         .from('cost_line_item_templates')
         .insert({
           ...data,
-          tenant_id: tenantId!,
+          tenant_id: effectiveTenantId,
         })
         .select()
         .single();

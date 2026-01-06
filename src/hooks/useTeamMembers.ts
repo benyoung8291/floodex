@@ -16,18 +16,18 @@ export interface TeamMember {
 }
 
 export function useTeamMembers() {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['team-members', tenantId],
+    queryKey: ['team-members', effectiveTenantId],
     queryFn: async () => {
-      if (!tenantId) throw new Error('No tenant ID');
+      if (!effectiveTenantId) return [];
 
       // Get profiles for the tenant
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, phone, created_at')
-        .eq('tenant_id', tenantId);
+        .eq('tenant_id', effectiveTenantId);
 
       if (profilesError) throw profilesError;
 
@@ -38,7 +38,7 @@ export function useTeamMembers() {
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role')
-        .eq('tenant_id', tenantId)
+        .eq('tenant_id', effectiveTenantId)
         .in('user_id', userIds);
 
       if (rolesError) throw rolesError;
@@ -66,17 +66,17 @@ export function useTeamMembers() {
         return (a.full_name || '').localeCompare(b.full_name || '');
       });
     },
-    enabled: !!tenantId,
+    enabled: !!effectiveTenantId,
   });
 }
 
 export function useUpdateMemberRole() {
   const queryClient = useQueryClient();
-  const { tenantId, user } = useAuth();
+  const { effectiveTenantId, user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: AppRole }) => {
-      if (!tenantId) throw new Error('No tenant ID');
+      if (!effectiveTenantId) throw new Error('No tenant ID');
       if (userId === user?.id) throw new Error('Cannot change your own role');
 
       // Update the user's role
@@ -84,12 +84,12 @@ export function useUpdateMemberRole() {
         .from('user_roles')
         .update({ role: newRole })
         .eq('user_id', userId)
-        .eq('tenant_id', tenantId);
+        .eq('tenant_id', effectiveTenantId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team-members', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['team-members', effectiveTenantId] });
       toast.success('Role updated successfully');
     },
     onError: (error) => {
@@ -100,11 +100,11 @@ export function useUpdateMemberRole() {
 
 export function useRemoveTeamMember() {
   const queryClient = useQueryClient();
-  const { tenantId, user } = useAuth();
+  const { effectiveTenantId, user } = useAuth();
 
   return useMutation({
     mutationFn: async (userId: string) => {
-      if (!tenantId) throw new Error('No tenant ID');
+      if (!effectiveTenantId) throw new Error('No tenant ID');
       if (userId === user?.id) throw new Error('Cannot remove yourself from the team');
 
       // Remove their role
@@ -112,7 +112,7 @@ export function useRemoveTeamMember() {
         .from('user_roles')
         .delete()
         .eq('user_id', userId)
-        .eq('tenant_id', tenantId);
+        .eq('tenant_id', effectiveTenantId);
 
       if (roleError) throw roleError;
 
@@ -125,7 +125,7 @@ export function useRemoveTeamMember() {
       if (profileError) throw profileError;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team-members', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['team-members', effectiveTenantId] });
       toast.success('Team member removed');
     },
     onError: (error) => {

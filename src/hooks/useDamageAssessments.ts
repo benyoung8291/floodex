@@ -56,12 +56,12 @@ export function useJobDamageAssessments(jobId: string | undefined) {
 }
 
 export function useCreateDamageAssessment() {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: CreateDamageAssessmentData) => {
-      if (!tenantId) {
+      if (!effectiveTenantId) {
         throw new Error('User must be authenticated');
       }
 
@@ -69,7 +69,7 @@ export function useCreateDamageAssessment() {
         .from('damage_assessments')
         .insert({
           job_id: data.jobId,
-          tenant_id: tenantId,
+          tenant_id: effectiveTenantId,
           chamber_id: data.chamberId || null,
           area_name: data.areaName,
           material_type: data.materialType,

@@ -108,16 +108,18 @@ export function useJobCostSummary(jobId: string | undefined) {
 
 export function useCreateJobCostItem() {
   const queryClient = useQueryClient();
-  const { tenantId, user } = useAuth();
+  const { effectiveTenantId, user } = useAuth();
 
   return useMutation({
     mutationFn: async (data: CreateJobCostItemData) => {
+      if (!effectiveTenantId || !user) throw new Error('Not authenticated');
+      
       const { data: result, error } = await supabase
         .from('job_cost_items')
         .insert({
           ...data,
-          tenant_id: tenantId!,
-          added_by: user!.id,
+          tenant_id: effectiveTenantId,
+          added_by: user.id,
         })
         .select()
         .single();
@@ -188,15 +190,17 @@ export function useDeleteJobCostItem() {
 
 export function useApplyTemplateToJob() {
   const queryClient = useQueryClient();
-  const { tenantId, user } = useAuth();
+  const { effectiveTenantId, user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ jobId, template }: { jobId: string; template: CostTemplate }) => {
+      if (!effectiveTenantId || !user) throw new Error('Not authenticated');
+      
       const { data: result, error } = await supabase
         .from('job_cost_items')
         .insert({
           job_id: jobId,
-          tenant_id: tenantId!,
+          tenant_id: effectiveTenantId,
           template_id: template.id,
           name: template.name,
           description: template.description,
@@ -205,7 +209,7 @@ export function useApplyTemplateToJob() {
           quantity: 1,
           unit_rate: template.default_rate,
           is_billable: true,
-          added_by: user!.id,
+          added_by: user.id,
         })
         .select()
         .single();
@@ -226,15 +230,16 @@ export function useApplyTemplateToJob() {
 
 export function useApplyAutoTemplates() {
   const queryClient = useQueryClient();
-  const { tenantId, user } = useAuth();
+  const { effectiveTenantId, user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ jobId, templates }: { jobId: string; templates: CostTemplate[] }) => {
+      if (!effectiveTenantId || !user) throw new Error('Not authenticated');
       if (templates.length === 0) return [];
 
       const items = templates.map((template) => ({
         job_id: jobId,
-        tenant_id: tenantId!,
+        tenant_id: effectiveTenantId,
         template_id: template.id,
         name: template.name,
         description: template.description,
@@ -243,7 +248,7 @@ export function useApplyAutoTemplates() {
         quantity: 1,
         unit_rate: template.default_rate,
         is_billable: true,
-        added_by: user!.id,
+        added_by: user.id,
       }));
 
       const { data: result, error } = await supabase
@@ -340,15 +345,16 @@ export function useEquipmentCostSuggestions(jobId: string | undefined) {
 
 export function useAddEquipmentCosts() {
   const queryClient = useQueryClient();
-  const { tenantId, user } = useAuth();
+  const { effectiveTenantId, user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ jobId, suggestions }: { jobId: string; suggestions: EquipmentCostSuggestion[] }) => {
+      if (!effectiveTenantId || !user) throw new Error('Not authenticated');
       if (suggestions.length === 0) return [];
 
       const items = suggestions.map((suggestion) => ({
         job_id: jobId,
-        tenant_id: tenantId!,
+        tenant_id: effectiveTenantId,
         name: `${suggestion.equipment_name} (${suggestion.days_deployed} days)`,
         description: `Equipment rental: ${suggestion.equipment_type}`,
         category: 'equipment',
@@ -356,7 +362,7 @@ export function useAddEquipmentCosts() {
         quantity: suggestion.days_deployed,
         unit_rate: suggestion.daily_rate,
         is_billable: true,
-        added_by: user!.id,
+        added_by: user.id,
       }));
 
       const { data: result, error } = await supabase

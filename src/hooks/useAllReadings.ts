@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Tables } from '@/integrations/supabase/types';
 
 type MoistureReading = Tables<'moisture_readings'>;
-type DryingChamber = Tables<'drying_chambers'>;
 type Job = Tables<'jobs'>;
 
 export interface ReadingWithDetails extends MoistureReading {
@@ -21,15 +20,18 @@ export interface JobWithChambers extends Job {
 
 // Fetch jobs with chamber and reading counts for job selector
 export function useJobsWithChambers() {
-  const { user } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['jobs-with-chambers'],
+    queryKey: ['jobs-with-chambers', effectiveTenantId],
     queryFn: async () => {
-      // Get all jobs
+      if (!effectiveTenantId) return [];
+      
+      // Get all jobs for the tenant
       const { data: jobs, error: jobsError } = await supabase
         .from('jobs')
         .select('*')
+        .eq('tenant_id', effectiveTenantId)
         .order('created_at', { ascending: false });
 
       if (jobsError) throw jobsError;
@@ -37,7 +39,8 @@ export function useJobsWithChambers() {
       // Get chamber counts per job
       const { data: chambers, error: chambersError } = await supabase
         .from('drying_chambers')
-        .select('job_id');
+        .select('job_id')
+        .eq('tenant_id', effectiveTenantId);
 
       if (chambersError) throw chambersError;
 
@@ -45,6 +48,7 @@ export function useJobsWithChambers() {
       const { data: readings, error: readingsError } = await supabase
         .from('moisture_readings')
         .select('job_id, logged_at, gpp')
+        .eq('tenant_id', effectiveTenantId)
         .eq('reading_type', 'ambient')
         .order('logged_at', { ascending: false });
 
@@ -76,7 +80,7 @@ export function useJobsWithChambers() {
         latest_gpp: readingAggregates[job.id]?.latest_gpp || null,
       })) as JobWithChambers[];
     },
-    enabled: !!user,
+    enabled: !!user && !!effectiveTenantId,
   });
 }
 
@@ -110,11 +114,13 @@ export function useAllJobReadings(jobId: string | undefined) {
 
 // Fetch recent readings across all jobs (for the main Readings page without job selected)
 export function useRecentReadings(limit = 20) {
-  const { user } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['recent-readings', limit],
+    queryKey: ['recent-readings', effectiveTenantId, limit],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('moisture_readings')
         .select(`
@@ -122,6 +128,7 @@ export function useRecentReadings(limit = 20) {
           drying_chambers!inner(name, job_id),
           jobs!inner(customer_name)
         `)
+        .eq('tenant_id', effectiveTenantId)
         .order('logged_at', { ascending: false })
         .limit(limit);
 
@@ -133,17 +140,21 @@ export function useRecentReadings(limit = 20) {
         job_customer_name: (reading.jobs as unknown as { customer_name: string })?.customer_name || 'Unknown',
       })) as ReadingWithDetails[];
     },
-    enabled: !!user,
+    enabled: !!user && !!effectiveTenantId,
   });
 }
 
 // Get reading stats for dashboard
 export function useReadingsStats() {
-  const { user } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['readings-stats'],
+    queryKey: ['readings-stats', effectiveTenantId],
     queryFn: async () => {
+      if (!effectiveTenantId) {
+        return { todayCount: 0, weekCount: 0, avgGpp: null, jobsNearTarget: 0 };
+      }
+      
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const todayISO = today.toISOString();
@@ -156,6 +167,7 @@ export function useReadingsStats() {
       const { count: todayCount, error: todayError } = await supabase
         .from('moisture_readings')
         .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', effectiveTenantId)
         .gte('logged_at', todayISO);
 
       if (todayError) throw todayError;
@@ -164,6 +176,7 @@ export function useReadingsStats() {
       const { count: weekCount, error: weekError } = await supabase
         .from('moisture_readings')
         .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', effectiveTenantId)
         .gte('logged_at', weekAgoISO);
 
       if (weekError) throw weekError;
@@ -172,6 +185,7 @@ export function useReadingsStats() {
       const { data: activeJobsData, error: activeJobsError } = await supabase
         .from('jobs')
         .select('id')
+        .eq('tenant_id', effectiveTenantId)
         .neq('status', 'completed');
 
       if (activeJobsError) throw activeJobsError;
@@ -186,6 +200,7 @@ export function useReadingsStats() {
         const { data: latestReadings, error: readingsError } = await supabase
           .from('moisture_readings')
           .select('job_id, gpp, logged_at')
+          .eq('tenant_id', effectiveTenantId)
           .in('job_id', activeJobIds)
           .eq('reading_type', 'ambient')
           .order('logged_at', { ascending: false });
@@ -209,6 +224,7 @@ export function useReadingsStats() {
         const { data: chambers, error: chambersError } = await supabase
           .from('drying_chambers')
           .select('id, job_id, target_gpp')
+          .eq('tenant_id', effectiveTenantId)
           .in('job_id', activeJobIds)
           .not('target_gpp', 'is', null);
 
@@ -240,6 +256,6 @@ export function useReadingsStats() {
         jobsNearTarget,
       };
     },
-    enabled: !!user,
+    enabled: !!user && !!effectiveTenantId,
   });
 }

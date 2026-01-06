@@ -38,21 +38,24 @@ export interface FormSignature {
 }
 
 export function useJobForms(jobId: string) {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['job-forms', jobId],
+    queryKey: ['job-forms', jobId, effectiveTenantId],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('job_forms')
         .select('*')
         .eq('job_id', jobId)
+        .eq('tenant_id', effectiveTenantId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as JobForm[];
     },
-    enabled: !!jobId && !!tenantId,
+    enabled: !!jobId && !!effectiveTenantId,
   });
 }
 
@@ -92,7 +95,7 @@ export function useFormSignatures(formId: string) {
 
 export function useCreateJobForm() {
   const queryClient = useQueryClient();
-  const { user, tenantId } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: {
@@ -102,12 +105,12 @@ export function useCreateJobForm() {
       title: string;
       field_values: Record<string, any>;
     }) => {
-      if (!tenantId || !user) throw new Error('Not authenticated');
+      if (!effectiveTenantId || !user) throw new Error('Not authenticated');
 
       const { data: form, error } = await supabase
         .from('job_forms')
         .insert({
-          tenant_id: tenantId,
+          tenant_id: effectiveTenantId,
           job_id: data.job_id,
           template_id: data.template_id || null,
           form_type: data.form_type,
@@ -204,7 +207,7 @@ export function useVoidJobForm() {
 
 export function useCreateFormSignature() {
   const queryClient = useQueryClient();
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: {
@@ -217,11 +220,11 @@ export function useCreateFormSignature() {
       latitude?: number;
       longitude?: number;
     }) => {
-      if (!tenantId) throw new Error('No tenant');
+      if (!effectiveTenantId) throw new Error('No tenant');
 
       // Upload signature image
       const timestamp = Date.now();
-      const path = `${tenantId}/${data.job_id}/signatures/sig_${data.form_id}_${data.signer_type}_${timestamp}.png`;
+      const path = `${effectiveTenantId}/${data.job_id}/signatures/sig_${data.form_id}_${data.signer_type}_${timestamp}.png`;
 
       const { error: uploadError } = await supabase.storage
         .from('signed-documents')
@@ -235,7 +238,7 @@ export function useCreateFormSignature() {
       const { data: signature, error } = await supabase
         .from('form_signatures')
         .insert({
-          tenant_id: tenantId,
+          tenant_id: effectiveTenantId,
           form_id: data.form_id,
           signer_type: data.signer_type,
           signer_name: data.signer_name,
