@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -54,8 +56,23 @@ export function TierFormDialog({
 
   const form = useForm<TierFormData>({
     resolver: zodResolver(tierSchema),
-    defaultValues: tier
-      ? {
+    defaultValues: {
+      name: '',
+      monthly_price: 0,
+      jobs_included: 0,
+      readings_included: 0,
+      overage_price_per_job: 0,
+      overage_price_per_reading: 0,
+      is_free_tier: false,
+      is_active: true,
+      sort_order: 0,
+    },
+  });
+
+  useEffect(() => {
+    if (open) {
+      if (tier) {
+        form.reset({
           name: tier.name,
           monthly_price: Number(tier.monthly_price),
           jobs_included: tier.jobs_included,
@@ -65,8 +82,9 @@ export function TierFormDialog({
           is_free_tier: tier.is_free_tier,
           is_active: tier.is_active,
           sort_order: tier.sort_order,
-        }
-      : {
+        });
+      } else {
+        form.reset({
           name: '',
           monthly_price: 0,
           jobs_included: 0,
@@ -76,8 +94,10 @@ export function TierFormDialog({
           is_free_tier: false,
           is_active: true,
           sort_order: 0,
-        },
-  });
+        });
+      }
+    }
+  }, [open, tier, form]);
 
   const handleSubmit = (data: TierFormData) => {
     onSubmit(data);
@@ -88,6 +108,11 @@ export function TierFormDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Tier' : 'Create New Tier'}</DialogTitle>
+          <DialogDescription>
+            {isEditing
+              ? 'Update the pricing tier details below.'
+              : 'Configure the new pricing tier details below.'}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
