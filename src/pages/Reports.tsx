@@ -6,6 +6,7 @@ import {
   Camera, 
   BarChart3,
   ChevronDown,
+  DollarSign,
 } from 'lucide-react';
 import { 
   Select, 
@@ -135,6 +136,13 @@ export default function Reports() {
             description="Scientific moisture analysis with GPP calculations and drying curves."
             icon={BarChart3}
             onClick={() => handleReportClick('psychrometric')}
+          />
+          
+          <ReportCard
+            title="Cost Summary"
+            description="Itemized cost breakdown with category totals for billing."
+            icon={DollarSign}
+            onClick={() => handleReportClick('cost-summary')}
           />
         </div>
       )}
