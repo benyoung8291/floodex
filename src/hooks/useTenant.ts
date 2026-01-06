@@ -8,43 +8,48 @@ type Tenant = Tables<'tenants'>;
 type TenantUpdate = TablesUpdate<'tenants'>;
 
 export function useTenant() {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['tenant', tenantId],
+    queryKey: ['tenant', effectiveTenantId],
     queryFn: async () => {
-      if (!tenantId) throw new Error('No tenant ID');
+      if (!effectiveTenantId) throw new Error('No tenant ID');
       
       const { data, error } = await supabase
         .from('tenants')
         .select('*')
-        .eq('id', tenantId)
+        .eq('id', effectiveTenantId)
         .single();
       
       if (error) throw error;
       return data as Tenant;
     },
-    enabled: !!tenantId,
+    enabled: !!effectiveTenantId,
   });
 }
 
 export function useUpdateTenant() {
   const queryClient = useQueryClient();
-  const { tenantId } = useAuth();
+  const { effectiveTenantId, isImpersonating } = useAuth();
 
   return useMutation({
     mutationFn: async (updates: TenantUpdate) => {
-      if (!tenantId) throw new Error('No tenant ID');
+      if (!effectiveTenantId) throw new Error('No tenant ID');
+      
+      // Prevent modifications while impersonating (read-only mode)
+      if (isImpersonating) {
+        throw new Error('Cannot modify tenant settings while impersonating');
+      }
       
       const { error } = await supabase
         .from('tenants')
         .update(updates)
-        .eq('id', tenantId);
+        .eq('id', effectiveTenantId);
       
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tenant', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenant', effectiveTenantId] });
       toast.success('Settings saved successfully');
     },
     onError: (error) => {

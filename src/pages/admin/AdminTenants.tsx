@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, Search, ExternalLink, Users, Briefcase, FileText } from 'lucide-react';
+import { Building2, Search, ExternalLink, Users, Briefcase, FileText, Eye, MoreHorizontal } from 'lucide-react';
 import { useAdminTenants } from '@/hooks/useAdminData';
+import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import {
@@ -17,6 +18,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const statusOptions = [
   { value: 'all', label: 'All Statuses' },
@@ -45,8 +52,15 @@ function getStatusBadgeVariant(status: string) {
 export default function AdminTenants() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const navigate = useNavigate();
+  const { startImpersonation } = useAuth();
   
   const { data: tenants, isLoading } = useAdminTenants(search, statusFilter);
+
+  const handleImpersonate = (tenantId: string, tenantName: string) => {
+    startImpersonation(tenantId, tenantName);
+    navigate('/dashboard');
+  };
 
   return (
     <div className="space-y-6">
@@ -155,12 +169,25 @@ export default function AdminTenants() {
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link to={`/admin/tenants/${tenant.id}`}>
-                            <ExternalLink className="w-4 h-4 mr-1" />
-                            View
-                          </Link>
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link to={`/admin/tenants/${tenant.id}`}>
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                View Details
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleImpersonate(tenant.id, tenant.name)}>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Impersonate
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}

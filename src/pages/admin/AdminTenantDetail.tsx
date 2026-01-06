@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,9 +15,11 @@ import {
   FileText,
   Calendar,
   CreditCard,
-  Clock
+  Clock,
+  Eye
 } from 'lucide-react';
 import { useAdminTenantDetail, useTenantUsers, useTenantJobs } from '@/hooks/useAdminData';
+import { useAuth } from '@/contexts/AuthContext';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Table,
@@ -56,9 +58,18 @@ function getRoleBadgeVariant(role: string) {
 
 export default function AdminTenantDetail() {
   const { tenantId } = useParams<{ tenantId: string }>();
+  const navigate = useNavigate();
+  const { startImpersonation } = useAuth();
   const { data: tenant, isLoading: tenantLoading } = useAdminTenantDetail(tenantId);
   const { data: users, isLoading: usersLoading } = useTenantUsers(tenantId);
   const { data: jobs, isLoading: jobsLoading } = useTenantJobs(tenantId);
+
+  const handleImpersonate = () => {
+    if (tenant) {
+      startImpersonation(tenant.id, tenant.name);
+      navigate('/dashboard');
+    }
+  };
 
   if (tenantLoading) {
     return (
@@ -88,7 +99,7 @@ export default function AdminTenantDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link to="/admin/tenants">
@@ -116,6 +127,10 @@ export default function AdminTenantDetail() {
             </div>
           </div>
         </div>
+        <Button variant="outline" onClick={handleImpersonate}>
+          <Eye className="w-4 h-4 mr-2" />
+          View as Tenant
+        </Button>
       </div>
 
       {/* Stats Cards */}
