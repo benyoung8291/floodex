@@ -156,10 +156,15 @@ export function EstimatePreviewDialog({
                               )}
                             </td>
                             <td className="text-right py-2 font-mono">
-                              {item.quantity} {getUnitLabel(item.unit_type).toLowerCase()}
+                              {item.unit_type === 'per_day' && item.days ? (
+                                <span>{item.quantity} × {item.days} days</span>
+                              ) : (
+                                <span>{item.quantity} {getUnitLabel(item.unit_type).toLowerCase()}</span>
+                              )}
                             </td>
                             <td className="text-right py-2 font-mono">
                               {formatCurrency(item.unit_rate)}
+                              {item.unit_type === 'per_day' && '/day'}
                             </td>
                             <td className="text-right py-2 font-mono font-medium">
                               {formatCurrency(item.total_amount)}
