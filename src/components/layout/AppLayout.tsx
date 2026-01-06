@@ -5,7 +5,9 @@ import { MobileBottomNav } from './MobileBottomNav';
 import { TopHeader } from './TopHeader';
 import { UsageWarningBanner } from '@/components/billing/UsageWarningBanner';
 import { TrialBanner } from '@/components/billing/TrialBanner';
+import { ImpersonationBanner } from '@/components/admin/ImpersonationBanner';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -13,17 +15,23 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const isMobile = useIsMobile();
-  const { user, isTenantAdmin } = useAuth();
+  const { user, isTenantAdmin, isImpersonating } = useAuth();
 
   return (
     <div className="min-h-screen flex w-full bg-background">
+      {/* Impersonation Banner - fixed at top */}
+      {isImpersonating && <ImpersonationBanner />}
+
       {/* Desktop Sidebar */}
       {!isMobile && <DesktopSidebar />}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Billing Banners - only show for logged in tenant admins */}
-        {user && isTenantAdmin && (
+      <div className={cn(
+        "flex-1 flex flex-col min-h-screen",
+        isImpersonating && "pt-10"
+      )}>
+        {/* Billing Banners - only show for logged in tenant admins, not during impersonation */}
+        {user && isTenantAdmin && !isImpersonating && (
           <>
             <TrialBanner />
             <UsageWarningBanner />

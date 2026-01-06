@@ -17,6 +17,13 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   isTenantAdmin: boolean;
   isSupervisor: boolean;
+  // Impersonation
+  impersonatedTenantId: string | null;
+  impersonatedTenantName: string | null;
+  isImpersonating: boolean;
+  effectiveTenantId: string | null;
+  startImpersonation: (tenantId: string, tenantName: string) => void;
+  stopImpersonation: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [tenantId, setTenantId] = useState<string | null>(null);
+  
+  // Impersonation state
+  const [impersonatedTenantId, setImpersonatedTenantId] = useState<string | null>(null);
+  const [impersonatedTenantName, setImpersonatedTenantName] = useState<string | null>(null);
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -114,6 +125,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Clear impersonation on sign out
+    setImpersonatedTenantId(null);
+    setImpersonatedTenantName(null);
     await supabase.auth.signOut();
     setRoles([]);
     setTenantId(null);
@@ -123,6 +137,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSuperAdmin = hasRole('super_admin');
   const isTenantAdmin = hasRole('tenant_admin');
   const isSupervisor = hasRole('supervisor');
+
+  // Impersonation methods
+  const isImpersonating = impersonatedTenantId !== null;
+  const effectiveTenantId = isImpersonating ? impersonatedTenantId : tenantId;
+
+  const startImpersonation = (newTenantId: string, newTenantName: string) => {
+    // Only super_admins can impersonate
+    if (!isSuperAdmin) {
+      console.warn('Only super_admins can impersonate tenants');
+      return;
+    }
+    setImpersonatedTenantId(newTenantId);
+    setImpersonatedTenantName(newTenantName);
+  };
+
+  const stopImpersonation = () => {
+    setImpersonatedTenantId(null);
+    setImpersonatedTenantName(null);
+  };
 
   return (
     <AuthContext.Provider
@@ -139,6 +172,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isSuperAdmin,
         isTenantAdmin,
         isSupervisor,
+        // Impersonation
+        impersonatedTenantId,
+        impersonatedTenantName,
+        isImpersonating,
+        effectiveTenantId,
+        startImpersonation,
+        stopImpersonation,
       }}
     >
       {children}
