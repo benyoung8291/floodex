@@ -9,35 +9,35 @@ type EquipmentAssignment = Tables<'equipment_assignments'>;
 
 // Fetch all equipment for tenant
 export function useEquipment() {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['equipment', tenantId],
+    queryKey: ['equipment', effectiveTenantId],
     queryFn: async () => {
-      if (!tenantId) throw new Error('No tenant ID');
+      if (!effectiveTenantId) return [];
 
       const { data, error } = await supabase
         .from('equipment')
         .select('*')
-        .eq('tenant_id', tenantId)
+        .eq('tenant_id', effectiveTenantId)
         .order('type', { ascending: true })
         .order('name', { ascending: true });
 
       if (error) throw error;
       return data as Equipment[];
     },
-    enabled: !!tenantId,
+    enabled: !!effectiveTenantId,
   });
 }
 
 // Fetch equipment assignments for a job
 export function useEquipmentAssignments(jobId: string | undefined) {
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useQuery({
-    queryKey: ['equipment-assignments', jobId],
+    queryKey: ['equipment-assignments', jobId, effectiveTenantId],
     queryFn: async () => {
-      if (!jobId || !tenantId) throw new Error('Missing job or tenant ID');
+      if (!jobId || !effectiveTenantId) return [];
 
       const { data, error } = await supabase
         .from('equipment_assignments')
@@ -46,29 +46,29 @@ export function useEquipmentAssignments(jobId: string | undefined) {
           equipment:equipment_id (*)
         `)
         .eq('job_id', jobId)
-        .eq('tenant_id', tenantId)
+        .eq('tenant_id', effectiveTenantId)
         .is('removed_at', null);
 
       if (error) throw error;
       return data as (EquipmentAssignment & { equipment: Equipment })[];
     },
-    enabled: !!jobId && !!tenantId,
+    enabled: !!jobId && !!effectiveTenantId,
   });
 }
 
 // Create new equipment
 export function useCreateEquipment() {
   const queryClient = useQueryClient();
-  const { tenantId } = useAuth();
+  const { effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: { name: string; type: string; serialNumber?: string; dailyRate?: number }) => {
-      if (!tenantId) throw new Error('No tenant ID');
+      if (!effectiveTenantId) throw new Error('No tenant ID');
 
       const { error, data: equipment } = await supabase
         .from('equipment')
         .insert({
-          tenant_id: tenantId,
+          tenant_id: effectiveTenantId,
           name: data.name,
           type: data.type,
           serial_number: data.serialNumber || null,
@@ -149,11 +149,11 @@ export function useDeleteEquipment() {
 // Assign equipment to a chamber
 export function useAssignEquipment() {
   const queryClient = useQueryClient();
-  const { tenantId, user } = useAuth();
+  const { effectiveTenantId, user } = useAuth();
 
   return useMutation({
     mutationFn: async (data: { equipmentId: string; chamberId: string; jobId: string }) => {
-      if (!tenantId || !user) throw new Error('Not authenticated');
+      if (!effectiveTenantId || !user) throw new Error('Not authenticated');
 
       // Insert assignment
       const { error: assignError } = await supabase
@@ -162,7 +162,7 @@ export function useAssignEquipment() {
           equipment_id: data.equipmentId,
           chamber_id: data.chamberId,
           job_id: data.jobId,
-          tenant_id: tenantId,
+          tenant_id: effectiveTenantId,
           assigned_by: user.id,
         });
 

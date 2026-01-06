@@ -41,46 +41,57 @@ export interface UpdatePhotoInput {
 
 // Fetch photos for a specific job
 export const useJobPhotos = (jobId: string) => {
+  const { effectiveTenantId } = useAuth();
+  
   return useQuery({
-    queryKey: ['job-photos', jobId],
+    queryKey: ['job-photos', jobId, effectiveTenantId],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('job_photos')
         .select('*')
         .eq('job_id', jobId)
+        .eq('tenant_id', effectiveTenantId)
         .order('taken_at', { ascending: false });
 
       if (error) throw error;
       return data as JobPhoto[];
     },
-    enabled: !!jobId,
+    enabled: !!jobId && !!effectiveTenantId,
   });
 };
 
 // Fetch all photos across all jobs for the tenant
 export const useAllPhotos = () => {
+  const { effectiveTenantId } = useAuth();
+  
   return useQuery({
-    queryKey: ['all-photos'],
+    queryKey: ['all-photos', effectiveTenantId],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('job_photos')
         .select('*')
+        .eq('tenant_id', effectiveTenantId)
         .order('taken_at', { ascending: false });
 
       if (error) throw error;
       return data as JobPhoto[];
     },
+    enabled: !!effectiveTenantId,
   });
 };
 
 // Create a new photo record
 export const useCreatePhoto = () => {
   const queryClient = useQueryClient();
-  const { user, tenantId } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (input: CreatePhotoInput) => {
-      if (!user || !tenantId) {
+      if (!user || !effectiveTenantId) {
         throw new Error('User not authenticated');
       }
 
@@ -88,7 +99,7 @@ export const useCreatePhoto = () => {
         .from('job_photos')
         .insert({
           job_id: input.job_id,
-          tenant_id: tenantId,
+          tenant_id: effectiveTenantId,
           storage_path: input.storage_path,
           tag: input.tag,
           caption: input.caption || null,

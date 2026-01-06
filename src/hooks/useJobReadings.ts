@@ -102,15 +102,15 @@ export function useLatestReadings(jobId: string | undefined) {
 export function useCreateChamber() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { user, tenantId } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: { jobId: string; name: string; targetGpp?: number; dryStandardPercent?: number }) => {
-      if (!user || !tenantId) throw new Error('Not authenticated');
+      if (!user || !effectiveTenantId) throw new Error('Not authenticated');
 
       const chamber: TablesInsert<'drying_chambers'> = {
         job_id: data.jobId,
-        tenant_id: tenantId,
+        tenant_id: effectiveTenantId,
         name: data.name,
         target_gpp: data.targetGpp || null,
         dry_standard_percent: data.dryStandardPercent || null,
@@ -147,7 +147,7 @@ export function useCreateChamber() {
 export function useCreateReading() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { user, tenantId } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: {
@@ -160,12 +160,12 @@ export function useCreateReading() {
       materialType?: string;
       moistureContent?: number;
     }) => {
-      if (!user || !tenantId) throw new Error('Not authenticated');
+      if (!user || !effectiveTenantId) throw new Error('Not authenticated');
 
       const reading: TablesInsert<'moisture_readings'> = {
         chamber_id: data.chamberId,
         job_id: data.jobId,
-        tenant_id: tenantId,
+        tenant_id: effectiveTenantId,
         reading_type: data.readingType,
         temperature: data.temperature,
         relative_humidity: data.relativeHumidity,
@@ -189,7 +189,7 @@ export function useCreateReading() {
       const billingPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
       await supabase.from('usage_logs').insert({
-        tenant_id: tenantId,
+        tenant_id: effectiveTenantId,
         event_type: 'reading_logged',
         job_id: data.jobId,
         user_id: user.id,
@@ -222,7 +222,7 @@ export function useCreateReading() {
 export function useCreateAndLinkReading() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { user, tenantId } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: {
@@ -237,12 +237,12 @@ export function useCreateAndLinkReading() {
       materialType?: string;
       moistureContent?: number;
     }) => {
-      if (!user || !tenantId) throw new Error('Not authenticated');
+      if (!user || !effectiveTenantId) throw new Error('Not authenticated');
 
       const reading: TablesInsert<'moisture_readings'> = {
         chamber_id: data.chamberId,
         job_id: data.jobId,
-        tenant_id: tenantId,
+        tenant_id: effectiveTenantId,
         reading_type: data.readingType,
         temperature: data.temperature,
         relative_humidity: data.relativeHumidity,
@@ -268,7 +268,7 @@ export function useCreateAndLinkReading() {
       const billingPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
       await supabase.from('usage_logs').insert({
-        tenant_id: tenantId,
+        tenant_id: effectiveTenantId,
         event_type: 'reading_logged',
         job_id: data.jobId,
         user_id: user.id,

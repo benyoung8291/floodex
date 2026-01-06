@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTenant } from './useTenant';
 import { Json } from '@/integrations/supabase/types';
 
 export interface FloorPlan {
@@ -18,19 +17,24 @@ export interface FloorPlan {
 }
 
 export const useJobFloorPlans = (jobId: string) => {
+  const { effectiveTenantId } = useAuth();
+  
   return useQuery({
-    queryKey: ['floor-plans', jobId],
+    queryKey: ['floor-plans', jobId, effectiveTenantId],
     queryFn: async () => {
+      if (!effectiveTenantId) return [];
+      
       const { data, error } = await supabase
         .from('floor_plans')
         .select('*')
         .eq('job_id', jobId)
+        .eq('tenant_id', effectiveTenantId)
         .order('floor_number', { ascending: true });
 
       if (error) throw error;
       return data as FloorPlan[];
     },
-    enabled: !!jobId,
+    enabled: !!jobId && !!effectiveTenantId,
   });
 };
 
@@ -53,8 +57,7 @@ export const useFloorPlan = (planId: string) => {
 
 export const useCreateFloorPlan = () => {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  const { data: tenant } = useTenant();
+  const { user, effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: {
@@ -64,13 +67,13 @@ export const useCreateFloorPlan = () => {
       canvas_data: object;
       thumbnail?: Blob;
     }) => {
-      if (!user || !tenant) throw new Error('Not authenticated');
+      if (!user || !effectiveTenantId) throw new Error('Not authenticated');
 
       let thumbnailPath: string | null = null;
 
       // Upload thumbnail if provided
       if (data.thumbnail) {
-        const fileName = `${tenant.id}/${data.job_id}/${crypto.randomUUID()}.png`;
+        const fileName = `${effectiveTenantId}/${data.job_id}/${crypto.randomUUID()}.png`;
         const { error: uploadError } = await supabase.storage
           .from('floor-plans')
           .upload(fileName, data.thumbnail, {
@@ -85,7 +88,7 @@ export const useCreateFloorPlan = () => {
         .from('floor_plans')
         .insert({
           job_id: data.job_id,
-          tenant_id: tenant.id,
+          tenant_id: effectiveTenantId,
           name: data.name,
           floor_number: data.floor_number,
           canvas_data: data.canvas_data as Json,
@@ -106,7 +109,7 @@ export const useCreateFloorPlan = () => {
 
 export const useUpdateFloorPlan = () => {
   const queryClient = useQueryClient();
-  const { data: tenant } = useTenant();
+  const { effectiveTenantId } = useAuth();
 
   return useMutation({
     mutationFn: async (data: {
@@ -117,13 +120,13 @@ export const useUpdateFloorPlan = () => {
       canvas_data?: object;
       thumbnail?: Blob;
     }) => {
-      if (!tenant) throw new Error('Not authenticated');
+      if (!effectiveTenantId) throw new Error('Not authenticated');
 
       let thumbnailPath: string | undefined;
 
       // Upload new thumbnail if provided
       if (data.thumbnail) {
-        const fileName = `${tenant.id}/${data.job_id}/${crypto.randomUUID()}.png`;
+        const fileName = `${effectiveTenantId}/${data.job_id}/${crypto.randomUUID()}.png`;
         const { error: uploadError } = await supabase.storage
           .from('floor-plans')
           .upload(fileName, data.thumbnail, {

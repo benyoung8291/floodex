@@ -55,12 +55,12 @@ export function useJobWorkLogs(jobId: string | undefined) {
 }
 
 export function useCreateWorkLog() {
-  const { user, tenantId } = useAuth();
+  const { user, effectiveTenantId } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: CreateWorkLogData) => {
-      if (!user || !tenantId) {
+      if (!user || !effectiveTenantId) {
         throw new Error('User must be authenticated');
       }
 
@@ -68,7 +68,7 @@ export function useCreateWorkLog() {
         .from('job_work_logs')
         .insert({
           job_id: data.jobId,
-          tenant_id: tenantId,
+          tenant_id: effectiveTenantId,
           logged_by: user.id,
           attendance_date: data.attendanceDate.toISOString().split('T')[0],
           log_type: data.logType,
