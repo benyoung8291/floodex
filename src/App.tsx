@@ -8,7 +8,14 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
 
-// Pages
+// Marketing Pages
+import LandingPage from "./pages/marketing/LandingPage";
+import FeaturesPage from "./pages/marketing/FeaturesPage";
+import PricingPage from "./pages/marketing/PricingPage";
+import AboutPage from "./pages/marketing/AboutPage";
+import ContactPage from "./pages/marketing/ContactPage";
+
+// App Pages
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
@@ -39,6 +46,13 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Marketing routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            
             {/* Public routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/share/:token" element={<ShareJob />} />
@@ -207,8 +221,7 @@ const App = () => (
               }
             />
 
-            {/* Redirects */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
