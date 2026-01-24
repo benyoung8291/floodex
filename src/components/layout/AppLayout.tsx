@@ -18,7 +18,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { user, isTenantAdmin, isImpersonating } = useAuth();
 
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="min-h-dvh flex w-full bg-background overflow-x-hidden max-w-full">
       {/* Impersonation Banner - fixed at top */}
       {isImpersonating && <ImpersonationBanner />}
 
@@ -27,7 +27,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* Main Content Area */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen",
+        "flex-1 flex flex-col min-h-dvh overflow-x-hidden max-w-full",
         isImpersonating && "pt-10"
       )}>
         {/* Billing Banners - only show for logged in tenant admins, not during impersonation */}
@@ -40,7 +40,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         
         <TopHeader />
         
-        <main className="flex-1 overflow-auto p-4 pb-20 md:pb-4">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-20 md:pb-4">
           {children}
         </main>
 
