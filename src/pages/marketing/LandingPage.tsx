@@ -6,6 +6,7 @@ import { FeatureCard } from '@/components/marketing/FeatureCard';
 import { PricingCard } from '@/components/marketing/PricingCard';
 import { TestimonialCarousel } from '@/components/marketing/TestimonialCarousel';
 import { StatsCounter } from '@/components/marketing/StatsCounter';
+import { AppMockup } from '@/components/marketing/AppMockup';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import {
   Droplets,
@@ -34,7 +35,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Problem/Solution Section */}
+      {/* Problem/Solution Section with App Preview */}
       <section className="py-20 lg:py-32 bg-gradient-to-b from-background to-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -48,33 +49,40 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-2xl bg-destructive/5 border border-destructive/20">
-              <div className="text-4xl mb-4">📋</div>
-              <h3 className="font-semibold text-destructive mb-2">The Old Way</h3>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                <li>Paper forms lost in the field</li>
-                <li>Manual calculations with errors</li>
-                <li>Hours creating reports</li>
-                <li>No real-time visibility</li>
-              </ul>
-            </div>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* Before/After comparison */}
+            <div className="space-y-6">
+              <div className="p-6 rounded-2xl bg-destructive/5 border border-destructive/20">
+                <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">
+                  <span className="text-2xl">📋</span> The Old Way
+                </h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> Paper forms lost in the field</li>
+                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> Manual calculations with errors</li>
+                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> Hours creating reports</li>
+                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> No real-time visibility</li>
+                </ul>
+              </div>
 
-            <div className="flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <ArrowRight className="h-8 w-8 text-primary" />
+              <div className="p-6 rounded-2xl bg-success/5 border border-success/20">
+                <h3 className="font-semibold text-success mb-3 flex items-center gap-2">
+                  <span className="text-2xl">📱</span> The FloodEx Way
+                </h3>
+                <ul className="text-sm text-muted-foreground space-y-2">
+                  <li className="flex items-center gap-2"><span className="text-success">✓</span> Digital capture in the field</li>
+                  <li className="flex items-center gap-2"><span className="text-success">✓</span> Auto-calculated g/kg & metrics</li>
+                  <li className="flex items-center gap-2"><span className="text-success">✓</span> One-click PDF reports</li>
+                  <li className="flex items-center gap-2"><span className="text-success">✓</span> Real-time team updates</li>
+                </ul>
               </div>
             </div>
 
-            <div className="text-center p-6 rounded-2xl bg-success/5 border border-success/20">
-              <div className="text-4xl mb-4">📱</div>
-              <h3 className="font-semibold text-success mb-2">The FloodEx Way</h3>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                <li>Digital capture in the field</li>
-                <li>Auto-calculated GPP & metrics</li>
-                <li>One-click PDF reports</li>
-                <li>Real-time team updates</li>
-              </ul>
+            {/* App mockup preview */}
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 opacity-50" />
+                <AppMockup variant="readings" className="relative z-10" />
+              </div>
             </div>
           </div>
         </div>
@@ -99,13 +107,13 @@ export default function LandingPage() {
             <FeatureCard
               icon={Droplets}
               title="Moisture Tracking"
-              description="Log readings by chamber with automatic GPP calculations and drying trend charts."
+              description="Log readings by chamber with automatic g/kg calculations and drying trend charts."
               delay={0}
             />
             <FeatureCard
               icon={Camera}
               title="Photo Documentation"
-              description="Capture, annotate, and organize photos. Add arrows, text, and damage markers."
+              description="Capture, annotate, and organise photos. Add arrows, text, and damage markers."
               delay={0.1}
             />
             <FeatureCard
@@ -129,7 +137,7 @@ export default function LandingPage() {
             <FeatureCard
               icon={Thermometer}
               title="Psychrometric Data"
-              description="Automatic dew point, vapor pressure, and specific humidity calculations."
+              description="Automatic dew point, vapour pressure, and specific humidity calculations."
               delay={0.5}
             />
             <FeatureCard

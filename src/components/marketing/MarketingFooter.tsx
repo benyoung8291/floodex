@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Droplets, Mail, Phone, MapPin } from 'lucide-react';
+import { Droplets, Mail, Phone } from 'lucide-react';
 
 export function MarketingFooter() {
   const currentYear = new Date().getFullYear();
@@ -8,30 +8,23 @@ export function MarketingFooter() {
     product: [
       { label: 'Features', href: '/features' },
       { label: 'Pricing', href: '/pricing' },
-      { label: 'Integrations', href: '/features#integrations' },
     ],
     company: [
       { label: 'About Us', href: '/about' },
       { label: 'Contact', href: '/contact' },
-      { label: 'Careers', href: '/about#careers' },
     ],
-    resources: [
+    support: [
       { label: 'Help Center', href: '/contact' },
-      { label: 'API Docs', href: '/features#api' },
-      { label: 'Blog', href: '/about#blog' },
-    ],
-    legal: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
+      { label: 'FAQ', href: '/pricing' },
     ],
   };
 
   return (
     <footer className="bg-card border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Column */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <Droplets className="h-7 w-7 text-primary" />
               <span className="text-lg font-bold">
@@ -87,28 +80,11 @@ export function MarketingFooter() {
             </ul>
           </div>
 
-          {/* Resources Links */}
+          {/* Support Links */}
           <div>
-            <h3 className="font-semibold text-sm mb-4">Resources</h3>
+            <h3 className="font-semibold text-sm mb-4">Support</h3>
             <ul className="space-y-3">
-              {footerLinks.resources.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div>
-            <h3 className="font-semibold text-sm mb-4">Legal</h3>
-            <ul className="space-y-3">
-              {footerLinks.legal.map((link) => (
+              {footerLinks.support.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
