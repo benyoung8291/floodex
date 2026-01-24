@@ -115,25 +115,25 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {/* Job Status Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* Job Status Stats - Scrollable chips on mobile */}
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible">
           {isLoading ? (
             <>
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
+              <Skeleton className="h-16 w-28 flex-shrink-0 sm:w-auto sm:h-24" />
+              <Skeleton className="h-16 w-28 flex-shrink-0 sm:w-auto sm:h-24" />
+              <Skeleton className="h-16 w-28 flex-shrink-0 sm:w-auto sm:h-24" />
             </>
           ) : (
             stats.map(({ label, value, icon: Icon, color }) => (
-              <Card key={label} className="bg-card">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-secondary ${color}`}>
-                      <Icon className="w-5 h-5" />
+              <Card key={label} className="bg-card flex-shrink-0 min-w-[100px] sm:min-w-0">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className={`p-1.5 sm:p-2 rounded-lg bg-secondary ${color}`}>
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{value}</p>
-                      <p className="text-xs text-muted-foreground">{label}</p>
+                      <p className="text-xl sm:text-2xl font-bold">{value}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">{label}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -151,19 +151,19 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible">
               {statsLoading ? (
                 <>
-                  <Skeleton className="h-16" />
-                  <Skeleton className="h-16" />
-                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16 w-24 flex-shrink-0 sm:w-auto" />
+                  <Skeleton className="h-16 w-24 flex-shrink-0 sm:w-auto" />
+                  <Skeleton className="h-16 w-24 flex-shrink-0 sm:w-auto" />
                 </>
               ) : (
                 readingStatsCards.map(({ label, value, icon: Icon, color }) => (
-                  <div key={label} className="text-center p-3 rounded-lg bg-muted/50">
+                  <div key={label} className="text-center p-3 rounded-lg bg-muted/50 flex-shrink-0 min-w-[80px] sm:min-w-0">
                     <Icon className={`w-5 h-5 mx-auto mb-1 ${color}`} />
                     <p className="text-lg font-bold">{value}</p>
-                    <p className="text-[10px] text-muted-foreground">{label}</p>
+                    <p className="text-[10px] text-muted-foreground whitespace-nowrap">{label}</p>
                   </div>
                 ))
               )}

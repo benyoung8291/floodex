@@ -25,11 +25,11 @@ export default function Photos() {
         </div>
       </div>
 
-      {/* Job filter */}
-      <div className="flex items-center gap-2">
+      {/* Job filter - Responsive width */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <span className="text-sm text-muted-foreground">Filter by job:</span>
         <Select value={selectedJobId} onValueChange={setSelectedJobId}>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-full sm:w-64">
             <SelectValue placeholder="All jobs" />
           </SelectTrigger>
           <SelectContent>

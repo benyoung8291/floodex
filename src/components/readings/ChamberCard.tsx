@@ -97,14 +97,14 @@ export function ChamberCard({
           </Button>
         </div>
 
-        {currentGpp !== null ? (
+        {currentGpp !== null && latestReading ? (
           <div className="space-y-2">
-            <div className="flex items-baseline justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
               <span className="text-2xl font-bold tabular-nums">
                 {formatHumidityRatio(currentGpp, units)}
               </span>
               {targetGpp && (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs sm:text-sm text-muted-foreground">
                   Target: {formatHumidityRatio(targetGpp, units)}
                 </span>
               )}
@@ -122,11 +122,14 @@ export function ChamberCard({
               />
             )}
             
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
               <span>Temp: {temperatureUnit === 'C' 
                 ? Math.round(fahrenheitToCelsius(latestReading.temperature)) 
                 : latestReading.temperature}°{temperatureUnit}</span>
               <span>RH: {latestReading.relative_humidity}%</span>
+              {latestReading.reading_type === 'material' && latestReading.material_type && (
+                <span className="text-primary">{latestReading.material_type}: {latestReading.moisture_content}%</span>
+              )}
             </div>
           </div>
         ) : (

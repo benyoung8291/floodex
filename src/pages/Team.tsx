@@ -109,47 +109,47 @@ export default function Team() {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <Users className="w-5 h-5 text-primary" />
+      {/* Stats - Scrollable on mobile */}
+      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible">
+        <Card className="flex-shrink-0 min-w-[130px] sm:min-w-0">
+          <CardContent className="p-4 sm:pt-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-full bg-primary/10">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{members?.length || 0}</p>
-                <p className="text-sm text-muted-foreground">Team Members</p>
+                <p className="text-xl sm:text-2xl font-bold">{members?.length || 0}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Members</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-secondary">
-                <Shield className="w-5 h-5 text-secondary-foreground" />
+        <Card className="flex-shrink-0 min-w-[130px] sm:min-w-0">
+          <CardContent className="p-4 sm:pt-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-full bg-secondary">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-secondary-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
+                <p className="text-xl sm:text-2xl font-bold">
                   {members?.filter(m => m.role === 'supervisor').length || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">Supervisors</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Supervisors</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-muted">
-                <User className="w-5 h-5 text-muted-foreground" />
+        <Card className="flex-shrink-0 min-w-[130px] sm:min-w-0">
+          <CardContent className="p-4 sm:pt-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-full bg-muted">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
+                <p className="text-xl sm:text-2xl font-bold">
                   {members?.filter(m => m.role === 'technician').length || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">Technicians</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Technicians</p>
               </div>
             </div>
           </CardContent>
