@@ -207,34 +207,34 @@ export default function ShareJob() {
 
         {/* Tabs for different sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsList className="flex w-full overflow-x-auto no-scrollbar scroll-smooth-x gap-1 p-1">
+            <TabsTrigger value="overview" className="flex-shrink-0 px-3">Overview</TabsTrigger>
             {permissions.can_view_photos && (
-              <TabsTrigger value="photos" className="flex items-center gap-1">
+              <TabsTrigger value="photos" className="flex-shrink-0 px-3 flex items-center gap-1">
                 <Camera className="h-3 w-3" />
                 Photos
               </TabsTrigger>
             )}
             {permissions.can_view_readings && (
-              <TabsTrigger value="readings" className="flex items-center gap-1">
+              <TabsTrigger value="readings" className="flex-shrink-0 px-3 flex items-center gap-1">
                 <BarChart3 className="h-3 w-3" />
                 Readings
               </TabsTrigger>
             )}
             {permissions.can_view_documents && (
-              <TabsTrigger value="documents" className="flex items-center gap-1">
+              <TabsTrigger value="documents" className="flex-shrink-0 px-3 flex items-center gap-1">
                 <FileText className="h-3 w-3" />
                 Documents
               </TabsTrigger>
             )}
             {permissions.can_view_floor_plans && (
-              <TabsTrigger value="plans" className="flex items-center gap-1">
+              <TabsTrigger value="plans" className="flex-shrink-0 px-3 flex items-center gap-1">
                 <Map className="h-3 w-3" />
                 Plans
               </TabsTrigger>
             )}
             {permissions.can_view_equipment && (
-              <TabsTrigger value="equipment" className="flex items-center gap-1">
+              <TabsTrigger value="equipment" className="flex-shrink-0 px-3 flex items-center gap-1">
                 <Wrench className="h-3 w-3" />
                 Equipment
               </TabsTrigger>
