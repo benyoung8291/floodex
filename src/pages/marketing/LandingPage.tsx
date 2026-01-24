@@ -4,8 +4,6 @@ import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { HeroSection } from '@/components/marketing/HeroSection';
 import { FeatureCard } from '@/components/marketing/FeatureCard';
 import { PricingCard } from '@/components/marketing/PricingCard';
-import { TestimonialCarousel } from '@/components/marketing/TestimonialCarousel';
-import { StatsCounter } from '@/components/marketing/StatsCounter';
 import { AppMockup } from '@/components/marketing/AppMockup';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import {
@@ -21,7 +19,6 @@ import {
   Shield,
   Zap,
   Clock,
-  Building2,
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -165,57 +162,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 lg:py-32 bg-gradient-to-b from-card to-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
-            <StatsCounter
-              value={500}
-              suffix="+"
-              label="Restoration Companies"
-              icon={Building2}
-              delay={0}
-            />
-            <StatsCounter
-              value={50000}
-              suffix="+"
-              label="Jobs Completed"
-              icon={ClipboardCheck}
-              delay={200}
-            />
-            <StatsCounter
-              value={1000000}
-              suffix="+"
-              label="Readings Logged"
-              icon={Droplets}
-              delay={400}
-            />
-            <StatsCounter
-              value={99}
-              suffix="%"
-              label="Customer Satisfaction"
-              icon={Shield}
-              delay={600}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Social Proof / Testimonials */}
-      <section className="py-20 lg:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              Testimonials
-            </span>
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-              Trusted by Restoration Pros
-            </h2>
-          </div>
-
-          <TestimonialCarousel />
-        </div>
-      </section>
 
       {/* Pricing Preview */}
       <section className="py-20 lg:py-32 bg-gradient-to-b from-background to-card" id="pricing">
@@ -304,7 +250,7 @@ export default function LandingPage() {
             <span className="text-primary">Restoration Business?</span>
           </h2>
           <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Join 500+ restoration companies already using FloodEx to document faster,
+            Start using FloodEx today to document faster,
             report smarter, and get paid quicker.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
