@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -366,102 +367,126 @@ export default function JobDetail() {
   };
 
   return (
-    <div className="p-4 space-y-4 pb-24">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/jobs')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-semibold text-foreground truncate">
-            {job.customer_name}
-          </h1>
-          <p className="text-sm text-muted-foreground truncate">{job.address}</p>
+    <div className="space-y-4 pb-24 max-w-full overflow-x-hidden">
+      {/* Header - Mobile Optimized */}
+      <div className="space-y-3">
+        {/* Top row: Back + Title */}
+        <div className="flex items-center gap-3 min-w-0">
+          <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => navigate('/jobs')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-semibold text-foreground truncate">
+              {job.customer_name}
+            </h1>
+            <p className="text-sm text-muted-foreground truncate">{job.address}</p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setShareDialogOpen(true)}>
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
-        </Button>
-        <Badge className={statusColors[job.status]}>
-          {job.status}
-        </Badge>
+        
+        {/* Actions row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge className={cn(statusColors[job.status], "flex-shrink-0")}>
+            {job.status}
+          </Badge>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" className="flex-shrink-0" onClick={() => setShareDialogOpen(true)}>
+            <Share2 className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Share</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex w-full overflow-x-auto no-scrollbar scroll-smooth-x gap-1 p-1">
-          <TabsTrigger value="overview" className="flex-shrink-0 px-3">Overview</TabsTrigger>
-          <TabsTrigger value="chambers" className="flex-shrink-0 px-3">Chambers</TabsTrigger>
-          <TabsTrigger value="readings" className="flex-shrink-0 px-3">Readings</TabsTrigger>
-          <TabsTrigger value="worklogs" className="flex-shrink-0 px-3 relative">
-            Logs
-            {workLogs.length > 0 && (
-              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
-                {workLogs.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="damage" className="flex-shrink-0 px-3 relative">
-            Damage
-            {damageAssessments.length > 0 && (
-              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
-                {damageAssessments.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="costing" className="flex-shrink-0 px-3 relative">
-            Costing
-            {costItems.length > 0 && (
-              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
-                {costItems.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="forms" className="flex-shrink-0 px-3 relative">
-            Forms
-            {jobForms.length > 0 && (
-              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
-                {jobForms.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="plans" className="flex-shrink-0 px-3">Plans</TabsTrigger>
-          <TabsTrigger value="safety" className="flex-shrink-0 px-3">Safety</TabsTrigger>
-          <TabsTrigger value="photos" className="flex-shrink-0 px-3 relative">
-            Photos
-            {jobPhotos.length > 0 && (
-              <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
-                {jobPhotos.length}
-              </span>
-            )}
-          </TabsTrigger>
-        </TabsList>
+      {/* Tabs - Icon-first on mobile */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="relative w-full overflow-hidden">
+          <TabsList className="flex w-full overflow-x-auto no-scrollbar scroll-smooth-x gap-0.5 p-1 bg-muted/50 rounded-lg">
+            <TabsTrigger value="overview" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="chambers" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
+              <Droplets className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Chambers</span>
+            </TabsTrigger>
+            <TabsTrigger value="readings" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
+              <Clock className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Readings</span>
+            </TabsTrigger>
+            <TabsTrigger value="worklogs" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Logs</span>
+              {workLogs.length > 0 && (
+                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
+                  {workLogs.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="damage" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
+              <FileWarning className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Damage</span>
+              {damageAssessments.length > 0 && (
+                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
+                  {damageAssessments.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="costing" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Costing</span>
+              {costItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
+                  {costItems.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="forms" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
+              <FileSignature className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Forms</span>
+              {jobForms.length > 0 && (
+                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
+                  {jobForms.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="plans" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
+              <MapPin className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Plans</span>
+            </TabsTrigger>
+            <TabsTrigger value="safety" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Safety</span>
+            </TabsTrigger>
+            <TabsTrigger value="photos" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
+              <Camera className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Photos</span>
+              {jobPhotos.length > 0 && (
+                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
+                  {jobPhotos.length > 9 ? '9+' : jobPhotos.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4 mt-4">
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <Card className="bg-card border-border">
-              <CardContent className="p-3 text-center">
-                <Calendar className="h-5 w-5 mx-auto text-primary mb-1" />
-                <p className="text-2xl font-bold">{job.days_drying}</p>
-                <p className="text-xs text-muted-foreground">Days Drying</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardContent className="p-3 text-center">
-                <Droplets className="h-5 w-5 mx-auto text-primary mb-1" />
-                <p className="text-2xl font-bold">{chambers.length}</p>
-                <p className="text-xs text-muted-foreground">Chambers</p>
-              </CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardContent className="p-3 text-center">
-                <Clock className="h-5 w-5 mx-auto text-primary mb-1" />
-                <p className="text-2xl font-bold">{latestReadings.size}</p>
-                <p className="text-xs text-muted-foreground">Readings</p>
-              </CardContent>
-            </Card>
+          {/* Quick Stats - Horizontal scrollable chips on mobile */}
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+            <div className="flex-shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-card border border-border">
+              <Calendar className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold tabular-nums">{job.days_drying}</span>
+              <span className="text-xs text-muted-foreground">days</span>
+            </div>
+            <div className="flex-shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-card border border-border">
+              <Droplets className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold tabular-nums">{chambers.length}</span>
+              <span className="text-xs text-muted-foreground">chambers</span>
+            </div>
+            <div className="flex-shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-card border border-border">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold tabular-nums">{latestReadings.size}</span>
+              <span className="text-xs text-muted-foreground">readings</span>
+            </div>
           </div>
 
           {/* Customer Info */}

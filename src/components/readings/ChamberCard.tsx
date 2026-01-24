@@ -61,23 +61,23 @@ export function ChamberCard({
   return (
     <Card 
       className={cn(
-        'border-border bg-card cursor-pointer transition-all hover:border-primary/50',
+        'border-border bg-card cursor-pointer transition-all hover:border-primary/50 card-interactive overflow-hidden',
         status && statusColors[status]
       )}
       onClick={() => onViewHistory(chamber.id)}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10">
+      <CardContent className="p-4 min-w-0">
+        <div className="flex items-start gap-2 mb-3 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
               <Droplets className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{chamber.name}</h3>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-foreground truncate">{chamber.name}</h3>
               {latestReading && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {formatDistanceToNow(new Date(latestReading.logged_at), { addSuffix: true })}
+                  <Clock className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{formatDistanceToNow(new Date(latestReading.logged_at), { addSuffix: true })}</span>
                 </p>
               )}
             </div>
@@ -86,14 +86,14 @@ export function ChamberCard({
           <Button
             size="sm"
             variant="outline"
-            className="gap-1"
+            className="gap-1 flex-shrink-0"
             onClick={(e) => {
               e.stopPropagation();
               onAddReading(chamber.id);
             }}
           >
             <Plus className="h-4 w-4" />
-            Log
+            <span className="hidden xs:inline">Log</span>
           </Button>
         </div>
 
