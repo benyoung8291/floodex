@@ -150,6 +150,21 @@
 }
 
 @layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Smooth horizontal scroll for touch devices */
+  .scroll-smooth-x {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Status badge utilities */
   .status-emergency {
     @apply bg-emergency text-emergency-foreground;

@@ -389,11 +389,11 @@ export default function JobDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-10">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="chambers">Chambers</TabsTrigger>
-          <TabsTrigger value="readings">Readings</TabsTrigger>
-          <TabsTrigger value="worklogs" className="relative">
+        <TabsList className="flex w-full overflow-x-auto no-scrollbar scroll-smooth-x gap-1 p-1">
+          <TabsTrigger value="overview" className="flex-shrink-0 px-3">Overview</TabsTrigger>
+          <TabsTrigger value="chambers" className="flex-shrink-0 px-3">Chambers</TabsTrigger>
+          <TabsTrigger value="readings" className="flex-shrink-0 px-3">Readings</TabsTrigger>
+          <TabsTrigger value="worklogs" className="flex-shrink-0 px-3 relative">
             Logs
             {workLogs.length > 0 && (
               <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
@@ -401,7 +401,7 @@ export default function JobDetail() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="damage" className="relative">
+          <TabsTrigger value="damage" className="flex-shrink-0 px-3 relative">
             Damage
             {damageAssessments.length > 0 && (
               <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
@@ -409,7 +409,7 @@ export default function JobDetail() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="costing" className="relative">
+          <TabsTrigger value="costing" className="flex-shrink-0 px-3 relative">
             Costing
             {costItems.length > 0 && (
               <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
@@ -417,7 +417,7 @@ export default function JobDetail() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="forms" className="relative">
+          <TabsTrigger value="forms" className="flex-shrink-0 px-3 relative">
             Forms
             {jobForms.length > 0 && (
               <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
@@ -425,9 +425,9 @@ export default function JobDetail() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="plans">Plans</TabsTrigger>
-          <TabsTrigger value="safety">Safety</TabsTrigger>
-          <TabsTrigger value="photos" className="relative">
+          <TabsTrigger value="plans" className="flex-shrink-0 px-3">Plans</TabsTrigger>
+          <TabsTrigger value="safety" className="flex-shrink-0 px-3">Safety</TabsTrigger>
+          <TabsTrigger value="photos" className="flex-shrink-0 px-3 relative">
             Photos
             {jobPhotos.length > 0 && (
               <span className="ml-1 text-xs bg-primary/20 px-1.5 rounded-full">
