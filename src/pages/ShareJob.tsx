@@ -183,23 +183,23 @@ export default function ShareJob() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 mt-2">
-              <div className="text-center p-3 bg-muted rounded-lg">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible mt-2">
+              <div className="text-center p-3 bg-muted rounded-lg flex-shrink-0 min-w-[90px] sm:min-w-0">
                 <Calendar className="h-5 w-5 mx-auto text-primary mb-1" />
                 <p className="text-2xl font-bold">{job.days_drying}</p>
-                <p className="text-xs text-muted-foreground">Days Drying</p>
+                <p className="text-xs text-muted-foreground whitespace-nowrap">Days Drying</p>
               </div>
-              <div className="text-center p-3 bg-muted rounded-lg">
+              <div className="text-center p-3 bg-muted rounded-lg flex-shrink-0 min-w-[90px] sm:min-w-0">
                 <Droplets className="h-5 w-5 mx-auto text-primary mb-1" />
                 <p className="text-2xl font-bold">{data.chambers?.length || 0}</p>
                 <p className="text-xs text-muted-foreground">Chambers</p>
               </div>
-              <div className="text-center p-3 bg-muted rounded-lg">
+              <div className="text-center p-3 bg-muted rounded-lg flex-shrink-0 min-w-[90px] sm:min-w-0">
                 <Clock className="h-5 w-5 mx-auto text-primary mb-1" />
                 <p className="text-sm font-medium">
                   {format(new Date(job.start_date), 'MMM d')}
                 </p>
-                <p className="text-xs text-muted-foreground">Start Date</p>
+                <p className="text-xs text-muted-foreground whitespace-nowrap">Start Date</p>
               </div>
             </div>
           </CardContent>
@@ -300,19 +300,19 @@ function OverviewSection({ data }: { data: SharedJobData }) {
         <CardHeader>
           <CardTitle className="text-base">Job Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Loss Type</span>
-            <span>{lossTypeLabels[job.loss_type] || job.loss_type}</span>
+        <CardContent className="space-y-3 text-sm">
+          <div className="space-y-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Loss Type</span>
+            <p className="font-medium">{lossTypeLabels[job.loss_type] || job.loss_type}</p>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Start Date</span>
-            <span>{format(new Date(job.start_date), 'MMMM d, yyyy')}</span>
+          <div className="space-y-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Start Date</span>
+            <p className="font-medium">{format(new Date(job.start_date), 'MMMM d, yyyy')}</p>
           </div>
           {job.outdoor_gpp && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Outdoor GPP</span>
-              <span>{job.outdoor_gpp.toFixed(1)}</span>
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">Outdoor GPP</span>
+              <p className="font-medium">{job.outdoor_gpp.toFixed(1)}</p>
             </div>
           )}
         </CardContent>

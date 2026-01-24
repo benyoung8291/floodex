@@ -42,10 +42,10 @@ export default function Reports() {
         <p className="text-muted-foreground">Generate and export job documentation</p>
       </div>
 
-      {/* Job Selector */}
+      {/* Job Selector - Responsive layout */}
       <Card>
         <CardContent className="py-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <label className="text-sm font-medium text-muted-foreground whitespace-nowrap">
               Select Job:
             </label>
@@ -53,15 +53,14 @@ export default function Reports() {
               value={selectedJobId || ''}
               onValueChange={setSelectedJobId}
             >
-              <SelectTrigger className="flex-1 max-w-md">
-                <SelectValue placeholder={jobsLoading ? "Loading jobs..." : "Select a job to generate reports"} />
+              <SelectTrigger className="w-full sm:flex-1 sm:max-w-md">
+                <SelectValue placeholder={jobsLoading ? "Loading jobs..." : "Select a job"} />
               </SelectTrigger>
               <SelectContent>
                 {jobs?.map((job) => (
                   <SelectItem key={job.id} value={job.id}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
                       <span className="font-medium">{job.customer_name}</span>
-                      <span className="text-muted-foreground">-</span>
                       <span className="text-sm text-muted-foreground truncate max-w-[200px]">
                         {job.address}
                       </span>

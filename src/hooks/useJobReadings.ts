@@ -67,24 +67,60 @@ export function useChamberReadings(chamberId: string | undefined) {
   });
 }
 
-// Fetch latest ambient reading per chamber for a job
-export function useLatestReadings(jobId: string | undefined) {
+// Fetch latest reading per chamber for a job (supports both ambient and all types)
+export function useLatestReadings(jobId: string | undefined, includeAllTypes: boolean = false) {
   return useQuery({
-    queryKey: ['latest-readings', jobId],
+    queryKey: ['latest-readings', jobId, includeAllTypes],
     queryFn: async () => {
       if (!jobId) throw new Error('Job ID required');
       
       // Get all readings for this job, ordered by logged_at desc
-      const { data, error } = await supabase
+      let query = supabase
         .from('moisture_readings')
         .select('*')
         .eq('job_id', jobId)
-        .eq('reading_type', 'ambient')
         .order('logged_at', { ascending: false });
+      
+      // Only filter for ambient if not including all types
+      if (!includeAllTypes) {
+        query = query.eq('reading_type', 'ambient');
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       
       // Group by chamber and take the latest
+      const latestByChamberId = new Map<string, MoistureReading>();
+      for (const reading of data || []) {
+        if (!latestByChamberId.has(reading.chamber_id)) {
+          latestByChamberId.set(reading.chamber_id, reading);
+        }
+      }
+      
+      return latestByChamberId;
+    },
+    enabled: !!jobId,
+  });
+}
+
+// Fetch latest material reading per chamber for a job
+export function useLatestMaterialReadings(jobId: string | undefined) {
+  return useQuery({
+    queryKey: ['latest-material-readings', jobId],
+    queryFn: async () => {
+      if (!jobId) throw new Error('Job ID required');
+      
+      const { data, error } = await supabase
+        .from('moisture_readings')
+        .select('*')
+        .eq('job_id', jobId)
+        .eq('reading_type', 'material')
+        .order('logged_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Group by chamber and take the latest material reading
       const latestByChamberId = new Map<string, MoistureReading>();
       for (const reading of data || []) {
         if (!latestByChamberId.has(reading.chamber_id)) {

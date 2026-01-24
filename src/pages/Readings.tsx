@@ -203,26 +203,26 @@ export default function Readings() {
         <p className="text-muted-foreground">Psychrometric data and drying progress</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Stats Cards - Scrollable on mobile */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 sm:gap-3 sm:overflow-visible">
         {statsLoading ? (
           <>
-            <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
+            <Skeleton className="h-16 w-24 flex-shrink-0 sm:w-auto sm:h-20" />
+            <Skeleton className="h-16 w-24 flex-shrink-0 sm:w-auto sm:h-20" />
+            <Skeleton className="h-16 w-24 flex-shrink-0 sm:w-auto sm:h-20" />
+            <Skeleton className="h-16 w-24 flex-shrink-0 sm:w-auto sm:h-20" />
           </>
         ) : (
           statsCards.map(({ label, value, icon: Icon, color }) => (
-            <Card key={label} className="bg-card">
-              <CardContent className="p-3">
+            <Card key={label} className="bg-card flex-shrink-0 min-w-[90px] sm:min-w-0">
+              <CardContent className="p-2 sm:p-3">
                 <div className="flex items-center gap-2">
-                  <div className={`p-2 rounded-lg bg-secondary ${color}`}>
-                    <Icon className="w-4 h-4" />
+                  <div className={`p-1.5 sm:p-2 rounded-lg bg-secondary ${color}`}>
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <div>
-                    <p className="text-lg font-bold">{value}</p>
-                    <p className="text-[10px] text-muted-foreground">{label}</p>
+                    <p className="text-base sm:text-lg font-bold">{value}</p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground whitespace-nowrap">{label}</p>
                   </div>
                 </div>
               </CardContent>
