@@ -7,6 +7,7 @@ export function MarketingFooter() {
   const footerLinks = {
     product: [
       { label: 'Features', href: '/features' },
+      { label: 'Compare', href: '/compare' },
       { label: 'Pricing', href: '/pricing' },
     ],
     company: [

@@ -20,6 +20,7 @@ export function MarketingNav() {
 
   const navLinks = [
     { href: '/features', label: 'Features' },
+    { href: '/compare', label: 'Compare' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
