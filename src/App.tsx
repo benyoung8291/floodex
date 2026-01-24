@@ -14,6 +14,7 @@ import FeaturesPage from "./pages/marketing/FeaturesPage";
 import PricingPage from "./pages/marketing/PricingPage";
 import AboutPage from "./pages/marketing/AboutPage";
 import ContactPage from "./pages/marketing/ContactPage";
+import ComparePage from "./pages/marketing/ComparePage";
 
 // App Pages
 import Auth from "./pages/Auth";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/compare" element={<ComparePage />} />
             
             {/* Public routes */}
             <Route path="/auth" element={<Auth />} />
