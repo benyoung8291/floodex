@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Play, ArrowRight, Droplets, Activity, FileText } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 export function HeroSection() {
@@ -66,7 +66,7 @@ export function HeroSection() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
-            Trusted by 500+ Restoration Companies
+            Built for Restoration Professionals
           </div>
 
           {/* Headline */}
@@ -86,50 +86,18 @@ export function HeroSection() {
             document damage, and generate professional reports—all from the field.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-16 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          {/* CTA Button */}
+          <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <Link to="/auth?tab=signup">
               <Button 
                 size="lg" 
-                className="w-full sm:w-auto text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-105 group"
+                className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-105 group"
               >
                 Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="w-full sm:w-auto text-lg px-8 py-6 border-2 hover:bg-white/5 group"
-            >
-              <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-              Watch Demo
-            </Button>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <div className="text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                <Droplets className="h-5 w-5 text-primary" />
-                <span className="text-2xl sm:text-3xl font-bold">50K+</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Jobs Tracked</p>
-            </div>
-            <div className="text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                <Activity className="h-5 w-5 text-primary" />
-                <span className="text-2xl sm:text-3xl font-bold">1M+</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Readings Logged</p>
-            </div>
-            <div className="text-center sm:text-left">
-              <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                <FileText className="h-5 w-5 text-primary" />
-                <span className="text-2xl sm:text-3xl font-bold">10K+</span>
-              </div>
-              <p className="text-sm text-muted-foreground">Reports Generated</p>
-            </div>
+            <p className="text-sm text-muted-foreground mt-4">No credit card required</p>
           </div>
         </div>
       </div>
