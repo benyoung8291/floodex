@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { AppMockup } from '@/components/marketing/AppMockup';
 import {
   Droplets,
   Camera,
   FileText,
   Users,
   Activity,
-  Thermometer,
-  ClipboardCheck,
   Calculator,
   ArrowRight,
   Check,
@@ -18,11 +17,7 @@ import {
   Smartphone,
   Cloud,
   BarChart3,
-  Image,
-  PenTool,
   Layers,
-  Share2,
-  Download,
   Building2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -36,72 +31,29 @@ const featureCategories = [
     features: [
       'Create drying chambers for each affected area',
       'Log temperature, humidity, and moisture readings',
-      'Automatic GPP (Grains Per Pound) calculations',
-      'Dew point and vapor pressure calculations',
+      'Automatic g/kg humidity ratio calculations',
+      'Dew point and vapour pressure calculations',
       'Visual trend charts showing drying progress',
       'Outdoor baseline comparison readings',
       'Material-specific moisture standards',
     ],
-    visual: (
-      <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl p-8 flex items-center justify-center">
-        <div className="relative">
-          <div className="w-32 h-48 bg-card rounded-xl border border-border shadow-2xl p-4">
-            <div className="text-xs text-muted-foreground mb-2">Living Room</div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>RH</span>
-                <span className="font-mono text-primary">62%</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Temp</span>
-                <span className="font-mono">72°F</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>GPP</span>
-                <span className="font-mono text-success">48.2</span>
-              </div>
-            </div>
-            <div className="mt-4 h-16 bg-muted rounded-lg flex items-end justify-around px-2 pb-2">
-              {[40, 55, 70, 85, 95, 100].map((h, i) => (
-                <div key={i} className="w-2 bg-primary/60 rounded-t" style={{ height: `${h}%` }} />
-              ))}
-            </div>
-          </div>
-          <Activity className="absolute -top-4 -right-4 h-8 w-8 text-primary animate-pulse" />
-        </div>
-      </div>
-    ),
+    mockup: 'readings' as const,
   },
   {
     id: 'photos',
     title: 'Photo Documentation',
     icon: Camera,
-    description: 'Capture, annotate, and organize visual evidence for every job.',
+    description: 'Capture, annotate, and organise visual evidence for every job.',
     features: [
       'Unlimited photo storage per job',
       'Built-in annotation tools (arrows, circles, text)',
-      'Category organization (before, during, after)',
+      'Category organisation (before, during, after)',
       'Automatic timestamp and location data',
       'Thermal image support',
       'Batch upload from camera roll',
       'High-resolution export for reports',
     ],
-    visual: (
-      <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl p-8 flex items-center justify-center">
-        <div className="relative">
-          <div className="w-48 h-36 bg-muted rounded-xl overflow-hidden shadow-2xl">
-            <div className="w-full h-full bg-gradient-to-br from-muted-foreground/20 to-muted-foreground/5 flex items-center justify-center">
-              <Image className="h-12 w-12 text-muted-foreground/30" />
-            </div>
-          </div>
-          <div className="absolute -bottom-3 -right-3 w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
-            <PenTool className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="absolute top-4 right-4 w-20 h-1 bg-destructive rounded-full rotate-45" />
-          <div className="absolute top-8 right-8 w-6 h-6 rounded-full border-2 border-warning" />
-        </div>
-      </div>
-    ),
+    mockup: 'photos' as const,
   },
   {
     id: 'reports',
@@ -111,31 +63,13 @@ const featureCategories = [
     features: [
       'One-click PDF generation',
       'Multiple report templates',
-      'Custom branding (logo, colors)',
+      'Custom branding (logo, colours)',
       'Comprehensive drying logs',
       'Photo documentation sections',
       'Equipment usage summaries',
       'Digital signature capture',
     ],
-    visual: (
-      <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-2xl p-8 flex items-center justify-center">
-        <div className="relative">
-          <div className="w-36 h-48 bg-card rounded-lg border border-border shadow-2xl transform rotate-3">
-            <div className="h-8 bg-primary/10 rounded-t-lg" />
-            <div className="p-3 space-y-2">
-              <div className="h-2 bg-muted rounded w-3/4" />
-              <div className="h-2 bg-muted rounded w-full" />
-              <div className="h-2 bg-muted rounded w-1/2" />
-              <div className="h-10 bg-muted/50 rounded mt-4" />
-              <div className="h-2 bg-muted rounded w-full" />
-              <div className="h-2 bg-muted rounded w-3/4" />
-            </div>
-          </div>
-          <div className="absolute -bottom-2 -left-2 w-36 h-48 bg-card/50 rounded-lg border border-border -rotate-6 -z-10" />
-          <Download className="absolute -top-3 -right-3 h-8 w-8 text-primary" />
-        </div>
-      </div>
-    ),
+    mockup: 'reports' as const,
   },
   {
     id: 'team',
@@ -149,18 +83,9 @@ const featureCategories = [
       'Job assignment and tracking',
       'Activity logs and audit trails',
       'Share job links with customers',
-      'Comment and notes on jobs',
+      'Comments and notes on jobs',
     ],
-    visual: (
-      <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl p-8 flex items-center justify-center">
-        <div className="relative flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-lg font-bold">M</div>
-          <div className="w-14 h-14 rounded-full bg-primary/30 border-2 border-primary flex items-center justify-center text-xl font-bold -ml-6">J</div>
-          <div className="w-12 h-12 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center text-lg font-bold -ml-6">S</div>
-          <Share2 className="absolute -top-2 -right-2 h-6 w-6 text-primary" />
-        </div>
-      </div>
-    ),
+    mockup: 'dashboard' as const,
   },
   {
     id: 'equipment',
@@ -176,28 +101,7 @@ const featureCategories = [
       'Equipment location tracking',
       'QR code scanning support',
     ],
-    visual: (
-      <div className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 rounded-2xl p-8 flex items-center justify-center">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="w-16 h-16 bg-card rounded-lg border border-border flex flex-col items-center justify-center p-2 shadow-lg">
-            <div className="text-xs text-muted-foreground">Dehum</div>
-            <div className="text-sm font-mono text-success">3 days</div>
-          </div>
-          <div className="w-16 h-16 bg-card rounded-lg border border-border flex flex-col items-center justify-center p-2 shadow-lg">
-            <div className="text-xs text-muted-foreground">Air Mover</div>
-            <div className="text-sm font-mono text-success">3 days</div>
-          </div>
-          <div className="w-16 h-16 bg-card rounded-lg border border-border flex flex-col items-center justify-center p-2 shadow-lg">
-            <div className="text-xs text-muted-foreground">Fan</div>
-            <div className="text-sm font-mono text-warning">1 day</div>
-          </div>
-          <div className="w-16 h-16 bg-card rounded-lg border border-border flex flex-col items-center justify-center p-2 shadow-lg">
-            <div className="text-xs text-muted-foreground">Sensor</div>
-            <div className="text-sm font-mono text-success">5 days</div>
-          </div>
-        </div>
-      </div>
-    ),
+    mockup: 'equipment' as const,
   },
   {
     id: 'estimates',
@@ -205,39 +109,15 @@ const featureCategories = [
     icon: Calculator,
     description: 'Create professional estimates and track job costs accurately.',
     features: [
-      'Customizable estimate templates',
+      'Customisable estimate templates',
       'Line item cost tracking',
-      'Labor and material categories',
+      'Labour and material categories',
       'Equipment rental calculations',
       'Customer-ready PDF estimates',
       'Margin and markup settings',
       'Cost vs. estimate comparisons',
     ],
-    visual: (
-      <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 rounded-2xl p-8 flex items-center justify-center">
-        <div className="w-40 bg-card rounded-xl border border-border shadow-2xl overflow-hidden">
-          <div className="bg-primary/10 p-3 text-center text-sm font-medium">Estimate #1234</div>
-          <div className="p-3 space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Labor</span>
-              <span className="font-mono">$2,400</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Equipment</span>
-              <span className="font-mono">$850</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Materials</span>
-              <span className="font-mono">$320</span>
-            </div>
-            <div className="border-t border-border pt-2 flex justify-between text-sm font-medium">
-              <span>Total</span>
-              <span className="text-primary">$3,570</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
+    mockup: 'estimates' as const,
   },
 ];
 
@@ -278,7 +158,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Feature Sections */}
+      {/* Feature Sections with App Mockups */}
       {featureCategories.map((category, index) => (
         <section
           key={category.id}
@@ -312,9 +192,16 @@ export default function FeaturesPage() {
                 </ul>
               </div>
 
-              {/* Visual */}
-              <div className={cn(index % 2 === 1 && "lg:order-1")}>
-                {category.visual}
+              {/* App Mockup */}
+              <div className={cn(
+                "flex justify-center",
+                index % 2 === 1 && "lg:order-1"
+              )}>
+                <div className="relative">
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 opacity-50" />
+                  <AppMockup variant={category.mockup} className="relative z-10" />
+                </div>
               </div>
             </div>
           </div>
@@ -351,7 +238,7 @@ export default function FeaturesPage() {
               <tbody className="divide-y divide-border">
                 {[
                   { feature: 'Mobile data capture', floodex: true, spreadsheets: false, paper: false },
-                  { feature: 'Automatic GPP calculations', floodex: true, spreadsheets: false, paper: false },
+                  { feature: 'Automatic humidity calculations', floodex: true, spreadsheets: false, paper: false },
                   { feature: 'Real-time team sync', floodex: true, spreadsheets: true, paper: false },
                   { feature: 'Photo annotations', floodex: true, spreadsheets: false, paper: false },
                   { feature: 'One-click reports', floodex: true, spreadsheets: false, paper: false },
