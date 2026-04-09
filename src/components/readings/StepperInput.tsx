@@ -29,8 +29,8 @@ export function StepperInput({
   className,
 }: StepperInputProps) {
   const [isPressed, setIsPressed] = useState<'inc' | 'dec' | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const increment = useCallback((fast = false) => {
     onChange(Math.min(max, value + (fast ? fastStep : step)));

@@ -10,13 +10,15 @@ export function MarketingNav() {
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const navLinks = [
     { href: '/features', label: 'Features' },
@@ -36,14 +38,14 @@ export function MarketingNav() {
           ? 'bg-background/95 backdrop-blur-md shadow-lg border-b border-border/50'
           : 'bg-transparent'
       )}
+      aria-label="Main navigation"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="flex items-center gap-2 group" aria-label="FloodEx home">
             <div className="relative">
               <Droplets className="h-8 w-8 text-primary transition-transform group-hover:scale-110" />
-              <div className="absolute inset-0 bg-primary/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <span className="text-xl font-bold tracking-tight">
               Flood<span className="text-primary">Ex</span>
@@ -72,9 +74,7 @@ export function MarketingNav() {
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-4">
             <Link to="/auth">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
+              <Button variant="ghost" size="sm">Sign In</Button>
             </Link>
             <Link to="/auth?tab=signup">
               <Button 
@@ -91,6 +91,7 @@ export function MarketingNav() {
             className="lg:hidden p-2 text-foreground"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -101,33 +102,28 @@ export function MarketingNav() {
       <div
         className={cn(
           'lg:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border/50 transition-all duration-300 overflow-hidden',
-          isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          isMobileMenuOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
         )}
       >
-        <div className="px-4 py-4 space-y-3">
+        <div className="px-4 py-4 space-y-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               to={link.href}
-              onClick={() => setIsMobileMenuOpen(false)}
               className={cn(
-                'block py-2 text-base font-medium transition-colors',
-                isActive(link.href) ? 'text-primary' : 'text-muted-foreground'
+                'block py-3 px-3 rounded-lg text-base font-medium transition-colors',
+                isActive(link.href) ? 'text-primary bg-primary/10' : 'text-muted-foreground'
               )}
             >
               {link.label}
             </Link>
           ))}
           <div className="pt-4 border-t border-border/50 space-y-3">
-            <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full">
-                Sign In
-              </Button>
+            <Link to="/auth">
+              <Button variant="outline" className="w-full">Sign In</Button>
             </Link>
-            <Link to="/auth?tab=signup" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full bg-primary">
-                Start Free Trial
-              </Button>
+            <Link to="/auth?tab=signup">
+              <Button className="w-full bg-primary">Start Free Trial</Button>
             </Link>
           </div>
         </div>

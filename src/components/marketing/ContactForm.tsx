@@ -25,11 +25,11 @@ import { toast } from 'sonner';
 import { Send, CheckCircle } from 'lucide-react';
 
 const contactSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email'),
-  company: z.string().optional(),
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
+  email: z.string().trim().email('Please enter a valid email').max(255),
+  company: z.string().max(200).optional(),
   subject: z.string().min(1, 'Please select a subject'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
+  message: z.string().trim().min(10, 'Message must be at least 10 characters').max(2000),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -82,7 +82,7 @@ export function ContactForm() {
         <p className="text-muted-foreground mb-6">
           Thanks for reaching out. We'll get back to you within 24 hours.
         </p>
-        <Button variant="outline" onClick={() => setIsSubmitted(false)}>
+        <Button variant="outline" onClick={() => { setIsSubmitted(false); form.reset(); }}>
           Send Another Message
         </Button>
       </div>
@@ -100,7 +100,7 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Name *</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Smith" {...field} />
+                  <Input placeholder="Your name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -113,7 +113,7 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Email *</FormLabel>
                 <FormControl>
-                  <Input placeholder="john@company.com" type="email" {...field} />
+                  <Input placeholder="you@company.com" type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -129,7 +129,7 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Company</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your Restoration Company" {...field} />
+                  <Input placeholder="Your restoration company" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -148,7 +148,8 @@ export function ContactForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="sales">Sales Inquiry</SelectItem>
+                    <SelectItem value="demo">Request a Demo</SelectItem>
+                    <SelectItem value="sales">Sales Enquiry</SelectItem>
                     <SelectItem value="support">Technical Support</SelectItem>
                     <SelectItem value="partnership">Partnership</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
