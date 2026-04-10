@@ -367,8 +367,13 @@ export default function Auth() {
   }
 
   return (
-    <div className="marketing-theme min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="marketing-theme min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(204_98%_37%/0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,hsl(204_98%_37%/0.05),transparent_50%)]" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-primary/[0.04] blur-3xl -translate-y-1/2 translate-x-1/3" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-primary/[0.03] blur-3xl translate-y-1/3 -translate-x-1/4" />
+      
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <img src={floodexLogo} alt="FloodEx" className="h-12 w-auto mb-2" />
