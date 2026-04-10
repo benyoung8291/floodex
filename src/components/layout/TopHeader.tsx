@@ -1,4 +1,5 @@
 import { Wifi, WifiOff, Bell } from 'lucide-react';
+import floodexLogo from '@/assets/floodex-logo.png';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,11 +39,8 @@ export function TopHeader() {
   return (
     <header className="h-14 md:h-16 flex items-center justify-between px-4 border-b border-border bg-card/50 backdrop-blur-sm safe-top">
       {/* Mobile Logo */}
-      <div className="md:hidden flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <span className="text-sm font-bold text-primary-foreground">FE</span>
-        </div>
-        <span className="text-lg font-bold">FloodEx</span>
+      <div className="md:hidden flex items-center">
+        <img src={floodexLogo} alt="FloodEx" className="h-8 w-auto" />
       </div>
 
       {/* Spacer for desktop */}
