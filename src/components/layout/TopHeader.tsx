@@ -40,7 +40,7 @@ export function TopHeader() {
     <header className="h-14 md:h-16 flex items-center justify-between px-4 border-b border-border bg-card/50 backdrop-blur-sm safe-top">
       {/* Mobile Logo */}
       <div className="md:hidden flex items-center">
-        <img src={floodexLogo} alt="FloodEx" className="h-8 w-auto" />
+        <img src={floodexLogo} alt="FloodEx" className="h-10 w-auto" />
       </div>
 
       {/* Spacer for desktop */}
