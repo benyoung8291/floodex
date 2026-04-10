@@ -1,92 +1,58 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Droplets, BarChart3, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Droplets, BarChart3, FileText, Camera } from 'lucide-react';
+
+const stats = [
+  { num: 'All-in-One', label: 'Field documentation' },
+  { num: 'IICRC', label: 'Compliant reports' },
+  { num: '1-Click', label: 'PDF generation' },
+  { num: 'AUS', label: 'Built & hosted' },
+];
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/15" />
-      
-      {/* Geometric accent shapes */}
-      <div className="absolute top-20 right-[10%] w-72 h-72 bg-primary/8 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
-      <div className="absolute bottom-32 left-[5%] w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s', animationDelay: '2s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-3xl" />
+    <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 relative overflow-hidden max-w-6xl mx-auto">
+      <div className="absolute -top-[200px] -right-[200px] w-[700px] h-[700px] rounded-full bg-[radial-gradient(circle,rgba(240,80,200,0.12)_0%,transparent_60%)] pointer-events-none" />
 
-      {/* Grid pattern overlay */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }}
-      />
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
+        <div className="inline-flex items-center gap-2 bg-[hsl(260,20%,16%)] text-[hsl(37,30%,94%)] text-[13px] font-bold px-4 py-[7px] rounded-full mb-8">
+          <div className="w-2 h-2 rounded-full bg-primary" />
+          Australia's flood restoration documentation platform
+        </div>
+      </motion.div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-            </span>
-            Flood Restoration Software
+      <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.5 }} className="text-[clamp(44px,7vw,88px)] font-black leading-[0.98] tracking-[-0.04em] text-[hsl(260,20%,16%)] max-w-[850px] mb-7">
+        Document faster.<br />
+        <span className="bg-primary text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">Report smarter.</span><br />
+        Get paid quicker.
+      </motion.h1>
+
+      <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-[hsl(260,8%,46%)] max-w-[540px] leading-[1.7] font-medium mb-12">
+        Stop wrestling with paper forms and spreadsheets. FloodEx is the mobile-first platform that helps restoration technicians track moisture, capture evidence, and generate professional reports — all from the field.
+      </motion.p>
+
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5 }} className="flex items-center gap-3 flex-wrap mb-16">
+        <Link to="/auth?tab=signup">
+          <Button className="rounded-full shadow-none border-none bg-primary text-white font-extrabold text-base py-4 px-8 hover:opacity-85">
+            Start free trial →
+          </Button>
+        </Link>
+        <Link to="/features">
+          <Button variant="outline" className="rounded-full border-[hsl(260,12%,82%)]/60 text-[hsl(260,20%,16%)] font-bold text-base py-4 px-8 hover:bg-[hsl(37,22%,90%)]">
+            See all features
+          </Button>
+        </Link>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36, duration: 0.5 }} className="inline-grid grid-cols-2 md:grid-cols-4 bg-white/60 backdrop-blur-sm border border-[hsl(260,12%,82%)]/50 rounded-2xl overflow-hidden">
+        {stats.map((s, i) => (
+          <div key={i} className={`px-7 py-5 text-center ${i < stats.length - 1 ? "border-r border-[hsl(260,12%,82%)]/40" : ""}`}>
+            <div className="text-[28px] font-black tracking-tight text-[hsl(260,20%,16%)] leading-none">{s.num}</div>
+            <div className="text-xs text-[hsl(260,8%,46%)] mt-1 font-medium">{s.label}</div>
           </div>
-
-          {/* Headline — SEO-optimised H1 */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
-            Document Faster.{' '}
-            <span className="text-primary">Report Smarter.</span>
-          </h1>
-
-          {/* Sub-headline */}
-          <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            The mobile-first flood restoration software that helps technicians track moisture readings, 
-            capture evidence, and generate professional reports — all from the field.
-          </p>
-
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Link to="/auth?tab=signup">
-              <Button 
-                size="lg" 
-                className="w-full sm:w-auto text-lg px-8 py-6 bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-105 group"
-              >
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link to="/features">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6">
-                See All Features
-              </Button>
-            </Link>
-          </div>
-          <p className="text-sm text-muted-foreground">No credit card required · 14-day free trial</p>
-        </div>
-
-        {/* Feature pills */}
-        <div className="mt-16 flex flex-wrap justify-center gap-3 sm:gap-4">
-          {[
-            { icon: Droplets, label: 'Moisture Tracking' },
-            { icon: BarChart3, label: 'Psychrometric Calcs' },
-            { icon: FileText, label: 'One-Click Reports' },
-          ].map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-card/80 border border-border backdrop-blur-sm">
-              <Icon className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce hidden sm:block">
-        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-muted-foreground/50 rounded-full animate-pulse" />
-        </div>
-      </div>
+        ))}
+      </motion.div>
     </section>
   );
 }

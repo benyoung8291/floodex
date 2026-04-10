@@ -8,7 +8,7 @@ interface MarketingLayoutProps {
 
 export function MarketingLayout({ children }: MarketingLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="marketing-theme min-h-screen flex flex-col">
       <MarketingNav />
       <main className="flex-1">
         {children}

@@ -2,20 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Droplets } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export function MarketingNav() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
@@ -28,106 +19,65 @@ export function MarketingNav() {
     { href: '/contact', label: 'Contact' },
   ];
 
-  const isActive = (href: string) => location.pathname === href;
-
   return (
-    <nav
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isScrolled
-          ? 'bg-background/95 backdrop-blur-md shadow-lg border-b border-border/50'
-          : 'bg-transparent'
-      )}
-      aria-label="Main navigation"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group" aria-label="FloodEx home">
-            <div className="relative">
-              <Droplets className="h-8 w-8 text-primary transition-transform group-hover:scale-110" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">
-              Flood<span className="text-primary">Ex</span>
-            </span>
+    <nav className="sticky top-4 z-50 mx-4 md:mx-8 mt-4 flex items-center justify-between px-3 py-2 bg-[hsl(37,30%,94%)]/80 backdrop-blur-xl rounded-full border border-[hsl(260,12%,82%)]/60 shadow-sm">
+      <Link to="/" className="flex items-center gap-2 text-lg font-black tracking-tight no-underline text-[hsl(260,20%,16%)] pl-2">
+        <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black tracking-tight">
+          <Droplets className="w-4 h-4" />
+        </div>
+        Flood<span className="text-primary">Ex</span>
+      </Link>
+      <div className="hidden md:flex items-center gap-1">
+        {navLinks.map((link) => (
+          <Link
+            key={link.href}
+            to={link.href}
+            className="text-sm font-semibold text-[hsl(260,20%,16%)]/70 no-underline hover:text-[hsl(260,20%,16%)] px-4 py-2 rounded-full hover:bg-[hsl(260,20%,16%)]/5 transition-colors"
+          >
+            {link.label}
           </Link>
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <Link to="/auth" className="hidden md:block">
+          <Button variant="ghost" className="rounded-full text-sm font-semibold text-[hsl(260,20%,16%)]/70 hover:text-[hsl(260,20%,16%)]">Log in</Button>
+        </Link>
+        <Link to="/auth?tab=signup" className="hidden md:block">
+          <Button className="rounded-full text-sm shadow-none border-none bg-primary text-white font-extrabold hover:opacity-85">Start free trial</Button>
+        </Link>
+        <button
+          className="md:hidden p-2 text-[hsl(260,20%,16%)]"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 mx-0 bg-[hsl(37,30%,94%)]/95 backdrop-blur-xl rounded-3xl border border-[hsl(260,12%,82%)]/60 shadow-lg p-4 md:hidden">
+          <div className="space-y-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={cn(
-                  'relative text-sm font-medium transition-colors hover:text-primary',
-                  isActive(link.href) ? 'text-primary' : 'text-muted-foreground'
-                )}
+                className="block py-3 px-4 rounded-xl text-base font-semibold text-[hsl(260,20%,16%)]/70 hover:bg-[hsl(260,20%,16%)]/5 transition-colors no-underline"
               >
                 {link.label}
-                {isActive(link.href) && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
-                )}
               </Link>
             ))}
           </div>
-
-          {/* Desktop CTA */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="mt-4 pt-4 border-t border-[hsl(260,12%,82%)]/40 space-y-2">
             <Link to="/auth">
-              <Button variant="ghost" size="sm">Sign In</Button>
+              <Button variant="outline" className="w-full rounded-full">Log in</Button>
             </Link>
             <Link to="/auth?tab=signup">
-              <Button 
-                size="sm"
-                className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all"
-              >
-                Start Free Trial
-              </Button>
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="lg:hidden p-2 text-foreground"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <div
-        className={cn(
-          'lg:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md border-b border-border/50 transition-all duration-300 overflow-hidden',
-          isMobileMenuOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
-        )}
-      >
-        <div className="px-4 py-4 space-y-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={cn(
-                'block py-3 px-3 rounded-lg text-base font-medium transition-colors',
-                isActive(link.href) ? 'text-primary bg-primary/10' : 'text-muted-foreground'
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="pt-4 border-t border-border/50 space-y-3">
-            <Link to="/auth">
-              <Button variant="outline" className="w-full">Sign In</Button>
-            </Link>
-            <Link to="/auth?tab=signup">
-              <Button className="w-full bg-primary">Start Free Trial</Button>
+              <Button className="w-full rounded-full bg-primary text-white font-extrabold">Start free trial</Button>
             </Link>
           </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 }
