@@ -1,144 +1,141 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
-import { PricingCard } from '@/components/marketing/PricingCard';
+import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/marketing/AnimateIn';
 import { FAQAccordion } from '@/components/marketing/FAQAccordion';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
-import { Check, X, ArrowRight, Shield, Clock, CreditCard } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { Check, X, Shield, Clock, CreditCard } from 'lucide-react';
 
 export default function PricingPage() {
   const { data: tiers, isLoading } = useSubscriptionTiers();
   const sortedTiers = tiers?.sort((a, b) => a.monthly_price - b.monthly_price) || [];
 
   const featureMatrix = [
-    { feature: 'Jobs per month', values: sortedTiers.map(t => t.jobs_included) },
+    { feature: 'Jobs per month', values: sortedTiers.map(t => String(t.jobs_included)) },
     { feature: 'Moisture readings', values: sortedTiers.map(t => t.readings_included.toLocaleString()) },
-    { feature: 'Unlimited photos', values: [true, true, true, true] },
-    { feature: 'Photo annotations', values: [true, true, true, true] },
-    { feature: 'PDF reports', values: [true, true, true, true] },
+    { feature: 'Unlimited photos', values: sortedTiers.map(() => true) },
+    { feature: 'Photo annotations', values: sortedTiers.map(() => true) },
+    { feature: 'PDF reports', values: sortedTiers.map(() => true) },
     { feature: 'Team members', values: ['1', '3', '10', 'Unlimited'] },
     { feature: 'Equipment tracking', values: [false, true, true, true] },
     { feature: 'Cost estimates', values: [false, true, true, true] },
     { feature: 'Custom branding', values: [false, false, true, true] },
     { feature: 'Priority support', values: [false, false, true, true] },
-    { feature: 'API access', values: [false, false, false, true] },
-    { feature: 'Dedicated account manager', values: [false, false, false, true] },
   ];
 
   return (
     <MarketingLayout>
       {/* Hero */}
-      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 lg:pb-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              Pricing
-            </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
-              Simple, Transparent <span className="text-primary">Pricing</span>
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground">
-              Start free, upgrade when you're ready. Pay only for what you use.
-            </p>
-          </div>
+      <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 max-w-6xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
+          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-[hsl(260,8%,46%)] mb-4">Pricing</div>
+        </motion.div>
+        <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.5 }} className="text-[clamp(44px,7vw,88px)] font-black leading-[0.98] tracking-[-0.04em] text-[hsl(260,20%,16%)] max-w-[850px] mb-7">
+          Simple pricing.<br />
+          <span className="bg-primary text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">Free to start.</span>
+        </motion.h1>
+        <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-[hsl(260,8%,46%)] max-w-[540px] leading-[1.7] font-medium mb-14">
+          Start free, upgrade when you're ready. Pay only for what you use. No hidden fees, no surprises.
+        </motion.p>
 
-          {isLoading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-[500px] rounded-2xl bg-muted animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4">
-              {sortedTiers.map((tier, index) => (
-                <PricingCard
-                  key={tier.id}
-                  name={tier.name}
-                  price={tier.monthly_price}
-                  jobsIncluded={tier.jobs_included}
-                  readingsIncluded={tier.readings_included}
-                  overagePerJob={tier.overage_price_per_job}
-                  overagePerReading={tier.overage_price_per_reading}
-                  isFree={tier.is_free_tier}
-                  isPopular={tier.name.toLowerCase() === 'pro'}
-                  delay={index * 0.1}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-[400px] rounded-3xl bg-[hsl(37,20%,90%)] animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-[960px]">
+            {sortedTiers.map((tier) => {
+              const isFeatured = tier.name.toLowerCase() === 'pro';
+              return (
+                <StaggerItem key={tier.id}>
+                  <div className={`border rounded-3xl p-8 flex flex-col relative h-full transition-shadow hover:shadow-lg ${
+                    isFeatured
+                      ? "bg-[hsl(260,20%,16%)] border-[hsl(260,20%,16%)]/80 shadow-xl"
+                      : "bg-white border-[hsl(260,12%,82%)]/50"
+                  }`}>
+                    {isFeatured && (
+                      <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 bg-primary text-white text-[11px] font-black px-4 py-[3px] rounded-full whitespace-nowrap uppercase tracking-[0.04em]">Most popular</div>
+                    )}
+                    <div className={`text-2xl font-black tracking-tight mb-[6px] ${isFeatured ? "text-[hsl(37,30%,94%)]" : "text-[hsl(260,20%,16%)]"}`}>{tier.name}</div>
+                    <div className="flex items-baseline gap-[3px] mb-[6px]">
+                      <span className={`text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-[hsl(37,30%,94%)]" : ""}`}>${tier.monthly_price}</span>
+                      <span className={`text-[15px] font-semibold ${isFeatured ? "text-white/40" : "text-[hsl(260,8%,46%)]"}`}>/ month</span>
+                    </div>
+                    <div className={`text-[13px] font-medium leading-[1.65] mb-6 pb-6 border-b ${isFeatured ? "text-white/40 border-white/10" : "text-[hsl(260,8%,46%)] border-[hsl(260,12%,82%)]/40"}`}>
+                      {tier.jobs_included} jobs · {tier.readings_included.toLocaleString()} readings/mo
+                    </div>
+                    <ul className="flex-1 flex flex-col gap-[9px] mb-6">
+                      {['Unlimited photos', 'PDF reports', 'Photo annotations'].map((f) => (
+                        <li key={f} className={`text-[13px] font-semibold flex items-start gap-2 ${isFeatured ? "text-white/55" : "text-[hsl(260,20%,16%)]/70"}`}>
+                          <span className={`font-black shrink-0 ${isFeatured ? "text-primary" : "text-green-600"}`}>✓</span>{f}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to="/auth?tab=signup">
+                      <button className={`block w-full text-center py-[13px] rounded-full text-sm font-extrabold cursor-pointer transition-all ${
+                        isFeatured
+                          ? "bg-primary text-white hover:opacity-85 border-none"
+                          : "bg-transparent border border-[hsl(260,12%,82%)]/50 text-[hsl(260,20%,16%)] hover:bg-[hsl(37,22%,90%)]"
+                      }`}>Start free trial</button>
+                    </Link>
+                  </div>
+                </StaggerItem>
+              );
+            })}
+          </StaggerContainer>
+        )}
       </section>
 
       {/* Trust Badges */}
-      <section className="py-10 sm:py-12 border-y border-border bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-6 sm:gap-8 lg:gap-16">
-            <div className="flex items-center gap-3">
-              <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-success" />
+      <section className="mx-4 md:mx-8 rounded-[32px] bg-[hsl(37,22%,90%)] px-6 md:px-12 py-12">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row flex-wrap justify-center items-center gap-8 lg:gap-16">
+          {[
+            { icon: Shield, title: 'Money-Back Guarantee', desc: '30-day full refund' },
+            { icon: Clock, title: '14-Day Free Trial', desc: 'No credit card required' },
+            { icon: CreditCard, title: 'Cancel Anytime', desc: 'No long-term contracts' },
+          ].map((item) => (
+            <div key={item.title} className="flex items-center gap-3">
+              <item.icon className="h-7 w-7 text-primary" />
               <div>
-                <p className="font-medium text-sm sm:text-base">Money-Back Guarantee</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">30-day full refund</p>
+                <p className="font-extrabold text-sm text-[hsl(260,20%,16%)]">{item.title}</p>
+                <p className="text-xs text-[hsl(260,8%,46%)]">{item.desc}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Clock className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
-              <div>
-                <p className="font-medium text-sm sm:text-base">14-Day Free Trial</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">No credit card required</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <CreditCard className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
-              <div>
-                <p className="font-medium text-sm sm:text-base">Cancel Anytime</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">No long-term contracts</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Feature Comparison */}
-      <section className="py-16 sm:py-20 lg:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Compare All Features</h2>
-            <p className="text-muted-foreground">See exactly what's included in each plan.</p>
-          </div>
-
+      {/* Feature Comparison Table */}
+      {sortedTiers.length > 0 && (
+        <section className="px-4 md:px-8 py-20 md:py-28 max-w-6xl mx-auto">
+          <AnimateIn>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] mb-14">Compare all features</h2>
+          </AnimateIn>
           <div className="overflow-x-auto -mx-4 px-4">
             <table className="w-full min-w-[600px]">
               <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-4 px-3 sm:px-4 font-medium text-sm">Feature</th>
+                <tr className="border-b border-[hsl(260,12%,82%)]/40">
+                  <th className="text-left py-4 px-3 font-extrabold text-sm text-[hsl(260,20%,16%)]">Feature</th>
                   {sortedTiers.map((tier) => (
-                    <th 
-                      key={tier.id} 
-                      className={cn(
-                        "text-center py-4 px-2 sm:px-4 font-medium text-sm",
-                        tier.name.toLowerCase() === 'pro' && "text-primary"
-                      )}
-                    >
+                    <th key={tier.id} className={`text-center py-4 px-2 font-extrabold text-sm ${tier.name.toLowerCase() === 'pro' ? "text-primary" : "text-[hsl(260,20%,16%)]"}`}>
                       {tier.name}
-                      {tier.name.toLowerCase() === 'pro' && (
-                        <span className="block text-xs text-primary font-normal">Popular</span>
-                      )}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-[hsl(260,12%,82%)]/30">
                 {featureMatrix.map((row, i) => (
-                  <tr key={i} className="hover:bg-muted/50 transition-colors">
-                    <td className="py-3 sm:py-4 px-3 sm:px-4 text-xs sm:text-sm">{row.feature}</td>
+                  <tr key={i} className="hover:bg-[hsl(37,22%,90%)]/50 transition-colors">
+                    <td className="py-3 px-3 text-sm text-[hsl(260,20%,16%)] font-medium">{row.feature}</td>
                     {row.values.map((value, j) => (
-                      <td key={j} className="text-center py-3 sm:py-4 px-2 sm:px-4">
+                      <td key={j} className="text-center py-3 px-2">
                         {typeof value === 'boolean' ? (
-                          value ? <Check className="h-4 w-4 sm:h-5 sm:w-5 text-success mx-auto" /> : <X className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/30 mx-auto" />
+                          value ? <Check className="h-5 w-5 text-green-600 mx-auto" /> : <X className="h-5 w-5 text-[hsl(260,8%,46%)]/30 mx-auto" />
                         ) : (
-                          <span className="text-xs sm:text-sm font-mono">{value}</span>
+                          <span className="text-sm font-mono text-[hsl(260,20%,16%)]">{value}</span>
                         )}
                       </td>
                     ))}
@@ -147,74 +144,40 @@ export default function PricingPage() {
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
-
-      {/* Overage Pricing */}
-      <section className="py-16 sm:py-20 lg:py-32 bg-card">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Soft Limits, No Surprises</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
-              Exceed your limits? No problem. We use soft limits so your work never stops.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="p-5 sm:p-6 rounded-2xl border border-border bg-background">
-              <h3 className="font-semibold mb-4">Job Overage Rates</h3>
-              <div className="space-y-3">
-                {sortedTiers.filter(t => !t.is_free_tier).map((tier) => (
-                  <div key={tier.id} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{tier.name}</span>
-                    <span className="font-mono">${tier.overage_price_per_job.toFixed(2)}/job</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="p-5 sm:p-6 rounded-2xl border border-border bg-background">
-              <h3 className="font-semibold mb-4">Reading Overage Rates</h3>
-              <div className="space-y-3">
-                {sortedTiers.filter(t => !t.is_free_tier).map((tier) => (
-                  <div key={tier.id} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{tier.name}</span>
-                    <span className="font-mono">${tier.overage_price_per_reading.toFixed(3)}/reading</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* FAQ */}
-      <section className="py-16 sm:py-20 lg:py-32">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-          </div>
+      <section className="mx-4 md:mx-8 rounded-[32px] bg-[hsl(37,22%,90%)] px-6 md:px-12 py-20 md:py-28">
+        <div className="max-w-4xl mx-auto">
+          <AnimateIn>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] mb-14">Frequently asked questions</h2>
+          </AnimateIn>
           <FAQAccordion />
         </div>
       </section>
 
-      {/* Enterprise CTA */}
-      <section className="py-16 sm:py-20 lg:py-32 bg-gradient-to-br from-primary/10 to-transparent">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Need a Custom Solution?</h2>
-          <p className="text-base sm:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
+      <div className="py-4" />
+
+      {/* CTA */}
+      <div className="mx-4 md:mx-8 my-8 rounded-[32px] bg-[hsl(260,20%,16%)] px-6 md:px-12 py-20 md:py-28 text-center">
+        <AnimateIn>
+          <h2 className="text-[clamp(34px,5vw,60px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(37,30%,94%)] mb-4">
+            Need a custom<br /><span className="text-primary">solution?</span>
+          </h2>
+          <p className="text-[17px] text-white/40 font-medium mb-12 max-w-lg mx-auto">
             For large organisations with custom needs, we offer tailored plans with volume discounts and dedicated support.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center gap-3 flex-wrap">
             <Link to="/contact">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">Contact Us</Button>
+              <Button variant="outline" className="rounded-full border-white/15 text-white/50 hover:bg-white/5 hover:text-white/70 text-base py-4 px-8">Contact us</Button>
             </Link>
             <Link to="/auth?tab=signup">
-              <Button size="lg" className="w-full sm:w-auto">
-                Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Button className="rounded-full shadow-none border-none bg-primary text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
             </Link>
           </div>
-        </div>
-      </section>
+        </AnimateIn>
+      </div>
     </MarketingLayout>
   );
 }

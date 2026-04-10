@@ -1,17 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { AnimateIn, StaggerContainer, StaggerItem, ScaleIn } from '@/components/marketing/AnimateIn';
 import { AppMockup } from '@/components/marketing/AppMockup';
+import { motion } from 'framer-motion';
 import {
   Droplets, Camera, FileText, Users, Activity, Calculator,
-  ArrowRight, Check, MapPin, Clock, Shield, Smartphone, Cloud,
-  BarChart3, Layers, Building2,
+  Check, Smartphone, Cloud, MapPin, Clock, Shield, BarChart3, Layers, Building2,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 const featureCategories = [
   {
-    id: 'moisture',
     title: 'Moisture Tracking',
     icon: Droplets,
     description: 'Comprehensive moisture monitoring with automatic calculations and trend analysis.',
@@ -19,15 +18,12 @@ const featureCategories = [
       'Create drying chambers for each affected area',
       'Log temperature, humidity, and moisture readings',
       'Automatic g/kg humidity ratio calculations',
-      'Dew point and vapour pressure calculations',
       'Visual trend charts showing drying progress',
       'Outdoor baseline comparison readings',
-      'Material-specific moisture standards',
     ],
     mockup: 'readings' as const,
   },
   {
-    id: 'photos',
     title: 'Photo Documentation',
     icon: Camera,
     description: 'Capture, annotate, and organise visual evidence for every job.',
@@ -36,14 +32,11 @@ const featureCategories = [
       'Built-in annotation tools (arrows, circles, text)',
       'Category organisation (before, during, after)',
       'Automatic timestamp and location data',
-      'Thermal image support',
-      'Batch upload from camera roll',
       'High-resolution export for reports',
     ],
     mockup: 'photos' as const,
   },
   {
-    id: 'reports',
     title: 'Professional Reports',
     icon: FileText,
     description: 'Generate polished, insurance-ready reports with a single click.',
@@ -52,171 +45,130 @@ const featureCategories = [
       'Multiple report templates',
       'Custom branding (logo, colours)',
       'Comprehensive drying logs',
-      'Photo documentation sections',
-      'Equipment usage summaries',
       'Digital signature capture',
     ],
     mockup: 'reports' as const,
   },
   {
-    id: 'team',
     title: 'Team Collaboration',
     icon: Users,
     description: 'Work together seamlessly with role-based access and real-time updates.',
     features: [
       'Invite unlimited team members',
-      'Role-based permissions (Admin, Tech, Viewer)',
+      'Role-based permissions',
       'Real-time sync across devices',
-      'Job assignment and tracking',
-      'Activity logs and audit trails',
       'Share job links with customers',
-      'Comments and notes on jobs',
+      'Activity logs and audit trails',
     ],
     mockup: 'dashboard' as const,
   },
-  {
-    id: 'equipment',
-    title: 'Equipment Tracking',
-    icon: Activity,
-    description: 'Monitor and manage all your restoration equipment across jobs.',
-    features: [
-      'Equipment inventory management',
-      'Assign equipment to jobs',
-      'Track runtime hours',
-      'Automatic cost calculations',
-      'Maintenance scheduling',
-      'Equipment location tracking',
-      'QR code scanning support',
-    ],
-    mockup: 'equipment' as const,
-  },
-  {
-    id: 'estimates',
-    title: 'Cost Estimates',
-    icon: Calculator,
-    description: 'Create professional estimates and track job costs accurately.',
-    features: [
-      'Customisable estimate templates',
-      'Line item cost tracking',
-      'Labour and material categories',
-      'Equipment rental calculations',
-      'Customer-ready PDF estimates',
-      'Margin and markup settings',
-      'Cost vs. estimate comparisons',
-    ],
-    mockup: 'estimates' as const,
-  },
+];
+
+const extraFeatures = [
+  { icon: Smartphone, title: 'Mobile First', desc: 'Works on any device' },
+  { icon: Cloud, title: 'Cloud Storage', desc: 'Secure, unlimited data' },
+  { icon: MapPin, title: 'Job Locations', desc: 'Map view of all jobs' },
+  { icon: BarChart3, title: 'Analytics', desc: 'Business insights' },
+  { icon: Shield, title: 'Data Security', desc: '256-bit encryption' },
+  { icon: Clock, title: 'Work Logs', desc: 'Track time per job' },
+  { icon: Layers, title: 'Floor Plans', desc: 'Upload & annotate' },
+  { icon: Building2, title: 'Multi-Location', desc: 'Multiple offices' },
 ];
 
 export default function FeaturesPage() {
   return (
     <MarketingLayout>
       {/* Hero */}
-      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 lg:pb-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              Features
-            </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
-              Everything You Need to{' '}
-              <span className="text-primary">Run Restoration Jobs</span>
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground mb-10">
-              From first inspection to final report — FloodEx gives your team the tools to document
-              faster, track moisture accurately, and generate professional reports.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/auth?tab=signup">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link to="/pricing">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">View Pricing</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
+      <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 max-w-6xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
+          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-[hsl(260,8%,46%)] mb-4">Features</div>
+        </motion.div>
+        <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.5 }} className="text-[clamp(44px,7vw,88px)] font-black leading-[0.98] tracking-[-0.04em] text-[hsl(260,20%,16%)] max-w-[850px] mb-7">
+          Everything you need to{' '}
+          <span className="bg-primary text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">run restoration jobs</span>
+        </motion.h1>
+        <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-[hsl(260,8%,46%)] max-w-[540px] leading-[1.7] font-medium mb-12">
+          From first inspection to final report — FloodEx gives your team the tools to document faster, track moisture accurately, and generate professional reports.
+        </motion.p>
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5 }} className="flex items-center gap-3 flex-wrap">
+          <Link to="/auth?tab=signup">
+            <Button className="rounded-full shadow-none border-none bg-primary text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
+          </Link>
+          <Link to="/pricing">
+            <Button variant="outline" className="rounded-full border-[hsl(260,12%,82%)]/60 text-[hsl(260,20%,16%)] font-bold text-base py-4 px-8 hover:bg-[hsl(37,22%,90%)]">View pricing</Button>
+          </Link>
+        </motion.div>
       </section>
 
-      {/* Feature Sections */}
+      {/* Feature Categories */}
       {featureCategories.map((category, index) => (
         <section
-          key={category.id}
-          id={category.id}
-          className={cn("py-16 sm:py-20 lg:py-32", index % 2 === 0 ? "bg-background" : "bg-card")}
+          key={category.title}
+          className={index % 2 === 0
+            ? "mx-4 md:mx-8 rounded-[32px] bg-[hsl(37,22%,90%)] px-6 md:px-12 py-20 md:py-28 mb-4"
+            : "mx-4 md:mx-8 rounded-[32px] bg-[hsl(260,20%,16%)] px-6 md:px-12 py-20 md:py-28 mb-4"
+          }
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className={cn("grid lg:grid-cols-2 gap-10 lg:gap-20 items-center")}>
-              <div className={cn(index % 2 === 1 && "lg:order-2")}>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                  <category.icon className="h-4 w-4" />
-                  {category.title}
-                </div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{category.description}</h2>
-                <ul className="space-y-3 mt-6 sm:mt-8">
-                  {category.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground text-sm sm:text-base">{feature}</span>
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+            <div className={index % 2 === 1 ? "md:order-2" : ""}>
+              <AnimateIn>
+                <div className={`text-xs font-extrabold uppercase tracking-[0.12em] mb-4 ${index % 2 === 1 ? "text-white/30" : "text-[hsl(260,8%,46%)]"}`}>{category.title}</div>
+                <h2 className={`text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] mb-4 ${index % 2 === 1 ? "text-[hsl(37,30%,94%)]" : "text-[hsl(260,20%,16%)]"}`}>
+                  {category.description}
+                </h2>
+                <ul className="flex flex-col gap-4 mt-8">
+                  {category.features.map((feature) => (
+                    <li key={feature} className={`flex items-start gap-3 text-sm font-medium leading-[1.6] ${index % 2 === 1 ? "text-white/50" : "text-[hsl(260,8%,46%)]"}`}>
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-[2px] ${index % 2 === 1 ? "bg-primary/15" : "bg-[hsl(283,50%,94%)]"}`}>
+                        <Check className={`w-3 h-3 ${index % 2 === 1 ? "text-primary" : "text-[hsl(260,20%,16%)]"}`} />
+                      </span>
+                      {feature}
                     </li>
                   ))}
                 </ul>
-              </div>
-              <div className={cn("flex justify-center", index % 2 === 1 && "lg:order-1")}>
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 opacity-50" />
-                  <AppMockup variant={category.mockup} className="relative z-10" />
-                </div>
-              </div>
+              </AnimateIn>
+            </div>
+            <div className={index % 2 === 1 ? "md:order-1" : ""}>
+              <ScaleIn>
+                <AppMockup variant={category.mockup} className="relative z-10" />
+              </ScaleIn>
             </div>
           </div>
         </section>
       ))}
 
-      {/* Additional Features */}
-      <section className="py-16 sm:py-20 lg:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Plus Everything Else You Need</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {[
-              { icon: Smartphone, title: 'Mobile First', description: 'Works on any device, anywhere' },
-              { icon: Cloud, title: 'Cloud Storage', description: 'Secure, unlimited data storage' },
-              { icon: MapPin, title: 'Job Locations', description: 'Map view of all active jobs' },
-              { icon: BarChart3, title: 'Analytics', description: 'Insights into your business' },
-              { icon: Shield, title: 'Data Security', description: '256-bit encryption standard' },
-              { icon: Clock, title: 'Work Logs', description: 'Track time spent on each job' },
-              { icon: Layers, title: 'Floor Plans', description: 'Upload and annotate blueprints' },
-              { icon: Building2, title: 'Multi-Location', description: 'Manage multiple offices' },
-            ].map((feature, i) => (
-              <div key={i} className="p-4 sm:p-6 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors">
-                <feature.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-3 sm:mb-4" />
-                <h3 className="font-semibold mb-1 text-sm sm:text-base">{feature.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{feature.description}</p>
+      {/* Extra Features Grid */}
+      <section className="px-4 md:px-8 py-20 md:py-28 max-w-6xl mx-auto">
+        <AnimateIn>
+          <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] mb-14">Plus everything else</h2>
+        </AnimateIn>
+        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {extraFeatures.map((f) => (
+            <StaggerItem key={f.title}>
+              <div className="bg-white border border-[hsl(260,12%,82%)]/40 rounded-3xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all h-full">
+                <f.icon className="h-7 w-7 text-primary mb-3" />
+                <h3 className="font-extrabold text-[15px] mb-1 text-[hsl(260,20%,16%)]">{f.title}</h3>
+                <p className="text-[13px] text-[hsl(260,8%,46%)] font-medium">{f.desc}</p>
               </div>
-            ))}
-          </div>
-        </div>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
       </section>
 
       {/* CTA */}
-      <section className="py-16 sm:py-20 lg:py-32 bg-gradient-to-br from-primary/10 to-transparent">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6">Experience All Features Free</h2>
-          <p className="text-base sm:text-lg text-muted-foreground mb-10">
-            Start your 14-day trial today. No credit card required.
+      <div className="mx-4 md:mx-8 my-8 rounded-[32px] bg-[hsl(260,20%,16%)] px-6 md:px-12 py-20 md:py-28 text-center">
+        <AnimateIn>
+          <h2 className="text-[clamp(34px,5vw,60px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(37,30%,94%)] mb-4">
+            Experience all features<br /><span className="text-primary">free for 14 days</span>
+          </h2>
+          <p className="text-[17px] text-white/40 font-medium mb-12 max-w-lg mx-auto">
+            No credit card required. Start documenting smarter today.
           </p>
           <Link to="/auth?tab=signup">
-            <Button size="lg" className="text-lg px-10 py-6">
-              Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Button className="rounded-full shadow-none border-none bg-primary text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
           </Link>
-        </div>
-      </section>
+        </AnimateIn>
+      </div>
     </MarketingLayout>
   );
 }

@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/marketing/AnimateIn';
 import { ComparisonTable } from '@/components/marketing/ComparisonTable';
-import { CompetitorCard } from '@/components/marketing/CompetitorCard';
-import {
-  ArrowRight, Zap, DollarSign, Smartphone, Clock, Shield, Users,
-} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Zap, DollarSign, Smartphone, Clock, Shield, Users } from 'lucide-react';
 
 const features = [
   { name: 'Mobile-first design', category: 'Core Documentation' },
@@ -19,24 +18,16 @@ const features = [
   { name: 'One-click PDF reports', category: 'Reporting' },
   { name: 'Insurance-compliant format', category: 'Reporting' },
   { name: 'Custom company branding', category: 'Reporting' },
-  { name: 'Thermal readings section', category: 'Reporting' },
   { name: 'Digital signatures', category: 'Reporting' },
-  { name: 'Comprehensive report template', category: 'Reporting' },
   { name: 'Easy learning curve', category: 'Usability' },
-  { name: 'Offline capability', category: 'Usability' },
   { name: 'Team collaboration', category: 'Usability' },
-  { name: 'Quick onboarding (< 1 hour)', category: 'Usability' },
   { name: 'Free tier available', category: 'Pricing' },
   { name: 'Transparent pricing', category: 'Pricing' },
   { name: 'No long-term contracts', category: 'Pricing' },
-  { name: 'Pay-as-you-grow model', category: 'Pricing' },
 ];
 
 const competitors = [
-  {
-    name: 'FloodEx', isHighlighted: true,
-    features: Object.fromEntries(features.map(f => [f.name, true])),
-  },
+  { name: 'FloodEx', isHighlighted: true, features: Object.fromEntries(features.map(f => [f.name, true])) },
   {
     name: 'Encircle',
     features: {
@@ -45,12 +36,10 @@ const competitors = [
       'Built-in floor plans (mud maps)': false, 'Equipment tracking': true,
       'Work logging': true, 'Damage assessments': true,
       'One-click PDF reports': true, 'Insurance-compliant format': true,
-      'Custom company branding': true, 'Thermal readings section': true,
-      'Digital signatures': true, 'Comprehensive report template': true,
-      'Easy learning curve': 'partial', 'Offline capability': true,
-      'Team collaboration': true, 'Quick onboarding (< 1 hour)': false,
+      'Custom company branding': true, 'Digital signatures': true,
+      'Easy learning curve': 'partial', 'Team collaboration': true,
       'Free tier available': false, 'Transparent pricing': false,
-      'No long-term contracts': false, 'Pay-as-you-grow model': false,
+      'No long-term contracts': false,
     },
   },
   {
@@ -61,12 +50,10 @@ const competitors = [
       'Built-in floor plans (mud maps)': true, 'Equipment tracking': 'partial',
       'Work logging': false, 'Damage assessments': true,
       'One-click PDF reports': 'partial', 'Insurance-compliant format': true,
-      'Custom company branding': true, 'Thermal readings section': false,
-      'Digital signatures': true, 'Comprehensive report template': 'partial',
-      'Easy learning curve': false, 'Offline capability': 'partial',
-      'Team collaboration': true, 'Quick onboarding (< 1 hour)': false,
+      'Custom company branding': true, 'Digital signatures': true,
+      'Easy learning curve': false, 'Team collaboration': true,
       'Free tier available': false, 'Transparent pricing': false,
-      'No long-term contracts': false, 'Pay-as-you-grow model': false,
+      'No long-term contracts': false,
     },
   },
   {
@@ -77,187 +64,108 @@ const competitors = [
       'Built-in floor plans (mud maps)': false, 'Equipment tracking': 'partial',
       'Work logging': true, 'Damage assessments': 'partial',
       'One-click PDF reports': true, 'Insurance-compliant format': 'partial',
-      'Custom company branding': true, 'Thermal readings section': false,
-      'Digital signatures': true, 'Comprehensive report template': false,
-      'Easy learning curve': true, 'Offline capability': 'partial',
-      'Team collaboration': true, 'Quick onboarding (< 1 hour)': true,
+      'Custom company branding': true, 'Digital signatures': true,
+      'Easy learning curve': true, 'Team collaboration': true,
       'Free tier available': false, 'Transparent pricing': true,
-      'No long-term contracts': true, 'Pay-as-you-grow model': 'partial',
+      'No long-term contracts': true,
     },
-  },
-  {
-    name: 'Paper/Spreadsheets',
-    features: {
-      'Mobile-first design': false, 'Moisture tracking with auto calculations': false,
-      'Photo documentation': 'partial', 'Photo annotations': false,
-      'Built-in floor plans (mud maps)': false, 'Equipment tracking': 'partial',
-      'Work logging': 'partial', 'Damage assessments': 'partial',
-      'One-click PDF reports': false, 'Insurance-compliant format': false,
-      'Custom company branding': 'partial', 'Thermal readings section': false,
-      'Digital signatures': false, 'Comprehensive report template': false,
-      'Easy learning curve': true, 'Offline capability': true,
-      'Team collaboration': false, 'Quick onboarding (< 1 hour)': true,
-      'Free tier available': true, 'Transparent pricing': true,
-      'No long-term contracts': true, 'Pay-as-you-grow model': true,
-    },
-  },
-];
-
-const competitorDetails = [
-  {
-    name: 'Encircle',
-    description: 'Encircle is the industry standard for enterprise restoration companies. However, their enterprise-focused approach means complex pricing, lengthy onboarding, and features many small-to-mid teams never use.',
-    advantages: [
-      'Transparent, tiered pricing vs. enterprise sales quotes',
-      'Built-in floor plan tool (no external software needed)',
-      'Free tier for small businesses to get started',
-      'Faster onboarding — start documenting in minutes',
-      'No lengthy contracts or annual commitments required',
-    ],
-    targetAudience: 'Teams frustrated with Encircle complexity or pricing',
-  },
-  {
-    name: 'Xactimate',
-    description: 'Xactimate is the gold standard for restoration estimating. While essential for estimates, it\'s not designed for field documentation — technicians need additional tools for moisture tracking and drying reports.',
-    advantages: [
-      'Purpose-built for field documentation, not just estimating',
-      'Real-time moisture tracking with trend analysis and GPP calculations',
-      'Intuitive mobile interface designed for field technicians',
-      'Works alongside Xactimate — use FloodEx for docs, Xactimate for estimates',
-      'Fraction of the cost for documentation needs',
-    ],
-    targetAudience: 'Companies using Xactimate who need better field documentation',
-  },
-  {
-    name: 'DASH',
-    description: 'DASH is a general contractor management tool. While versatile, it lacks restoration-specific features like moisture tracking, psychrometric calculations, and insurance-compliant drying logs.',
-    advantages: [
-      'Built specifically for water damage restoration workflows',
-      'Automatic moisture calculations (GPP, dew point, humidity ratio)',
-      'Insurance-compliant report templates out of the box',
-      'Thermal reading sections and comprehensive damage assessments',
-      'Industry-standard drying log format',
-    ],
-    targetAudience: 'Restoration companies using generic contractor software',
   },
 ];
 
 const differentiators = [
-  { icon: Zap, title: 'Purpose-Built for Restoration', description: 'Not a generic contractor tool — every feature designed for water damage documentation.' },
-  { icon: Smartphone, title: 'Field-First Design', description: 'Built for mobile use in the field, not desktop-only office software.' },
-  { icon: Clock, title: 'Instant Reports', description: 'Generate insurance-ready PDF reports in one click, not hours of formatting.' },
-  { icon: DollarSign, title: 'Transparent Pricing', description: 'Know exactly what you\'ll pay. No surprise fees or enterprise sales calls.' },
-  { icon: Shield, title: 'Insurance Compliant', description: 'Reports meet insurance documentation standards right out of the box.' },
-  { icon: Users, title: 'Free to Start', description: 'Try everything with our free tier. No credit card, no commitment.' },
+  { icon: Zap, title: 'Purpose-Built', desc: 'Not a generic contractor tool — every feature designed for water damage documentation.', bg: 'bg-[hsl(345,40%,92%)]' },
+  { icon: Smartphone, title: 'Field-First', desc: 'Built for mobile use in the field, not desktop-only office software.', bg: 'bg-[hsl(325,70%,94%)]' },
+  { icon: Clock, title: 'Instant Reports', desc: 'Generate insurance-ready PDF reports in one click, not hours.', bg: 'bg-[hsl(283,50%,94%)]' },
+  { icon: DollarSign, title: 'Transparent Pricing', desc: "Know exactly what you'll pay. No surprise fees or sales calls.", bg: 'bg-[hsl(263,45%,93%)]' },
+  { icon: Shield, title: 'Insurance Compliant', desc: 'Reports meet insurance documentation standards out of the box.', bg: 'bg-white' },
+  { icon: Users, title: 'Free to Start', desc: 'Try everything with our free tier. No credit card, no commitment.', bg: 'bg-[hsl(275,50%,92%)]' },
 ];
 
 export default function ComparePage() {
   return (
     <MarketingLayout>
       {/* Hero */}
-      <section className="pt-28 sm:pt-32 pb-12 sm:pb-16 lg:pt-40 lg:pb-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto">
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              Software Comparison
-            </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight mb-6">
-              How FloodEx Compares to{' '}
-              <span className="text-primary">Other Restoration Software</span>
-            </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              See why restoration professionals choose FloodEx for faster documentation and simpler pricing.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/auth?tab=signup">
-                <Button size="lg" className="w-full sm:w-auto group">
-                  Start Free Trial <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link to="/features">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">View All Features</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
+      <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 max-w-6xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
+          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-[hsl(260,8%,46%)] mb-4">Software comparison</div>
+        </motion.div>
+        <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.5 }} className="text-[clamp(44px,7vw,88px)] font-black leading-[0.98] tracking-[-0.04em] text-[hsl(260,20%,16%)] max-w-[850px] mb-7">
+          How FloodEx compares to{' '}
+          <span className="bg-primary text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">other tools</span>
+        </motion.h1>
+        <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-[hsl(260,8%,46%)] max-w-[540px] leading-[1.7] font-medium mb-12">
+          See why restoration professionals choose FloodEx for faster documentation and simpler pricing.
+        </motion.p>
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5 }} className="flex items-center gap-3 flex-wrap">
+          <Link to="/auth?tab=signup">
+            <Button className="rounded-full shadow-none border-none bg-primary text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
+          </Link>
+          <Link to="/features">
+            <Button variant="outline" className="rounded-full border-[hsl(260,12%,82%)]/60 text-[hsl(260,20%,16%)] font-bold text-base py-4 px-8 hover:bg-[hsl(37,22%,90%)]">View all features</Button>
+          </Link>
+        </motion.div>
       </section>
 
       {/* Comparison Table */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-background to-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Feature-by-Feature Comparison</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
-              Compare FloodEx against the most popular restoration software options.
-            </p>
-          </div>
+      <section className="mx-4 md:mx-8 rounded-[32px] bg-[hsl(37,22%,90%)] px-6 md:px-12 py-20 md:py-28">
+        <div className="max-w-5xl mx-auto">
+          <AnimateIn>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] mb-14">Feature-by-feature comparison</h2>
+          </AnimateIn>
           <ComparisonTable features={features} competitors={competitors} />
         </div>
       </section>
 
-      {/* Individual Comparisons */}
-      <section className="py-12 sm:py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Detailed Comparisons</h2>
-          </div>
-          <div className="divide-y divide-border">
-            {competitorDetails.map((competitor, index) => (
-              <CompetitorCard
-                key={competitor.name}
-                competitorName={competitor.name}
-                competitorDescription={competitor.description}
-                advantages={competitor.advantages}
-                targetAudience={competitor.targetAudience}
-                reversed={index % 2 === 1}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="py-4" />
 
       {/* Why Switch */}
-      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-card to-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12">
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              The FloodEx Difference
-            </span>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Why Teams Switch to FloodEx</h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {differentiators.map((item) => (
-              <div key={item.title} className="bg-card rounded-xl border border-border p-5 sm:p-6 hover:border-primary/50 transition-colors">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                </div>
-                <h3 className="font-semibold text-base sm:text-lg mb-2">{item.title}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{item.description}</p>
-              </div>
-            ))}
-          </div>
+      <section className="px-4 md:px-8 py-20 md:py-28 max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row items-start justify-between mb-12 gap-8">
+          <AnimateIn>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] max-w-[340px]">
+              Why teams<br />switch to<br />FloodEx
+            </h2>
+          </AnimateIn>
+          <AnimateIn>
+            <p className="text-[15px] text-[hsl(260,8%,46%)] max-w-[320px] md:text-right font-medium leading-[1.7] mt-2">
+              Purpose-built for restoration, not repurposed from another industry.
+            </p>
+          </AnimateIn>
         </div>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {differentiators.map((d) => (
+            <StaggerItem key={d.title}>
+              <div className={`${d.bg} border border-[hsl(260,12%,82%)]/40 rounded-3xl p-7 flex flex-col gap-4 transition-all hover:-translate-y-1 hover:shadow-lg h-full`}>
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <d.icon className="w-6 h-6 text-[hsl(260,20%,16%)]" />
+                </div>
+                <h4 className="text-[17px] font-extrabold tracking-tight text-[hsl(260,20%,16%)]">{d.title}</h4>
+                <p className="text-[13px] text-[hsl(260,20%,16%)]/60 leading-[1.6] font-medium">{d.desc}</p>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
       </section>
 
       {/* CTA */}
-      <section className="py-16 sm:py-20 lg:py-32">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">Ready to See the Difference?</h2>
-          <p className="text-base sm:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
+      <div className="mx-4 md:mx-8 my-8 rounded-[32px] bg-[hsl(260,20%,16%)] px-6 md:px-12 py-20 md:py-28 text-center">
+        <AnimateIn>
+          <h2 className="text-[clamp(34px,5vw,60px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(37,30%,94%)] mb-4">
+            Ready to see the<br /><span className="text-primary">difference?</span>
+          </h2>
+          <p className="text-[17px] text-white/40 font-medium mb-12 max-w-lg mx-auto">
             Start your free trial today. No credit card required.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center gap-3 flex-wrap">
             <Link to="/auth?tab=signup">
-              <Button size="lg" className="w-full sm:w-auto group">
-                Start Free Trial <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <Button className="rounded-full shadow-none border-none bg-primary text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
             </Link>
             <Link to="/pricing">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto">View Pricing</Button>
+              <Button variant="outline" className="rounded-full border-white/15 text-white/50 hover:bg-white/5 hover:text-white/70 text-base py-4 px-8">View pricing</Button>
             </Link>
           </div>
-        </div>
-      </section>
+        </AnimateIn>
+      </div>
     </MarketingLayout>
   );
 }

@@ -2,25 +2,30 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { HeroSection } from '@/components/marketing/HeroSection';
-import { FeatureCard } from '@/components/marketing/FeatureCard';
-import { PricingCard } from '@/components/marketing/PricingCard';
-import { AppMockup } from '@/components/marketing/AppMockup';
+import { AnimateIn, StaggerContainer, StaggerItem, ScaleIn } from '@/components/marketing/AnimateIn';
 import { FAQAccordion } from '@/components/marketing/FAQAccordion';
+import { AppMockup } from '@/components/marketing/AppMockup';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import {
-  Droplets,
-  Camera,
-  FileText,
-  Users,
-  Activity,
-  Thermometer,
-  ClipboardCheck,
-  Calculator,
-  ArrowRight,
-  Shield,
-  Zap,
-  Check,
+  Droplets, Camera, FileText, Users, Activity, Thermometer,
+  ClipboardCheck, Calculator, Check, Zap, Shield, Smartphone,
 } from 'lucide-react';
+
+const features = [
+  { icon: Droplets, bg: 'bg-[hsl(345,40%,92%)]', iconBg: 'bg-primary', title: 'Moisture Tracking', desc: 'Log readings by chamber with automatic g/kg calculations and drying trend charts.' },
+  { icon: Camera, bg: 'bg-[hsl(325,70%,94%)]', iconBg: 'bg-primary/30', title: 'Photo Documentation', desc: 'Capture, annotate, and organise photos. Add arrows, text, and damage markers.' },
+  { icon: FileText, bg: 'bg-[hsl(283,50%,94%)]', iconBg: 'bg-primary/20', title: 'Professional Reports', desc: 'Generate polished PDF reports with one click. Customisable with your branding.' },
+  { icon: Users, bg: 'bg-[hsl(263,45%,93%)]', iconBg: 'bg-primary/20', title: 'Team Collaboration', desc: 'Invite technicians with role-based access. See updates in real-time.' },
+  { icon: Activity, bg: 'bg-white', iconBg: 'bg-[hsl(325,70%,94%)]', title: 'Equipment Tracking', desc: 'Assign dehumidifiers, air movers, and sensors to jobs. Track runtime and costs.' },
+  { icon: Thermometer, bg: 'bg-[hsl(275,50%,92%)]', iconBg: 'bg-primary/20', title: 'Psychrometric Calcs', desc: 'Automatic dew point, vapour pressure, and specific humidity calculations.' },
+];
+
+const whyReasons = [
+  { icon: Zap, title: 'Purpose-Built', desc: 'Not a generic tool — every feature designed for flood & water damage workflows.' },
+  { icon: Shield, title: 'IICRC Compliant', desc: 'Reports meet industry documentation standards right out of the box.' },
+  { icon: Smartphone, title: 'Field-First', desc: 'Mobile-optimised for use on-site with gloves, in low light, and on the go.' },
+  { icon: Thermometer, title: 'Auto Calculations', desc: 'GPP, dew point, vapour pressure — calculated automatically from readings.' },
+];
 
 export default function LandingPage() {
   const { data: tiers, isLoading: tiersLoading } = useSubscriptionTiers();
@@ -28,217 +33,217 @@ export default function LandingPage() {
 
   return (
     <MarketingLayout>
-      {/* Hero */}
       <HeroSection />
 
       {/* Problem / Solution */}
-      <section className="py-16 sm:py-20 lg:py-32 bg-gradient-to-b from-background to-card" aria-labelledby="problem-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 id="problem-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Stop Wrestling with{' '}
-              <span className="text-destructive line-through opacity-60">Paper & Spreadsheets</span>
+      <section className="mx-4 md:mx-8 rounded-[32px] bg-[hsl(37,22%,90%)] px-6 md:px-12 py-20 md:py-28">
+        <div className="max-w-5xl mx-auto">
+          <AnimateIn>
+            <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-[hsl(260,8%,46%)] mb-4">The problem</div>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] mb-4">
+              Stop wrestling with<br />paper & spreadsheets
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Restoration pros waste hours on documentation. FloodEx puts everything in one place—accessible from any device.
+            <p className="text-[17px] text-[hsl(260,8%,46%)] max-w-[480px] leading-[1.7] font-medium mb-14">
+              Restoration pros waste hours on documentation. FloodEx puts everything in one place — accessible from any device.
             </p>
-          </div>
+          </AnimateIn>
 
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-20 items-center">
-            <div className="space-y-4 sm:space-y-6">
-              <div className="p-5 sm:p-6 rounded-2xl bg-destructive/5 border border-destructive/20">
-                <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">
-                  <span className="text-xl">📋</span> The Old Way
-                </h3>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> Paper forms lost in the field</li>
-                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> Manual calculations with errors</li>
-                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> Hours creating reports</li>
-                  <li className="flex items-center gap-2"><span className="text-destructive">✕</span> No real-time visibility</li>
-                </ul>
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <StaggerItem>
+              <div className="bg-white border border-[hsl(260,12%,82%)]/40 rounded-3xl p-8 h-full">
+                <h4 className="text-[17px] font-extrabold tracking-tight text-red-600 mb-4">📋 The Old Way</h4>
+                <div className="flex flex-col gap-[9px]">
+                  {['Paper forms lost in the field', 'Manual calculations with errors', 'Hours creating reports', 'No real-time visibility'].map(item => (
+                    <div key={item} className="flex items-start gap-2 text-[13px] text-[hsl(260,20%,16%)]/60 font-medium">
+                      <span className="text-red-500 font-black shrink-0">✕</span>{item}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="p-5 sm:p-6 rounded-2xl bg-success/5 border border-success/20">
-                <h3 className="font-semibold text-success mb-3 flex items-center gap-2">
-                  <span className="text-xl">📱</span> The FloodEx Way
-                </h3>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li className="flex items-center gap-2"><span className="text-success">✓</span> Digital capture in the field</li>
-                  <li className="flex items-center gap-2"><span className="text-success">✓</span> Auto-calculated g/kg & metrics</li>
-                  <li className="flex items-center gap-2"><span className="text-success">✓</span> One-click PDF reports</li>
-                  <li className="flex items-center gap-2"><span className="text-success">✓</span> Real-time team updates</li>
-                </ul>
+            </StaggerItem>
+            <StaggerItem>
+              <div className="bg-white border border-[hsl(260,12%,82%)]/40 rounded-3xl p-8 h-full">
+                <h4 className="text-[17px] font-extrabold tracking-tight text-green-600 mb-4">📱 The FloodEx Way</h4>
+                <div className="flex flex-col gap-[9px]">
+                  {['Digital capture in the field', 'Auto-calculated g/kg & metrics', 'One-click PDF reports', 'Real-time team updates'].map(item => (
+                    <div key={item} className="flex items-start gap-2 text-[13px] text-[hsl(260,20%,16%)]/60 font-medium">
+                      <span className="text-green-600 font-black shrink-0">✓</span>{item}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="flex justify-center">
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 opacity-50" />
-                <AppMockup variant="readings" className="relative z-10" />
-              </div>
-            </div>
-          </div>
+            </StaggerItem>
+          </StaggerContainer>
         </div>
       </section>
 
+      <div className="py-4" />
+
       {/* Features */}
-      <section className="py-16 sm:py-20 lg:py-32" id="features" aria-labelledby="features-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              Features
-            </span>
-            <h2 id="features-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Everything You Need in the Field
+      <section className="px-4 md:px-8 py-20 md:py-28 max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row items-start justify-between mb-12 gap-8">
+          <AnimateIn>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] max-w-[340px]">
+              Everything you<br />need in<br />the field
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+          </AnimateIn>
+          <AnimateIn>
+            <p className="text-[15px] text-[hsl(260,8%,46%)] max-w-[320px] md:text-right font-medium leading-[1.7] mt-2">
               Purpose-built for water damage restoration — from first inspection to final report.
             </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <FeatureCard icon={Droplets} title="Moisture Tracking" description="Log readings by chamber with automatic g/kg calculations and drying trend charts." delay={0} />
-            <FeatureCard icon={Camera} title="Photo Documentation" description="Capture, annotate, and organise photos. Add arrows, text, and damage markers." delay={0.05} />
-            <FeatureCard icon={FileText} title="Professional Reports" description="Generate polished PDF reports with one click. Customisable with your branding." delay={0.1} />
-            <FeatureCard icon={Users} title="Team Collaboration" description="Invite technicians with role-based access. See updates in real-time." delay={0.15} />
-            <FeatureCard icon={Activity} title="Equipment Tracking" description="Assign dehumidifiers, air movers, and sensors to jobs. Track runtime and costs." delay={0.2} />
-            <FeatureCard icon={Thermometer} title="Psychrometric Data" description="Automatic dew point, vapour pressure, and specific humidity calculations." delay={0.25} />
-            <FeatureCard icon={ClipboardCheck} title="Digital Forms" description="Complete safety checks, work authorisations, and FNOL forms digitally." delay={0.3} />
-            <FeatureCard icon={Calculator} title="Cost Estimates" description="Create professional estimates with templates. Track costs per job." delay={0.35} />
-          </div>
-
-          <div className="text-center mt-10 sm:mt-12">
+          </AnimateIn>
+        </div>
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {features.map((f) => (
+            <StaggerItem key={f.title}>
+              <div className={`${f.bg} border border-[hsl(260,12%,82%)]/40 rounded-3xl p-7 flex flex-col gap-4 transition-all hover:-translate-y-1 hover:shadow-lg h-full`}>
+                <div className={`w-12 h-12 rounded-2xl ${f.iconBg} flex items-center justify-center`}>
+                  <f.icon className="w-6 h-6 text-[hsl(260,20%,16%)]" />
+                </div>
+                <h4 className="text-[17px] font-extrabold tracking-tight text-[hsl(260,20%,16%)]">{f.title}</h4>
+                <p className="text-[13px] text-[hsl(260,20%,16%)]/60 leading-[1.6] font-medium">{f.desc}</p>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+        <AnimateIn>
+          <div className="text-center mt-10">
             <Link to="/features">
-              <Button variant="outline" size="lg" className="group">
-                Explore All Features
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <Button variant="outline" className="rounded-full border-[hsl(260,12%,82%)]/60 text-[hsl(260,20%,16%)] font-bold hover:bg-[hsl(37,22%,90%)]">
+                Explore all features →
               </Button>
             </Link>
           </div>
+        </AnimateIn>
+      </section>
+
+      {/* App Mockup Section */}
+      <section className="mx-4 md:mx-8 rounded-[32px] bg-[hsl(260,20%,16%)] px-6 md:px-12 py-20 md:py-28">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+          <ScaleIn>
+            <AppMockup variant="readings" className="relative z-10" />
+          </ScaleIn>
+          <AnimateIn>
+            <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-white/30 mb-4">Live documentation</div>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(37,30%,94%)] mb-4">
+              Log readings.<br />Track drying.<br /><span className="text-primary">See progress.</span>
+            </h2>
+            <p className="text-[17px] text-white/45 max-w-[480px] leading-[1.7] font-medium mb-12">
+              Real-time moisture tracking with automatic psychrometric calculations. Know exactly where every chamber stands — at a glance.
+            </p>
+            <div className="flex flex-col gap-4 mt-6">
+              {whyReasons.map((r) => (
+                <div key={r.title} className="flex items-start gap-3 text-sm text-white/50 font-medium leading-[1.6]">
+                  <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mt-[2px]">
+                    <Check className="w-[10px] h-[10px] text-primary" />
+                  </div>
+                  <div>
+                    <span className="text-white/70 font-bold">{r.title}</span> — {r.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AnimateIn>
         </div>
       </section>
 
-      {/* Why FloodEx */}
-      <section className="py-16 sm:py-20 lg:py-32 bg-card" aria-labelledby="why-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 id="why-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Why Restoration Teams Choose FloodEx
-            </h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              { icon: Zap, title: 'Built for Restoration', desc: 'Not a generic tool — every feature is designed for flood & water damage workflows.' },
-              { icon: Shield, title: 'IICRC Compliant', desc: 'Reports meet industry documentation standards right out of the box.' },
-              { icon: Camera, title: 'Field-First Design', desc: 'Mobile-optimised for use on-site with gloves, in low light, and on the go.' },
-              { icon: Thermometer, title: 'Auto Calculations', desc: 'GPP, dew point, vapour pressure — calculated automatically from readings.' },
-              { icon: FileText, title: 'One-Click Reports', desc: 'Generate comprehensive, branded PDF reports in seconds — not hours.' },
-              { icon: Users, title: 'Team Management', desc: 'Role-based access, job sharing, and real-time collaboration across your crew.' },
-            ].map((item) => (
-              <div key={item.title} className="flex gap-4 p-5 rounded-xl border border-border bg-background hover:border-primary/40 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <item.icon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="py-4" />
 
       {/* Pricing Preview */}
-      <section className="py-16 sm:py-20 lg:py-32" id="pricing" aria-labelledby="pricing-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <span className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              Pricing
-            </span>
-            <h2 id="pricing-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start free, upgrade when you're ready. No hidden fees, no surprises.
-            </p>
-          </div>
+      <section className="px-4 md:px-8 py-20 md:py-28 max-w-6xl mx-auto" id="pricing">
+        <AnimateIn>
+          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-[hsl(260,8%,46%)] mb-4">Pricing</div>
+          <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] mb-4">
+            Simple pricing.<br />Free to start.
+          </h2>
+          <p className="text-[17px] text-[hsl(260,8%,46%)] max-w-[480px] leading-[1.7] font-medium mb-14">
+            Start free, upgrade when you're ready. No hidden fees, no surprises.
+          </p>
+        </AnimateIn>
 
-          {tiersLoading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-96 rounded-2xl bg-muted animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4">
-              {sortedTiers.map((tier, index) => (
-                <PricingCard
-                  key={tier.id}
-                  name={tier.name}
-                  price={tier.monthly_price}
-                  jobsIncluded={tier.jobs_included}
-                  readingsIncluded={tier.readings_included}
-                  overagePerJob={tier.overage_price_per_job}
-                  overagePerReading={tier.overage_price_per_reading}
-                  isFree={tier.is_free_tier}
-                  isPopular={tier.name.toLowerCase() === 'pro'}
-                  delay={index * 0.1}
-                />
-              ))}
-            </div>
-          )}
-
-          <div className="text-center mt-10">
-            <Link to="/pricing">
-              <Button variant="link" className="text-primary">View full pricing details →</Button>
-            </Link>
+        {tiersLoading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-96 rounded-3xl bg-[hsl(37,20%,90%)] animate-pulse" />
+            ))}
           </div>
-        </div>
+        ) : (
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-[960px]">
+            {sortedTiers.map((tier) => {
+              const isFeatured = tier.name.toLowerCase() === 'pro';
+              return (
+                <StaggerItem key={tier.id}>
+                  <div className={`border rounded-3xl p-8 flex flex-col relative h-full transition-shadow hover:shadow-lg ${
+                    isFeatured
+                      ? "bg-[hsl(260,20%,16%)] border-[hsl(260,20%,16%)]/80 shadow-xl"
+                      : "bg-white border-[hsl(260,12%,82%)]/50"
+                  }`}>
+                    {isFeatured && (
+                      <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 bg-primary text-white text-[11px] font-black px-4 py-[3px] rounded-full whitespace-nowrap uppercase tracking-[0.04em]">Most popular</div>
+                    )}
+                    <div className={`text-2xl font-black tracking-tight mb-[6px] ${isFeatured ? "text-[hsl(37,30%,94%)]" : "text-[hsl(260,20%,16%)]"}`}>{tier.name}</div>
+                    <div className="flex items-baseline gap-[3px] mb-[6px]">
+                      <span className={`text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-[hsl(37,30%,94%)]" : ""}`}>${tier.monthly_price}</span>
+                      <span className={`text-[15px] font-semibold ${isFeatured ? "text-white/40" : "text-[hsl(260,8%,46%)]"}`}>/ month</span>
+                    </div>
+                    <div className={`text-[13px] font-medium leading-[1.65] mb-6 pb-6 border-b ${isFeatured ? "text-white/40 border-white/10" : "text-[hsl(260,8%,46%)] border-[hsl(260,12%,82%)]/40"}`}>
+                      {tier.jobs_included} jobs · {tier.readings_included.toLocaleString()} readings/mo
+                    </div>
+                    <Link to="/auth?tab=signup" className="mt-auto">
+                      <button className={`block w-full text-center py-[13px] rounded-full text-sm font-extrabold cursor-pointer transition-all ${
+                        isFeatured
+                          ? "bg-primary text-white hover:opacity-85 border-none"
+                          : "bg-transparent border border-[hsl(260,12%,82%)]/50 text-[hsl(260,20%,16%)] hover:bg-[hsl(37,22%,90%)]"
+                      }`}>Start free trial</button>
+                    </Link>
+                  </div>
+                </StaggerItem>
+              );
+            })}
+          </StaggerContainer>
+        )}
+        <AnimateIn>
+          <div className="mt-10 text-center">
+            <Link to="/pricing" className="text-sm text-primary font-bold hover:underline">View full pricing details →</Link>
+          </div>
+        </AnimateIn>
       </section>
 
       {/* FAQ */}
-      <section className="py-16 sm:py-20 lg:py-32 bg-card" aria-labelledby="faq-heading">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-12">
-            <h2 id="faq-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Frequently Asked Questions
+      <section className="mx-4 md:mx-8 rounded-[32px] bg-[hsl(37,22%,90%)] px-6 md:px-12 py-20 md:py-28">
+        <div className="max-w-4xl mx-auto">
+          <AnimateIn>
+            <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-[hsl(260,8%,46%)] mb-4">FAQ</div>
+            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(260,20%,16%)] mb-14">
+              Common questions
             </h2>
-            <p className="text-muted-foreground">
-              Everything you need to know about FloodEx.
-            </p>
-          </div>
+          </AnimateIn>
           <FAQAccordion />
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-16 sm:py-20 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-primary/10 rounded-full blur-3xl" />
+      <div className="py-4" />
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6">
-            Ready to Transform Your{' '}
-            <span className="text-primary">Restoration Business?</span>
+      {/* Final CTA */}
+      <div className="mx-4 md:mx-8 my-8 rounded-[32px] bg-[hsl(260,20%,16%)] px-6 md:px-12 py-20 md:py-28 text-center">
+        <AnimateIn>
+          <h2 className="text-[clamp(34px,5vw,60px)] font-black leading-[1.0] tracking-[-0.04em] text-[hsl(37,30%,94%)] mb-4">
+            Ready to transform your<br /><span className="text-primary">restoration business?</span>
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
+          <p className="text-[17px] text-white/40 font-medium mb-12 max-w-lg mx-auto">
             Join restoration professionals who document faster, report smarter, and get paid quicker with FloodEx.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center gap-3 flex-wrap">
             <Link to="/auth?tab=signup">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto text-lg px-10 py-6 bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-105"
-              >
-                Start Your Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Button className="rounded-full shadow-none border-none bg-primary text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
+            </Link>
+            <Link to="/auth">
+              <Button variant="outline" className="rounded-full border-white/15 text-white/50 hover:bg-white/5 hover:text-white/70 text-base py-4 px-8">Go to dashboard</Button>
             </Link>
           </div>
-          <p className="text-sm text-muted-foreground mt-6">
-            No credit card required · 14-day free trial · Cancel anytime
-          </p>
-        </div>
-      </section>
+          <p className="mt-8 text-xs text-white/25 font-medium">No credit card required · 14-day free trial · Cancel anytime</p>
+        </AnimateIn>
+      </div>
     </MarketingLayout>
   );
 }
