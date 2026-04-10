@@ -44,7 +44,7 @@ export function DesktopSidebar() {
     <aside className="hidden md:flex w-64 flex-col bg-sidebar border-r border-sidebar-border">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
-        <img src={floodexLogo} alt="FloodEx" className="h-9 w-auto" />
+        <img src={floodexLogo} alt="FloodEx" className="h-11 w-auto" />
       </div>
 
       {/* Navigation */}

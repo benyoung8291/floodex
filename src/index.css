@@ -13,28 +13,30 @@
 
 @layer base {
   :root {
-    /* Light theme - default for all pages */
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* Light theme - matching marketing website aesthetic */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 7%;
 
     /* Blue primary - matching marketing site */
     --primary: 204 98% 37%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    /* Warm cream/tan secondary - matching marketing */
+    --secondary: 40 18% 89%;
+    --secondary-foreground: 0 0% 7%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 45%;
+    --muted: 40 18% 89%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    /* Coral accent - matching marketing */
+    --accent: 12 89% 64%;
+    --accent-foreground: 0 0% 100%;
 
     /* Red for destructive actions and hazards */
     --destructive: 0 84% 60%;
@@ -52,20 +54,21 @@
     --emergency: 0 84% 60%;
     --emergency-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    /* Warm borders matching marketing */
+    --border: 25 18% 88%;
+    --input: 25 18% 88%;
     --ring: 204 98% 37%;
 
     --radius: 0.75rem;
 
-    /* Sidebar - light theme */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 222 47% 11%;
+    /* Sidebar - warm light theme */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 7%;
     --sidebar-primary: 204 98% 37%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 32% 91%;
+    --sidebar-accent: 40 18% 93%;
+    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-border: 25 18% 88%;
     --sidebar-ring: 204 98% 37%;
 
     /* Chart colors for psychrometric data */
