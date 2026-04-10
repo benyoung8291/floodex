@@ -207,7 +207,7 @@ export default function Auth() {
   if (inviteToken) {
     if (inviteLoading) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="marketing-theme min-h-screen flex items-center justify-center p-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       );
@@ -215,7 +215,7 @@ export default function Auth() {
 
     if (!invitation) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        <div className="marketing-theme min-h-screen flex items-center justify-center p-4">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center mb-4">
@@ -261,7 +261,7 @@ export default function Auth() {
     };
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="marketing-theme min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
@@ -367,7 +367,7 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="marketing-theme min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
