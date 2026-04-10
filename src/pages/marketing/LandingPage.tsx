@@ -238,7 +238,7 @@ export default function LandingPage() {
               <Button className="rounded-full shadow-none border-none bg-accent text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
             </Link>
             <Link to="/auth">
-              <Button variant="outline" className="rounded-full border-white/15 text-white/50 hover:bg-white/5 hover:text-white/70 text-base py-4 px-8">Go to dashboard</Button>
+              <Button variant="outline" className="rounded-full border-white/30 text-white font-bold hover:bg-white/10 text-base py-4 px-8">Go to dashboard</Button>
             </Link>
           </div>
           <p className="mt-8 text-xs text-white/25 font-medium">No credit card required · 14-day free trial · Cancel anytime</p>
