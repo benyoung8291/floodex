@@ -42,8 +42,10 @@ export function MarketingLayout({ children }: MarketingLayoutProps) {
   const { pathname } = useLocation();
 
   return (
-    <div className="marketing-theme min-h-screen flex flex-col overflow-x-hidden">
-      <MarketingNav />
+    <div className="marketing-theme min-h-screen flex flex-col">
+      <div className="sticky top-0 z-50">
+        <MarketingNav />
+      </div>
       <AnimatePresence mode="wait">
         <motion.main
           key={pathname}

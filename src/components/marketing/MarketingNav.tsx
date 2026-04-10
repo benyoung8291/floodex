@@ -21,7 +21,7 @@ export function MarketingNav() {
   ];
 
   return (
-    <nav className="sticky top-4 z-50 mx-4 md:mx-8 mt-4 flex items-center justify-between px-3 py-2 bg-white/80 backdrop-blur-xl rounded-full border border-border/60 shadow-sm">
+    <nav className="mx-4 md:mx-8 mt-4 flex items-center justify-between px-3 py-2 bg-white/80 backdrop-blur-xl rounded-full border border-border/60 shadow-sm">
       <Link to="/" className="flex items-center gap-2 no-underline pl-2">
         <img src={floodexLogo} alt="FloodEx" className="h-10 w-auto" />
       </Link>
