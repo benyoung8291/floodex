@@ -139,8 +139,8 @@ export default function Auth() {
           toast.error(error.message);
         }
       } else {
-        toast.success('Account created! Your 14-day trial has started.');
-        navigate('/dashboard');
+        setConfirmationEmail(validated.email);
+        setShowEmailConfirmation(true);
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
