@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Droplets } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import floodexLogo from '@/assets/floodex-logo.png';
 
 export function MarketingNav() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,11 +22,8 @@ export function MarketingNav() {
 
   return (
     <nav className="sticky top-4 z-50 mx-4 md:mx-8 mt-4 flex items-center justify-between px-3 py-2 bg-white/80 backdrop-blur-xl rounded-full border border-border/60 shadow-sm">
-      <Link to="/" className="flex items-center gap-2 text-lg font-black tracking-tight no-underline text-foreground pl-2">
-        <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-black tracking-tight">
-          <Droplets className="w-4 h-4" />
-        </div>
-        Flood<span className="text-primary">Ex</span>
+      <Link to="/" className="flex items-center gap-2 no-underline pl-2">
+        <img src={floodexLogo} alt="FloodEx" className="h-7 w-auto" />
       </Link>
       <div className="hidden md:flex items-center gap-1">
         {navLinks.map((link) => (
