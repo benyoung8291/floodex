@@ -9,16 +9,40 @@ interface MarketingLayoutProps {
 }
 
 const pageVariants = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' as const } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: 'easeIn' as const } },
+  initial: {
+    opacity: 0,
+    scale: 0.96,
+    filter: 'blur(6px)',
+    y: 40,
+  },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px)',
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1] as const,
+      staggerChildren: 0.06,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 1.02,
+    filter: 'blur(4px)',
+    y: -30,
+    transition: {
+      duration: 0.3,
+      ease: [0.55, 0, 1, 0.45] as const,
+    },
+  },
 };
 
 export function MarketingLayout({ children }: MarketingLayoutProps) {
   const { pathname } = useLocation();
 
   return (
-    <div className="marketing-theme min-h-screen flex flex-col">
+    <div className="marketing-theme min-h-screen flex flex-col overflow-x-hidden">
       <MarketingNav />
       <AnimatePresence mode="wait">
         <motion.main
