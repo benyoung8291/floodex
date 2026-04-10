@@ -207,6 +207,51 @@ export default function Auth() {
     ? getErrorDetails(acceptInvitation.error as AcceptInvitationError) 
     : null;
 
+  // Show email confirmation screen after signup
+  if (showEmailConfirmation) {
+    return (
+      <div className="marketing-theme min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(204_98%_37%/0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,hsl(204_98%_37%/0.05),transparent_50%)]" />
+        <div className="w-full max-w-md relative z-10">
+          <div className="flex flex-col items-center mb-8">
+            <img src={floodexLogo} alt="FloodEx" className="h-12 w-auto" />
+          </div>
+          <Card className="border-border">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <Mail className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Check your email</CardTitle>
+              <CardDescription className="mt-2">
+                We've sent a confirmation link to{' '}
+                <strong className="text-foreground">{confirmationEmail}</strong>.
+                Click the link in the email to verify your account and start your 14-day free trial.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert>
+                <Mail className="h-4 w-4" />
+                <AlertDescription>
+                  Didn't receive the email? Check your spam folder or try signing up again.
+                </AlertDescription>
+              </Alert>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowEmailConfirmation(false);
+                  setConfirmationEmail('');
+                }}
+              >
+                Back to Sign In
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   // Show invitation acceptance UI if we have a valid invite token
   if (inviteToken) {
     if (inviteLoading) {
