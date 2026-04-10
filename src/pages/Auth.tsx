@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Droplets, Loader2, UserPlus, AlertCircle, Check, X, Mail } from 'lucide-react';
+import { Loader2, UserPlus, AlertCircle, Check, X, Mail } from 'lucide-react';
+import floodexLogo from '@/assets/floodex-logo.png';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useValidateInvitation, useAcceptInvitation, AcceptInvitationError } from '@/hooks/useTeamInvitations';
@@ -264,10 +265,7 @@ export default function Auth() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4">
-              <Droplets className="w-10 h-10 text-primary-foreground" />
-            </div>
-            <h1 className="text-3xl font-bold">FloodEx</h1>
+            <img src={floodexLogo} alt="FloodEx" className="h-12 w-auto" />
           </div>
 
           <Card className="border-border">
@@ -373,11 +371,8 @@ export default function Auth() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4">
-            <Droplets className="w-10 h-10 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-bold">FloodEx</h1>
-          <p className="text-muted-foreground mt-2">Flood Restoration Management</p>
+          <img src={floodexLogo} alt="FloodEx" className="h-12 w-auto mb-2" />
+          <p className="text-muted-foreground">Flood Restoration Management</p>
         </div>
 
         <Card className="border-border">
