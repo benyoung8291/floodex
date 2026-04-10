@@ -61,6 +61,10 @@ export default function Auth() {
   const { data: invitation, isLoading: inviteLoading } = useValidateInvitation(inviteToken);
   const acceptInvitation = useAcceptInvitation();
 
+  // Email confirmation state
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState('');
+
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
