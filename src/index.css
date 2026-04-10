@@ -229,28 +229,30 @@
   }
 }
 
-/* Marketing theme - Subfloor-inspired cream/editorial style */
+/* Marketing theme - Clean light with blue & coral pops */
 .marketing-theme {
-  --background: 37 30% 94%;
-  --foreground: 260 20% 16%;
+  --background: 0 0% 98%;
+  --foreground: 0 0% 7%;
   --card: 0 0% 100%;
-  --card-foreground: 260 20% 16%;
+  --card-foreground: 0 0% 7%;
   --popover: 0 0% 100%;
-  --popover-foreground: 260 20% 16%;
-  --primary: 25 95% 53%;
+  --popover-foreground: 0 0% 7%;
+  --primary: 204 98% 37%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 37 28% 90%;
-  --secondary-foreground: 260 20% 16%;
-  --muted: 37 20% 90%;
-  --muted-foreground: 260 8% 46%;
-  --accent: 38 90% 91%;
-  --accent-foreground: 260 20% 16%;
-  --border: 260 12% 82%;
-  --input: 260 12% 82%;
-  --ring: 25 95% 53%;
+  --secondary: 40 18% 89%;
+  --secondary-foreground: 0 0% 7%;
+  --muted: 40 18% 89%;
+  --muted-foreground: 0 0% 40%;
+  --accent: 12 89% 64%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 25 18% 78%;
+  --input: 25 18% 78%;
+  --ring: 204 98% 37%;
   --radius: 14px;
-  background-color: hsl(37 30% 94%);
-  color: hsl(260 20% 16%);
+  background-color: hsl(0 0% 98%);
+  color: hsl(0 0% 7%);
   font-family: 'Figtree', sans-serif;
 }
 
