@@ -13,28 +13,28 @@
 
 @layer base {
   :root {
-    /* Safety Mode - Dark Theme by default for field work */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 96%;
+    /* Light theme - default for all pages */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 217 33% 17%;
-    --card-foreground: 210 40% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 217 33% 17%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
     /* Blue primary - matching marketing site */
     --primary: 204 98% 37%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 22%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20% 45%;
 
-    --accent: 217 33% 22%;
-    --accent-foreground: 210 40% 96%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
 
     /* Red for destructive actions and hazards */
     --destructive: 0 84% 60%;
@@ -52,20 +52,20 @@
     --emergency: 0 84% 60%;
     --emergency-foreground: 0 0% 100%;
 
-    --border: 217 33% 25%;
-    --input: 217 33% 22%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
     --ring: 204 98% 37%;
 
     --radius: 0.75rem;
 
-    /* Sidebar - slightly lighter than background */
-    --sidebar-background: 217 33% 14%;
-    --sidebar-foreground: 210 40% 96%;
+    /* Sidebar - light theme */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 204 98% 37%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 22%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 217 33% 22%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
     --sidebar-ring: 204 98% 37%;
 
     /* Chart colors for psychrometric data */
@@ -76,28 +76,28 @@
     --chart-5: 262 83% 58%;
   }
 
-  /* Light mode override for office/admin use */
-  .light {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+  /* Dark mode override for field work */
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 96%;
 
     --primary: 204 98% 37%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 217 33% 22%;
+    --secondary-foreground: 210 40% 96%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 45%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 217 33% 22%;
+    --accent-foreground: 210 40% 96%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -111,17 +111,17 @@
     --emergency: 0 84% 60%;
     --emergency-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    --border: 217 33% 25%;
+    --input: 217 33% 22%;
     --ring: 204 98% 37%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 222 47% 11%;
+    --sidebar-background: 217 33% 14%;
+    --sidebar-foreground: 210 40% 96%;
     --sidebar-primary: 204 98% 37%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 32% 91%;
+    --sidebar-accent: 217 33% 22%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 217 33% 22%;
     --sidebar-ring: 204 98% 37%;
   }
 }
