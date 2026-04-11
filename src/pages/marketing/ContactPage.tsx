@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { SEOHead, generateBreadcrumbData } from '@/components/marketing/SEOHead';
 import { ContactForm } from '@/components/marketing/ContactForm';
 import { AnimateIn } from '@/components/marketing/AnimateIn';
 import { motion } from 'framer-motion';
@@ -8,6 +9,16 @@ import { MessageCircle, Clock, HelpCircle } from 'lucide-react';
 export default function ContactPage() {
   return (
     <MarketingLayout>
+      <SEOHead
+        title="Contact FloodEx – Get in Touch About Flood Restoration Software"
+        description="Have questions about FloodEx flood restoration software? Contact our Australian team. We respond within 24 hours. Get support, request a demo, or learn about our water damage documentation platform."
+        keywords="contact FloodEx, FloodEx support, flood restoration software enquiry, water damage software demo, restoration software contact"
+        canonicalPath="/contact"
+        structuredData={generateBreadcrumbData([
+          { name: 'Home', path: '/' },
+          { name: 'Contact', path: '/contact' },
+        ])}
+      />
       {/* Hero */}
       <section className="px-4 md:px-8 pt-16 md:pt-24 pb-12 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>

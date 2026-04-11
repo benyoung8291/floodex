@@ -17,7 +17,7 @@ export function HeroSection() {
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
         <div className="inline-flex items-center gap-2 bg-foreground text-white text-[13px] font-bold px-4 py-[7px] rounded-full mb-8">
           <div className="w-2 h-2 rounded-full bg-accent" />
-          Australia's flood restoration documentation platform
+          Australia's #1 flood restoration documentation platform
         </div>
       </motion.div>
 
@@ -28,7 +28,7 @@ export function HeroSection() {
       </motion.h1>
 
       <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-muted-foreground max-w-[540px] leading-[1.7] font-medium mb-12">
-        Stop wrestling with paper forms and spreadsheets. FloodEx is the mobile-first platform that helps restoration technicians track moisture, capture evidence, and generate professional reports — all from the field.
+        Stop wrestling with paper forms and spreadsheets. FloodEx is the mobile-first <strong>flood restoration software</strong> that helps restoration technicians track moisture readings, capture photo evidence, and generate <strong>IICRC-compliant reports</strong> — all from the field.
       </motion.p>
 
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5 }} className="flex items-center gap-3 flex-wrap mb-16">
@@ -51,6 +51,13 @@ export function HeroSection() {
             <div className="text-xs text-muted-foreground mt-1 font-medium">{s.label}</div>
           </div>
         ))}
+      </motion.div>
+
+      {/* SEO-rich text below the fold */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }} className="mt-16 max-w-[640px]">
+        <p className="text-[13px] text-muted-foreground/60 leading-[1.7] font-medium">
+          FloodEx is purpose-built <Link to="/water-damage-restoration-software" className="text-primary/60 hover:text-primary no-underline">water damage restoration software</Link> for Australian restoration companies. Track <Link to="/moisture-tracking-software" className="text-primary/60 hover:text-primary no-underline">moisture readings</Link> with automatic g/kg calculations, document damage with annotated photos, and generate <Link to="/restoration-reporting-software" className="text-primary/60 hover:text-primary no-underline">one-click IICRC-compliant PDF reports</Link>. A smarter <Link to="/encircle-alternative" className="text-primary/60 hover:text-primary no-underline">alternative to Encircle</Link> at a fraction of the price — free tier available.
+        </p>
       </motion.div>
     </section>
   );

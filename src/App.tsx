@@ -16,6 +16,10 @@ import PricingPage from "./pages/marketing/PricingPage";
 import AboutPage from "./pages/marketing/AboutPage";
 import ContactPage from "./pages/marketing/ContactPage";
 import ComparePage from "./pages/marketing/ComparePage";
+import WaterDamageRestorationSoftwarePage from "./pages/marketing/WaterDamageRestorationSoftwarePage";
+import MoistureTrackingSoftwarePage from "./pages/marketing/MoistureTrackingSoftwarePage";
+import EncircleAlternativePage from "./pages/marketing/EncircleAlternativePage";
+import RestorationReportingSoftwarePage from "./pages/marketing/RestorationReportingSoftwarePage";
 
 // App Pages
 import Auth from "./pages/Auth";
@@ -56,7 +60,11 @@ const App = () => (
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/compare" element={<ComparePage />} />
-            
+            <Route path="/water-damage-restoration-software" element={<WaterDamageRestorationSoftwarePage />} />
+            <Route path="/moisture-tracking-software" element={<MoistureTrackingSoftwarePage />} />
+            <Route path="/encircle-alternative" element={<EncircleAlternativePage />} />
+            <Route path="/restoration-reporting-software" element={<RestorationReportingSoftwarePage />} />
+
             {/* Public routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/share/:token" element={<ShareJob />} />

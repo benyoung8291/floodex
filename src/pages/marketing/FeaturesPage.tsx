@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { SEOHead, generateBreadcrumbData } from '@/components/marketing/SEOHead';
 import { AnimateIn, StaggerContainer, StaggerItem, ScaleIn } from '@/components/marketing/AnimateIn';
 import { AppMockup } from '@/components/marketing/AppMockup';
 import { motion } from 'framer-motion';
@@ -78,6 +79,16 @@ const extraFeatures = [
 export default function FeaturesPage() {
   return (
     <MarketingLayout>
+      <SEOHead
+        title="Flood Restoration Software Features | FloodEx – Moisture Tracking, Reports, Equipment & More"
+        description="Explore FloodEx features: moisture tracking with auto g/kg calculations, photo documentation with annotations, one-click IICRC-compliant PDF reports, equipment tracking, psychrometric calculations, and team collaboration."
+        keywords="flood restoration software features, moisture tracking features, photo documentation restoration, one-click PDF reports, equipment tracking software, psychrometric calculator, team collaboration restoration, drying trend charts, IICRC compliant documentation"
+        canonicalPath="/features"
+        structuredData={generateBreadcrumbData([
+          { name: 'Home', path: '/' },
+          { name: 'Features', path: '/features' },
+        ])}
+      />
       {/* Hero */}
       <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>

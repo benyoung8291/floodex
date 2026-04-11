@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { SEOHead, generateBreadcrumbData } from '@/components/marketing/SEOHead';
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/marketing/AnimateIn';
 import { motion } from 'framer-motion';
 import { Zap, Shield, Users, Lightbulb } from 'lucide-react';
@@ -15,6 +16,16 @@ const values = [
 export default function AboutPage() {
   return (
     <MarketingLayout>
+      <SEOHead
+        title="About FloodEx – Australian-Built Flood Restoration Software"
+        description="FloodEx is built by restoration professionals, for restoration professionals. Australian-owned and operated by Local Carpet Cleaning Pty Ltd. Learn our story and mission to empower water damage restoration teams."
+        keywords="about FloodEx, Australian restoration software, flood restoration company, water damage software Australia, Local Carpet Cleaning Pty Ltd, restoration technology"
+        canonicalPath="/about"
+        structuredData={generateBreadcrumbData([
+          { name: 'Home', path: '/' },
+          { name: 'About', path: '/about' },
+        ])}
+      />
       {/* Hero */}
       <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>

@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { SEOHead, generateFAQData } from '@/components/marketing/SEOHead';
 import { HeroSection } from '@/components/marketing/HeroSection';
 import { AnimateIn, StaggerContainer, StaggerItem, ScaleIn } from '@/components/marketing/AnimateIn';
-import { FAQAccordion } from '@/components/marketing/FAQAccordion';
+import { FAQAccordion, faqs as faqData } from '@/components/marketing/FAQAccordion';
 import { AppMockup } from '@/components/marketing/AppMockup';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import {
@@ -33,6 +34,13 @@ export default function LandingPage() {
 
   return (
     <MarketingLayout>
+      <SEOHead
+        title="FloodEx – #1 Flood Restoration Software Australia | Water Damage Documentation & Reporting"
+        description="Australia's leading flood restoration software. Track moisture readings with auto g/kg calculations, document water damage with annotated photos, generate IICRC-compliant PDF reports. Free to start. Purpose-built for restoration technicians."
+        keywords="flood restoration software, water damage restoration software, moisture tracking app, drying log software, IICRC compliant reports, water damage documentation, restoration management software, psychrometric calculator, flood restoration app Australia"
+        canonicalPath="/"
+        structuredData={generateFAQData(faqData)}
+      />
       <HeroSection />
 
       {/* Problem / Solution */}
