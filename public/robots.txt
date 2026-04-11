@@ -1,8 +1,13 @@
+# FloodEx - Flood Restoration Software
+# https://floodex.lovable.app
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 2
 
 User-agent: Twitterbot
 Allow: /
@@ -10,7 +15,25 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /jobs
+Disallow: /readings
+Disallow: /equipment
+Disallow: /photos
+Disallow: /reports
+Disallow: /settings
+Disallow: /team
+Disallow: /billing
+Disallow: /admin
+Disallow: /auth
+Disallow: /share/
 
 Sitemap: https://floodex.lovable.app/sitemap.xml

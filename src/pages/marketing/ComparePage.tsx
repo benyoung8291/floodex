@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { SEOHead, generateBreadcrumbData } from '@/components/marketing/SEOHead';
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/marketing/AnimateIn';
 import { ComparisonTable } from '@/components/marketing/ComparisonTable';
 import { motion } from 'framer-motion';
@@ -84,6 +85,16 @@ const differentiators = [
 export default function ComparePage() {
   return (
     <MarketingLayout>
+      <SEOHead
+        title="FloodEx vs Encircle vs Xactimate vs DASH – Restoration Software Comparison 2026"
+        description="Compare FloodEx with Encircle, Xactimate, and DASH. Feature-by-feature comparison of water damage restoration software. See why FloodEx offers more value with transparent pricing and a free tier."
+        keywords="FloodEx vs Encircle, FloodEx vs Xactimate, FloodEx vs DASH, restoration software comparison, water damage software comparison, best restoration software 2026, Encircle alternative, Xactimate alternative"
+        canonicalPath="/compare"
+        structuredData={generateBreadcrumbData([
+          { name: 'Home', path: '/' },
+          { name: 'Compare', path: '/compare' },
+        ])}
+      />
       {/* Hero */}
       <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>

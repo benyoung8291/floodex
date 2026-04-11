@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
-const faqs = [
+export const faqs = [
   {
     question: "How does the 14-day free trial work?",
     answer: "Start using FloodEx immediately with full access to all features. No credit card required. At the end of your trial, choose a plan that fits your needs or continue with our free tier.",
@@ -37,6 +37,22 @@ const faqs = [
   {
     question: "Is there a mobile app?",
     answer: "FloodEx is a mobile-first web application that works on any device with a browser. Simply open FloodEx in your mobile browser and add it to your home screen for an app-like experience. No app store download required!",
+  },
+  {
+    question: "What makes FloodEx different from other restoration software?",
+    answer: "FloodEx is purpose-built for water damage restoration — not adapted from generic field service software. It features automatic g/kg calculations, psychrometric data, IICRC-compliant reports, and a mobile-first design for field use. Unlike Encircle ($250+/mo), FloodEx starts free with paid plans from $49 AUD/month.",
+  },
+  {
+    question: "Does FloodEx generate IICRC-compliant reports?",
+    answer: "Yes. FloodEx reports include moisture readings with g/kg calculations, psychrometric data (dew point, vapour pressure, specific humidity), drying trend charts, equipment logs, and photo documentation — meeting IICRC S500 documentation standards.",
+  },
+  {
+    question: "Can I track equipment with FloodEx?",
+    answer: "Yes. FloodEx lets you assign dehumidifiers, air movers, sensors, and other restoration equipment to jobs. Track runtime, calculate costs, and include all equipment data in your reports automatically.",
+  },
+  {
+    question: "How does FloodEx compare to Encircle?",
+    answer: "FloodEx offers the same core features as Encircle — moisture tracking, photo documentation, IICRC-compliant reports, and team collaboration — at a fraction of the price. FloodEx starts free and plans begin at $49 AUD/month, compared to Encircle at $250+ USD/month. FloodEx is also Australian-built with local support.",
   },
 ];
 

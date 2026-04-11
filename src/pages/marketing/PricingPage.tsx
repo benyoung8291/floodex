@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
+import { SEOHead, generateBreadcrumbData } from '@/components/marketing/SEOHead';
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/marketing/AnimateIn';
 import { FAQAccordion } from '@/components/marketing/FAQAccordion';
 import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
@@ -26,6 +27,16 @@ export default function PricingPage() {
 
   return (
     <MarketingLayout>
+      <SEOHead
+        title="FloodEx Pricing – Flood Restoration Software from $0/month | Free Tier Available"
+        description="FloodEx pricing starts free. Plans from $49 AUD/month for water damage restoration software. No contracts, 14-day free trial, 30-day money-back guarantee. Compare features across Free, Standard, Pro, and Enterprise plans."
+        keywords="flood restoration software pricing, water damage software cost, FloodEx pricing, restoration software plans, cheap restoration software, Encircle pricing alternative, free restoration software, water damage app pricing"
+        canonicalPath="/pricing"
+        structuredData={generateBreadcrumbData([
+          { name: 'Home', path: '/' },
+          { name: 'Pricing', path: '/pricing' },
+        ])}
+      />
       {/* Hero */}
       <section className="px-4 md:px-8 pt-16 md:pt-24 pb-20 md:pb-28 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
