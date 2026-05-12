@@ -88,6 +88,8 @@ export function createStripeClient(env: StripeEnv) {
     },
     subscriptions: {
       retrieve: (id: string) => request(env, "GET", `/subscriptions/${id}`),
+      update: (id: string, body: any) => request(env, "POST", `/subscriptions/${id}`, body),
+      cancel: (id: string) => request(env, "DELETE", `/subscriptions/${id}`),
     },
     webhooks: {
       // Stripe-style HMAC verification
