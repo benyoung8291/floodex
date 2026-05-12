@@ -1,8 +1,11 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { DesktopSidebar } from './DesktopSidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { TopHeader } from './TopHeader';
+import { CaptureFAB } from './CaptureFAB';
+import { CommandPalette, useCommandPalette } from './CommandPalette';
 import { UsageWarningBanner } from '@/components/billing/UsageWarningBanner';
 import { TrialBanner } from '@/components/billing/TrialBanner';
 import { ImpersonationBanner } from '@/components/admin/ImpersonationBanner';
@@ -15,38 +18,41 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const isMobile = useIsMobile();
+  const location = useLocation();
   const { user, isTenantAdmin, isImpersonating } = useAuth();
+  const palette = useCommandPalette();
+
+  // Hide global FAB on routes that have their own primary capture (e.g. wizards)
+  const hideFab = /\/jobs\/new/.test(location.pathname);
 
   return (
-    <div className="min-h-dvh flex w-full bg-background overflow-x-hidden max-w-full">
-      {/* Impersonation Banner - fixed at top */}
+    <div className="min-h-dvh flex w-full bg-background max-w-full">
       {isImpersonating && <ImpersonationBanner />}
 
-      {/* Desktop Sidebar */}
       {!isMobile && <DesktopSidebar />}
 
-      {/* Main Content Area */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-dvh overflow-x-hidden max-w-full",
+        "flex-1 flex flex-col min-h-dvh max-w-full min-w-0",
         isImpersonating && "pt-10"
       )}>
-        {/* Billing Banners - only show for logged in tenant admins, not during impersonation */}
         {user && isTenantAdmin && !isImpersonating && (
           <>
             <TrialBanner />
             <UsageWarningBanner />
           </>
         )}
-        
-        <TopHeader />
-        
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 pb-20 md:pb-4">
+
+        <TopHeader onOpenSearch={() => palette.setOpen(true)} />
+
+        <main className="flex-1 overflow-y-auto p-4 pb-24 md:pb-4 min-w-0">
           {children}
         </main>
 
-        {/* Mobile Bottom Navigation */}
         {isMobile && <MobileBottomNav />}
       </div>
+
+      {!hideFab && <CaptureFAB />}
+      <CommandPalette open={palette.open} onOpenChange={palette.setOpen} />
     </div>
   );
 }

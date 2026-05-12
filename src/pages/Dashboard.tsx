@@ -1,13 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2, Droplets, TrendingUp, Gauge } from 'lucide-react';
+import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2, Droplets, TrendingUp, Gauge, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useJobs } from '@/hooks/useJobs';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
+import { useNextActions } from '@/hooks/useNextAction';
+import { NextActionCard } from '@/components/jobs/NextActionCard';
 import { useReadingsStats } from '@/hooks/useAllReadings';
 import { useTenant } from '@/hooks/useTenant';
 import { formatHumidityRatio, getHumidityRatioStatus, type UnitSystem } from '@/lib/psychrometrics';
@@ -95,18 +97,20 @@ export default function Dashboard() {
   };
 
   const showOnboarding = !onboardingLoading && !isOnboardingComplete;
+  const nextActions = useNextActions(jobs);
+  const topActions = nextActions.slice(0, 5);
 
   return (
     <>
       {showOnboarding && <OnboardingWizard />}
-      
+
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <h1 className="text-2xl font-bold">Today</h1>
             <p className="text-muted-foreground">
-              Good {new Date().getHours() < 12 ? 'morning' : 'afternoon'}, welcome back
+              Good {new Date().getHours() < 12 ? 'morning' : 'afternoon'} — here's what needs you
             </p>
           </div>
           <Button onClick={() => navigate('/jobs/new')} className="gap-2">
@@ -114,6 +118,37 @@ export default function Dashboard() {
             <span className="hidden sm:inline">New Job</span>
           </Button>
         </div>
+
+        {/* Needs attention */}
+        {!isLoading && (
+          <section aria-labelledby="needs-attention" className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 id="needs-attention" className="text-lg font-semibold flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                Needs attention
+              </h2>
+              {nextActions.length > 5 && (
+                <Button variant="ghost" size="sm" onClick={() => navigate('/jobs')}>
+                  See all {nextActions.length}
+                </Button>
+              )}
+            </div>
+            {topActions.length === 0 ? (
+              <Card className="border-success/30 bg-success/5">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  <p className="text-sm">All clear. No overdue readings or emergencies.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-2">
+                {topActions.map((action) => (
+                  <NextActionCard key={action.jobId + action.title} action={action} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Job Status Stats - Scrollable chips on mobile */}
         <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible">
