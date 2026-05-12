@@ -276,6 +276,32 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
           )}
         </div>
       </CardContent>
+
+      <AlertDialog open={confirmCancelOpen} onOpenChange={setConfirmCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your {tier?.name ?? 'current'} plan will remain active until
+              {periodEnd ? <> <strong>{periodEnd}</strong></> : ' the end of your current billing period'}.
+              You won't be charged again. You can reactivate any time before then.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isMutating}>Keep subscription</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirmCancel();
+              }}
+              disabled={isMutating}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isMutating ? 'Cancelling…' : 'Cancel subscription'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
