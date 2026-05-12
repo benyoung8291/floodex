@@ -1,13 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2, Droplets, TrendingUp, Gauge } from 'lucide-react';
+import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2, Droplets, TrendingUp, Gauge, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useJobs } from '@/hooks/useJobs';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
+import { useNextActions } from '@/hooks/useNextAction';
+import { NextActionCard } from '@/components/jobs/NextActionCard';
 import { useReadingsStats } from '@/hooks/useAllReadings';
 import { useTenant } from '@/hooks/useTenant';
 import { formatHumidityRatio, getHumidityRatioStatus, type UnitSystem } from '@/lib/psychrometrics';
