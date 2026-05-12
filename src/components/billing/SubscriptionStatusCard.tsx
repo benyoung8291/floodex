@@ -74,9 +74,49 @@ type DisplayState =
   | 'unknown';
 
 export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardProps) {
-  const { data: subscription, isLoading } = useTenantSubscription();
-  const { data: stripeSub } = useStripeSubscription();
+  const { data: subscription, isLoading, refetch: refetchTenantSub } = useTenantSubscription();
+  const { data: stripeSub, refetch: refetchStripeSub } = useStripeSubscription();
   const { openCustomerPortal, isPortalLoading } = useStripeCheckout();
+  const queryClient = useQueryClient();
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
+  const [isMutating, setIsMutating] = useState(false);
+
+  const callCancelFn = async (body: { immediate?: boolean; reactivate?: boolean }) => {
+    setIsMutating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+        body: { ...body, environment: getStripeEnvironment() },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    try {
+      await callCancelFn({});
+      toast.success('Subscription will end at the end of your billing period.');
+      setConfirmCancelOpen(false);
+      await Promise.all([refetchTenantSub(), refetchStripeSub()]);
+      queryClient.invalidateQueries({ queryKey: ['stripe-subscription'] });
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Failed to cancel subscription');
+    }
+  };
+
+  const handleReactivate = async () => {
+    try {
+      await callCancelFn({ reactivate: true });
+      toast.success('Subscription reactivated.');
+      await Promise.all([refetchTenantSub(), refetchStripeSub()]);
+      queryClient.invalidateQueries({ queryKey: ['stripe-subscription'] });
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Failed to reactivate subscription');
+    }
+  };
 
   if (isLoading) {
     return (
