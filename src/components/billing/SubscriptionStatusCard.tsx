@@ -1,6 +1,17 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Crown,
   ExternalLink,
@@ -10,13 +21,16 @@ import {
   Clock,
   CreditCard,
   LifeBuoy,
+  Ban,
 } from 'lucide-react';
 import { differenceInDays, format, parseISO } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenantSubscription } from '@/hooks/useSubscriptionTiers';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { getStripeEnvironment } from '@/lib/stripe';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const SUPPORT_EMAIL = 'support@floodex.com.au';
@@ -60,9 +74,49 @@ type DisplayState =
   | 'unknown';
 
 export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardProps) {
-  const { data: subscription, isLoading } = useTenantSubscription();
-  const { data: stripeSub } = useStripeSubscription();
+  const { data: subscription, isLoading, refetch: refetchTenantSub } = useTenantSubscription();
+  const { data: stripeSub, refetch: refetchStripeSub } = useStripeSubscription();
   const { openCustomerPortal, isPortalLoading } = useStripeCheckout();
+  const queryClient = useQueryClient();
+  const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
+  const [isMutating, setIsMutating] = useState(false);
+
+  const callCancelFn = async (body: { immediate?: boolean; reactivate?: boolean }) => {
+    setIsMutating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+        body: { ...body, environment: getStripeEnvironment() },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    try {
+      await callCancelFn({});
+      toast.success('Subscription will end at the end of your billing period.');
+      setConfirmCancelOpen(false);
+      await Promise.all([refetchTenantSub(), refetchStripeSub()]);
+      queryClient.invalidateQueries({ queryKey: ['stripe-subscription'] });
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Failed to cancel subscription');
+    }
+  };
+
+  const handleReactivate = async () => {
+    try {
+      await callCancelFn({ reactivate: true });
+      toast.success('Subscription reactivated.');
+      await Promise.all([refetchTenantSub(), refetchStripeSub()]);
+      queryClient.invalidateQueries({ queryKey: ['stripe-subscription'] });
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Failed to reactivate subscription');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -171,10 +225,10 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
             </Button>
           )}
 
-          {state === 'cancel_pending' && hasStripeCustomer && (
+          {state === 'cancel_pending' && (
             <Button
-              onClick={openCustomerPortal}
-              disabled={isPortalLoading}
+              onClick={handleReactivate}
+              disabled={isMutating}
               className="gap-2"
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -185,6 +239,18 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
           {state !== 'cancelled' && (
             <Button variant="outline" onClick={onChangePlan}>
               Change plan
+            </Button>
+          )}
+
+          {state === 'active' && (
+            <Button
+              variant="outline"
+              onClick={() => setConfirmCancelOpen(true)}
+              disabled={isMutating}
+              className="gap-2 text-destructive hover:text-destructive"
+            >
+              <Ban className="w-4 h-4" />
+              Cancel subscription
             </Button>
           )}
 
@@ -210,6 +276,32 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
           )}
         </div>
       </CardContent>
+
+      <AlertDialog open={confirmCancelOpen} onOpenChange={setConfirmCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your {tier?.name ?? 'current'} plan will remain active until
+              {periodEnd ? <> <strong>{periodEnd}</strong></> : ' the end of your current billing period'}.
+              You won't be charged again. You can reactivate any time before then.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isMutating}>Keep subscription</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirmCancel();
+              }}
+              disabled={isMutating}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isMutating ? 'Cancelling…' : 'Cancel subscription'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
