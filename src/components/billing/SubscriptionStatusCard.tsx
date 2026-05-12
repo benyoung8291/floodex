@@ -1,6 +1,17 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Crown,
   ExternalLink,
@@ -10,13 +21,16 @@ import {
   Clock,
   CreditCard,
   LifeBuoy,
+  Ban,
 } from 'lucide-react';
 import { differenceInDays, format, parseISO } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTenantSubscription } from '@/hooks/useSubscriptionTiers';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { getStripeEnvironment } from '@/lib/stripe';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const SUPPORT_EMAIL = 'support@floodex.com.au';
