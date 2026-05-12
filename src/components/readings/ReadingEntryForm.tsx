@@ -135,6 +135,11 @@ export function ReadingEntryForm({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Log Reading - {chamberName}</DialogTitle>
+          {previousReading && prevTempInDisplayUnit !== null && prevRH !== null && (
+            <p className="text-xs text-muted-foreground">
+              Prefilled from last reading: {prevTempInDisplayUnit}°{temperatureUnit} · {prevRH}% RH · {formatHumidityRatio(previousReading.gpp, units)}
+            </p>
+          )}
         </DialogHeader>
 
         <Tabs value={readingType} onValueChange={(v) => setReadingType(v as 'ambient' | 'material')}>
