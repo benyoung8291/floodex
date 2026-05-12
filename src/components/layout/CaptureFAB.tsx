@@ -66,7 +66,7 @@ export function CaptureFAB({ className }: CaptureFABProps) {
           <Plus className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="rounded-t-2xl pb-safe">
+      <SheetContent side="bottom" className="rounded-t-2xl safe-bottom">
         <SheetHeader className="text-left">
           <SheetTitle>{inJob ? 'Capture for this job' : 'Quick capture'}</SheetTitle>
         </SheetHeader>
