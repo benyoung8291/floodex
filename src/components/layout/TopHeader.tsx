@@ -1,4 +1,4 @@
-import { Wifi, WifiOff, Bell } from 'lucide-react';
+import { Wifi, WifiOff, Bell, Search } from 'lucide-react';
 import floodexLogo from '@/assets/floodex-logo.png';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,11 @@ import {
 import { LogOut, Settings, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export function TopHeader() {
+interface TopHeaderProps {
+  onOpenSearch?: () => void;
+}
+
+export function TopHeader({ onOpenSearch }: TopHeaderProps = {}) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { user, signOut, roles } = useAuth();
   const navigate = useNavigate();
@@ -43,11 +47,23 @@ export function TopHeader() {
         <img src={floodexLogo} alt="FloodEx" className="h-10 w-auto" />
       </div>
 
-      {/* Spacer for desktop */}
-      <div className="hidden md:block" />
+      {/* Search trigger (desktop wide, mobile icon-only) */}
+      <button
+        onClick={onOpenSearch}
+        className="hidden md:flex items-center gap-2 flex-1 max-w-md mx-4 h-9 px-3 rounded-md border border-border bg-background/60 text-sm text-muted-foreground hover:bg-accent transition-colors"
+        aria-label="Open search (Ctrl+K)"
+      >
+        <Search className="w-4 h-4" />
+        <span className="flex-1 text-left">Search jobs, customers, actions…</span>
+        <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-muted rounded border border-border">⌘K</kbd>
+      </button>
+      <div className="md:hidden flex-1" />
 
       {/* Right side actions */}
       <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" className="md:hidden" onClick={onOpenSearch} aria-label="Search">
+          <Search className="w-5 h-5" />
+        </Button>
         {/* Online/Offline Status */}
         <div
           className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
