@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { SubscriptionStatusCard } from '@/components/billing/SubscriptionStatusCard';
 import { UsageMeters } from '@/components/billing/UsageMeters';
 import { PlanComparison } from '@/components/billing/PlanComparison';
+import { PaymentTestModeBanner } from '@/components/billing/PaymentTestModeBanner';
 
 export default function Billing() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,6 +34,7 @@ export default function Billing() {
 
   return (
     <div className="space-y-6">
+      <PaymentTestModeBanner />
       <div>
         <h1 className="text-2xl font-bold">Billing & Usage</h1>
         <p className="text-muted-foreground">Manage your subscription and monitor usage</p>

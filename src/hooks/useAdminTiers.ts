@@ -189,8 +189,8 @@ export function useToggleTierStatus() {
 // Stripe products are now managed by Lovable's built-in payments — no manual sync needed.
 export function useSyncTierToStripe() {
   return {
-    mutate: () => toast.info('Products are managed automatically by Lovable Payments.'),
-    mutateAsync: async () => {},
+    mutate: (_tier?: unknown) => toast.info('Products are managed automatically by Lovable Payments.'),
+    mutateAsync: async (_tier?: unknown) => {},
     isPending: false,
   };
 }
