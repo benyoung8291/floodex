@@ -1,84 +1,68 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
-
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-
-    if (userError || !user) {
-      console.error("Auth error:", userError);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const user = userData.user;
+    const { returnUrl, environment } = await req.json().catch(() => ({}));
+    const env: StripeEnv = environment === "live" ? "live" : "sandbox";
 
-    // Get the user's tenant
-    const { data: profile } = await supabaseClient
+    const { data: profile } = await supabase
       .from("profiles")
       .select("tenant_id")
       .eq("id", user.id)
       .single();
+    if (!profile?.tenant_id) throw new Error("No tenant");
 
-    if (!profile?.tenant_id) {
-      return new Response(JSON.stringify({ error: "No tenant found" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Get tenant's Stripe customer ID
-    const { data: tenant } = await supabaseClient
-      .from("tenants")
+    const { data: sub } = await supabase
+      .from("subscriptions")
       .select("stripe_customer_id")
-      .eq("id", profile.tenant_id)
-      .single();
+      .eq("tenant_id", profile.tenant_id)
+      .eq("environment", env)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!sub?.stripe_customer_id) throw new Error("No subscription found");
 
-    if (!tenant?.stripe_customer_id) {
-      return new Response(JSON.stringify({ error: "No billing account found. Please subscribe to a plan first." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
+    const stripe = createStripeClient(env);
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: sub.stripe_customer_id,
+      ...(returnUrl && { return_url: returnUrl }),
     });
 
-    const origin = req.headers.get("origin") || "http://localhost:5173";
-
-    console.log("Creating portal session for customer:", tenant.stripe_customer_id);
-
-    const session = await stripe.billingPortal.sessions.create({
-      customer: tenant.stripe_customer_id,
-      return_url: `${origin}/billing`,
-    });
-
-    console.log("Portal session created:", session.id);
-
-    return new Response(JSON.stringify({ url: session.url }), {
+    return new Response(JSON.stringify({ url: portal.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: unknown) {
-    console.error("Error creating portal session:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("create-portal-session error:", message);
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
