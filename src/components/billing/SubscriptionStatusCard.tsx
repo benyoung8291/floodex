@@ -1,17 +1,67 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, ExternalLink, AlertTriangle } from 'lucide-react';
-import { differenceInDays, parseISO } from 'date-fns';
+import {
+  Crown,
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  CreditCard,
+  LifeBuoy,
+} from 'lucide-react';
+import { differenceInDays, format, parseISO } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTenantSubscription } from '@/hooks/useSubscriptionTiers';
 import { useStripeCheckout } from '@/hooks/useStripeCheckout';
+import { cn } from '@/lib/utils';
+
+const SUPPORT_EMAIL = 'support@floodex.com.au';
 
 interface SubscriptionStatusCardProps {
   onChangePlan: () => void;
 }
 
+interface StripeSubRow {
+  status: string;
+  cancel_at_period_end: boolean;
+  current_period_end: string | null;
+}
+
+function useStripeSubscription() {
+  const { tenantId } = useAuth();
+  return useQuery({
+    queryKey: ['stripe-subscription', tenantId],
+    enabled: !!tenantId,
+    queryFn: async (): Promise<StripeSubRow | null> => {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('status, cancel_at_period_end, current_period_end')
+        .eq('tenant_id', tenantId!)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) return null;
+      return (data as StripeSubRow | null) ?? null;
+    },
+  });
+}
+
+type DisplayState =
+  | 'trial'
+  | 'free'
+  | 'active'
+  | 'cancel_pending'
+  | 'past_due'
+  | 'cancelled'
+  | 'unknown';
+
 export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardProps) {
   const { data: subscription, isLoading } = useTenantSubscription();
+  const { data: stripeSub } = useStripeSubscription();
   const { openCustomerPortal, isPortalLoading } = useStripeCheckout();
 
   if (isLoading) {
@@ -28,22 +78,38 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
   }
 
   const tier = subscription?.currentTier;
-  const status = subscription?.subscription_status || 'trial';
+  const tenantStatus = subscription?.subscription_status || 'trial';
   const trialEndsAt = subscription?.trial_ends_at;
-  
-  let daysRemaining = 0;
-  if (trialEndsAt && status === 'trial') {
-    daysRemaining = differenceInDays(parseISO(trialEndsAt), new Date());
+  const hasStripeCustomer = !!subscription?.stripe_customer_id;
+
+  // Resolve display state: prefer Stripe-derived signals when available
+  let state: DisplayState = 'unknown';
+  if (tenantStatus === 'trial') state = 'trial';
+  else if (tenantStatus === 'free') state = 'free';
+  else if (stripeSub?.cancel_at_period_end && stripeSub.status === 'active') state = 'cancel_pending';
+  else if (stripeSub?.status === 'past_due' || tenantStatus === 'past_due') state = 'past_due';
+  else if (stripeSub?.status === 'canceled' || tenantStatus === 'cancelled') state = 'cancelled';
+  else if (stripeSub?.status === 'active' || stripeSub?.status === 'trialing' || tenantStatus === 'active') state = 'active';
+
+  let trialDaysRemaining = 0;
+  if (trialEndsAt && state === 'trial') {
+    trialDaysRemaining = Math.max(0, differenceInDays(parseISO(trialEndsAt), new Date()));
   }
 
-  const getStatusBadge = () => {
-    switch (status) {
+  const periodEnd = stripeSub?.current_period_end
+    ? format(parseISO(stripeSub.current_period_end), 'MMM d, yyyy')
+    : null;
+
+  const badge = (() => {
+    switch (state) {
       case 'trial':
         return <Badge variant="secondary">Trial</Badge>;
       case 'active':
         return <Badge className="bg-success text-success-foreground">Active</Badge>;
+      case 'cancel_pending':
+        return <Badge className="bg-warning text-warning-foreground">Ending soon</Badge>;
       case 'past_due':
-        return <Badge variant="destructive">Past Due</Badge>;
+        return <Badge variant="destructive">Past due</Badge>;
       case 'cancelled':
         return <Badge variant="outline">Cancelled</Badge>;
       case 'free':
@@ -51,7 +117,11 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
       default:
         return null;
     }
-  };
+  })();
+
+  const supportHref = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+    `Billing help — ${tier?.name ?? 'Subscription'} (${state})`,
+  )}`;
 
   return (
     <Card>
@@ -64,9 +134,9 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-2xl font-bold">{tier?.name || 'Free'}</span>
-              {getStatusBadge()}
+              {badge}
             </div>
             {tier && !tier.is_free_tier && (
               <p className="text-muted-foreground">
@@ -76,29 +146,49 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
           </div>
         </div>
 
-        {status === 'trial' && daysRemaining > 0 && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 text-primary">
-            <AlertTriangle className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              {daysRemaining} days remaining in trial
-            </span>
-          </div>
-        )}
+        <StateBanner
+          state={state}
+          trialDaysRemaining={trialDaysRemaining}
+          periodEnd={periodEnd}
+        />
 
-        {status === 'past_due' && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
-            <AlertTriangle className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              Payment failed. Please update your payment method.
-            </span>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {state === 'past_due' && hasStripeCustomer && (
+            <Button
+              onClick={openCustomerPortal}
+              disabled={isPortalLoading}
+              className="gap-2"
+            >
+              <CreditCard className="w-4 h-4" />
+              Update payment method
+            </Button>
+          )}
 
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onChangePlan} className="flex-1">
-            Change Plan
-          </Button>
-          {subscription?.stripe_customer_id && (
+          {state === 'cancelled' && (
+            <Button onClick={onChangePlan} className="gap-2">
+              <Crown className="w-4 h-4" />
+              Resubscribe
+            </Button>
+          )}
+
+          {state === 'cancel_pending' && hasStripeCustomer && (
+            <Button
+              onClick={openCustomerPortal}
+              disabled={isPortalLoading}
+              className="gap-2"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Reactivate subscription
+            </Button>
+          )}
+
+          {state !== 'cancelled' && (
+            <Button variant="outline" onClick={onChangePlan}>
+              Change plan
+            </Button>
+          )}
+
+          {hasStripeCustomer && state !== 'past_due' && (
             <Button
               variant="ghost"
               onClick={openCustomerPortal}
@@ -106,11 +196,98 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
               className="gap-2"
             >
               <ExternalLink className="w-4 h-4" />
-              Manage Billing
+              Manage billing
+            </Button>
+          )}
+
+          {(state === 'past_due' || state === 'cancelled') && (
+            <Button variant="ghost" asChild className="gap-2">
+              <a href={supportHref}>
+                <LifeBuoy className="w-4 h-4" />
+                Contact support
+              </a>
             </Button>
           )}
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function StateBanner({
+  state,
+  trialDaysRemaining,
+  periodEnd,
+}: {
+  state: DisplayState;
+  trialDaysRemaining: number;
+  periodEnd: string | null;
+}) {
+  if (state === 'trial' && trialDaysRemaining > 0) {
+    return (
+      <Banner tone="info" icon={Clock}>
+        <strong>{trialDaysRemaining} day{trialDaysRemaining === 1 ? '' : 's'}</strong>{' '}
+        remaining in your trial. Choose a plan to keep access.
+      </Banner>
+    );
+  }
+
+  if (state === 'active') {
+    return (
+      <Banner tone="success" icon={CheckCircle2}>
+        Your subscription is active{periodEnd ? <> — renews on <strong>{periodEnd}</strong></> : null}.
+      </Banner>
+    );
+  }
+
+  if (state === 'cancel_pending') {
+    return (
+      <Banner tone="warning" icon={AlertTriangle}>
+        Your subscription is set to cancel
+        {periodEnd ? <> on <strong>{periodEnd}</strong></> : null}. You still have full access until then.
+      </Banner>
+    );
+  }
+
+  if (state === 'past_due') {
+    return (
+      <Banner tone="destructive" icon={AlertTriangle}>
+        We couldn't charge your card. Update your payment method to avoid losing access. Stripe is automatically retrying.
+      </Banner>
+    );
+  }
+
+  if (state === 'cancelled') {
+    return (
+      <Banner tone="muted" icon={XCircle}>
+        Your subscription has ended. Resubscribe to restore full access, or contact support if this looks wrong.
+      </Banner>
+    );
+  }
+
+  return null;
+}
+
+function Banner({
+  tone,
+  icon: Icon,
+  children,
+}: {
+  tone: 'info' | 'success' | 'warning' | 'destructive' | 'muted';
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  const styles: Record<typeof tone, string> = {
+    info: 'bg-primary/10 text-primary',
+    success: 'bg-success/10 text-success',
+    warning: 'bg-warning/10 text-warning-foreground',
+    destructive: 'bg-destructive/10 text-destructive',
+    muted: 'bg-muted text-muted-foreground',
+  };
+  return (
+    <div className={cn('flex items-start gap-2 p-3 rounded-lg text-sm', styles[tone])}>
+      <Icon className="w-4 h-4 mt-0.5 shrink-0" />
+      <div className="leading-snug">{children}</div>
+    </div>
   );
 }
