@@ -1,53 +1,42 @@
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface CheckoutOptions {
+  priceId: string;
+  returnUrl?: string;
+}
 
 export function useStripeCheckout() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [options, setOptions] = useState<CheckoutOptions | null>(null);
+  const [isPortalLoading, setIsPortalLoading] = useState(false);
 
-  const createCheckoutSession = async (priceId: string, tierId: string) => {
-    setIsLoading(true);
+  const openCheckout = useCallback((opts: CheckoutOptions) => {
+    setOptions(opts);
+    setIsOpen(true);
+  }, []);
+
+  const closeCheckout = useCallback(() => {
+    setIsOpen(false);
+    setOptions(null);
+  }, []);
+
+  const openCustomerPortal = useCallback(async () => {
+    setIsPortalLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { priceId, tierId },
+      const { data, error } = await supabase.functions.invoke("create-portal-session", {
+        body: { returnUrl: window.location.href, environment: import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN?.startsWith("pk_test_") ? "sandbox" : "live" },
       });
-
       if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      toast.error(error.message || 'Failed to start checkout');
+      if (data?.url) window.open(data.url, "_blank");
+      else throw new Error(data?.error || "No portal URL returned");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to open billing portal");
     } finally {
-      setIsLoading(false);
+      setIsPortalLoading(false);
     }
-  };
+  }, []);
 
-  const openCustomerPortal = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-portal-session');
-
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No portal URL returned');
-      }
-    } catch (error: any) {
-      console.error('Portal error:', error);
-      toast.error(error.message || 'Failed to open billing portal');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return {
-    isLoading,
-    createCheckoutSession,
-    openCustomerPortal,
-  };
+  return { isOpen, options, openCheckout, closeCheckout, openCustomerPortal, isPortalLoading };
 }

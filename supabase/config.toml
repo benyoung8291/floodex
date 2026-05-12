@@ -6,16 +6,13 @@ verify_jwt = false
 [functions.accept-invitation]
 verify_jwt = false
 
-[functions.create-checkout-session]
+[functions.create-checkout]
 verify_jwt = false
 
 [functions.create-portal-session]
 verify_jwt = false
 
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.sync-tier-to-stripe]
+[functions.payments-webhook]
 verify_jwt = false
 
 [functions.process-email-queue]

@@ -6,6 +6,7 @@ export interface SubscriptionTier {
   id: string;
   name: string;
   monthly_price: number;
+  yearly_price: number;
   jobs_included: number;
   readings_included: number;
   overage_price_per_job: number;
@@ -13,8 +14,8 @@ export interface SubscriptionTier {
   is_free_tier: boolean;
   is_active: boolean;
   sort_order: number;
-  stripe_price_id?: string;
-  stripe_product_id?: string;
+  monthly_lookup_key: string | null;
+  yearly_lookup_key: string | null;
 }
 
 export interface TenantSubscription {
@@ -34,9 +35,8 @@ export function useSubscriptionTiers() {
         .select('*')
         .eq('is_active', true)
         .order('sort_order');
-
       if (error) throw error;
-      return data || [];
+      return (data ?? []) as unknown as SubscriptionTier[];
     },
   });
 }

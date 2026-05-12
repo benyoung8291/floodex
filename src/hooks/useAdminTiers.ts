@@ -186,34 +186,11 @@ export function useToggleTierStatus() {
   });
 }
 
+// Stripe products are now managed by Lovable's built-in payments — no manual sync needed.
 export function useSyncTierToStripe() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (tier: SubscriptionTier) => {
-      const { data, error } = await supabase.functions.invoke('sync-tier-to-stripe', {
-        body: {
-          tierId: tier.id,
-          name: tier.name,
-          monthlyPrice: tier.monthly_price,
-          existingProductId: tier.stripe_product_id,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      return data;
-    },
-    onSuccess: (data, tier) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
-      logAuditEvent('tier_synced_to_stripe', tier.id, { 
-        stripe_product_id: data.productId, 
-        stripe_price_id: data.priceId 
-      });
-      toast.success('Tier synced to Stripe successfully');
-    },
-    onError: (error) => {
-      toast.error(`Failed to sync to Stripe: ${error.message}`);
-    },
-  });
+  return {
+    mutate: (_tier?: unknown) => toast.info('Products are managed automatically by Lovable Payments.'),
+    mutateAsync: async (_tier?: unknown) => {},
+    isPending: false,
+  };
 }

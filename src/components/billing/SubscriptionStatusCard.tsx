@@ -12,7 +12,7 @@ interface SubscriptionStatusCardProps {
 
 export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardProps) {
   const { data: subscription, isLoading } = useTenantSubscription();
-  const { openCustomerPortal, isLoading: isPortalLoading } = useStripeCheckout();
+  const { openCustomerPortal, isPortalLoading } = useStripeCheckout();
 
   if (isLoading) {
     return (
