@@ -807,6 +807,21 @@ export default function JobDetail() {
         </TabsContent>
 
         {/* Safety Tab */}
+        {/* Timeline Tab */}
+        <TabsContent value="timeline" className="space-y-4 mt-4">
+          <JobTimeline
+            job={job}
+            readings={allReadings as any}
+            photos={jobPhotos as any}
+            workLogs={workLogs as any}
+            damage={damageAssessments as any}
+            forms={jobForms as any}
+            costItems={costItems as any}
+            safetyChecks={safetyChecks as any}
+          />
+        </TabsContent>
+
+        {/* Safety Tab */}
         <TabsContent value="safety" className="space-y-4 mt-4">
           <Card className="bg-card border-border">
             <CardHeader>
