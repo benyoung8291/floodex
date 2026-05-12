@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -107,13 +107,14 @@ const lossClassLabels: Record<string, string> = {
 export default function JobDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { tenantId } = useAuth();
-  
+
   // Get unit preferences from tenant settings
   const { data: tenant } = useTenant();
   const units: UnitSystem = tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial';
   const temperatureUnit = (tenant?.temperature_unit || 'F') as 'F' | 'C';
-  
+
   // State
   const [activeTab, setActiveTab] = useState('overview');
   const [createChamberOpen, setCreateChamberOpen] = useState(false);
