@@ -1404,6 +1404,7 @@ export type Database = {
           is_active: boolean
           is_free_tier: boolean
           jobs_included: number
+          monthly_lookup_key: string | null
           monthly_price: number
           name: string
           overage_price_per_job: number
@@ -1413,6 +1414,8 @@ export type Database = {
           stripe_price_id: string | null
           stripe_product_id: string | null
           updated_at: string
+          yearly_lookup_key: string | null
+          yearly_price: number
         }
         Insert: {
           created_at?: string
@@ -1420,6 +1423,7 @@ export type Database = {
           is_active?: boolean
           is_free_tier?: boolean
           jobs_included?: number
+          monthly_lookup_key?: string | null
           monthly_price?: number
           name: string
           overage_price_per_job?: number
@@ -1429,6 +1433,8 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
+          yearly_lookup_key?: string | null
+          yearly_price?: number
         }
         Update: {
           created_at?: string
@@ -1436,6 +1442,7 @@ export type Database = {
           is_active?: boolean
           is_free_tier?: boolean
           jobs_included?: number
+          monthly_lookup_key?: string | null
           monthly_price?: number
           name?: string
           overage_price_per_job?: number
@@ -1445,6 +1452,56 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
+          yearly_lookup_key?: string | null
+          yearly_price?: number
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          environment: string
+          id: string
+          price_lookup_key: string | null
+          product_lookup_key: string | null
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string | null
+          tenant_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          environment?: string
+          id?: string
+          price_lookup_key?: string | null
+          product_lookup_key?: string | null
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id?: string | null
+          tenant_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          environment?: string
+          id?: string
+          price_lookup_key?: string | null
+          product_lookup_key?: string | null
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
