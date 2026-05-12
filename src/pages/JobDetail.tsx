@@ -423,7 +423,7 @@ export default function JobDetail() {
         {(() => {
           // Map current tab → lifecycle section
           const tabToSection: Record<string, string> = {
-            overview: 'summary', safety: 'summary',
+            overview: 'summary', timeline: 'summary', safety: 'summary',
             chambers: 'drying', readings: 'drying', plans: 'drying',
             photos: 'docs', worklogs: 'docs', damage: 'docs', forms: 'docs',
             costing: 'billing',
@@ -438,6 +438,7 @@ export default function JobDetail() {
           const subTabs: Record<string, { value: string; label: string; count?: number }[]> = {
             summary: [
               { value: 'overview', label: 'Overview' },
+              { value: 'timeline', label: 'Timeline' },
               { value: 'safety',   label: 'Safety' },
             ],
             drying: [
