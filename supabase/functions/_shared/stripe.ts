@@ -45,6 +45,7 @@ async function request(env: StripeEnv, method: string, path: string, body?: any,
   const headers: Record<string, string> = {
     Authorization: `Bearer ${lovable}`,
     "X-Connection-Api-Key": connKey,
+    "Stripe-Version": "2026-03-25.dahlia",
   };
   let payload: string | undefined;
   if (body) {
