@@ -396,77 +396,89 @@ export default function JobDetail() {
         </div>
       </div>
 
-      {/* Tabs - Icon-first on mobile */}
+      {/* Tabs - 4 lifecycle sections with sub-tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="relative w-full overflow-hidden">
-          <TabsList className="flex w-full overflow-x-auto no-scrollbar scroll-smooth-x gap-0.5 p-1 bg-muted/50 rounded-lg">
-            <TabsTrigger value="overview" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
-              <ClipboardList className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="chambers" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
-              <Droplets className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Chambers</span>
-            </TabsTrigger>
-            <TabsTrigger value="readings" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Readings</span>
-            </TabsTrigger>
-            <TabsTrigger value="worklogs" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Logs</span>
-              {workLogs.length > 0 && (
-                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
-                  {workLogs.length}
-                </span>
+        {(() => {
+          // Map current tab → lifecycle section
+          const tabToSection: Record<string, string> = {
+            overview: 'summary', safety: 'summary',
+            chambers: 'drying', readings: 'drying', plans: 'drying',
+            photos: 'docs', worklogs: 'docs', damage: 'docs', forms: 'docs',
+            costing: 'billing',
+          };
+          const activeSection = tabToSection[activeTab] ?? 'summary';
+          const sections = [
+            { id: 'summary', label: 'Summary',  icon: ClipboardList },
+            { id: 'drying',  label: 'Drying',   icon: Droplets },
+            { id: 'docs',    label: 'Docs',     icon: FileText },
+            { id: 'billing', label: 'Billing',  icon: DollarSign },
+          ] as const;
+          const subTabs: Record<string, { value: string; label: string; count?: number }[]> = {
+            summary: [
+              { value: 'overview', label: 'Overview' },
+              { value: 'safety',   label: 'Safety' },
+            ],
+            drying: [
+              { value: 'chambers', label: 'Chambers', count: chambers.length },
+              { value: 'readings', label: 'Readings' },
+              { value: 'plans',    label: 'Floor plans' },
+            ],
+            docs: [
+              { value: 'photos',   label: 'Photos',  count: jobPhotos.length },
+              { value: 'worklogs', label: 'Logs',    count: workLogs.length },
+              { value: 'damage',   label: 'Damage',  count: damageAssessments.length },
+              { value: 'forms',    label: 'Forms',   count: jobForms.length },
+            ],
+            billing: [
+              { value: 'costing',  label: 'Costing', count: costItems.length },
+            ],
+          };
+          const setSection = (id: string) => setActiveTab(subTabs[id][0].value);
+          return (
+            <div className="space-y-3">
+              {/* Section nav */}
+              <div className="grid grid-cols-4 gap-1 p-1 bg-muted/50 rounded-lg">
+                {sections.map(({ id, label, icon: Icon }) => {
+                  const isActive = activeSection === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setSection(id)}
+                      className={cn(
+                        'flex items-center justify-center gap-1.5 px-2 py-2 rounded-md text-xs font-medium transition-all active:scale-[0.97]',
+                        isActive
+                          ? 'bg-background text-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="hidden sm:inline">{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Sub nav (only when section has >1 sub) */}
+              {subTabs[activeSection].length > 1 && (
+                <TabsList className="flex w-full overflow-x-auto no-scrollbar gap-0.5 p-1 bg-muted/30 rounded-lg h-auto">
+                  {subTabs[activeSection].map(({ value, label, count }) => (
+                    <TabsTrigger
+                      key={value}
+                      value={value}
+                      className="flex-shrink-0 gap-1.5 px-3 py-1.5 text-xs"
+                    >
+                      {label}
+                      {typeof count === 'number' && count > 0 && (
+                        <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-primary/15 text-primary rounded-full">
+                          {count}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
               )}
-            </TabsTrigger>
-            <TabsTrigger value="damage" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
-              <FileWarning className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Damage</span>
-              {damageAssessments.length > 0 && (
-                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
-                  {damageAssessments.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="costing" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
-              <DollarSign className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Costing</span>
-              {costItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
-                  {costItems.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="forms" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
-              <FileSignature className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Forms</span>
-              {jobForms.length > 0 && (
-                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
-                  {jobForms.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="plans" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
-              <MapPin className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Plans</span>
-            </TabsTrigger>
-            <TabsTrigger value="safety" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Safety</span>
-            </TabsTrigger>
-            <TabsTrigger value="photos" className="flex-shrink-0 gap-1.5 px-2.5 sm:px-3 min-w-0 relative">
-              <Camera className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">Photos</span>
-              {jobPhotos.length > 0 && (
-                <span className="absolute -top-1 -right-1 text-[10px] bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center">
-                  {jobPhotos.length > 9 ? '9+' : jobPhotos.length}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-        </div>
+            </div>
+          );
+        })()}
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4 mt-4">
