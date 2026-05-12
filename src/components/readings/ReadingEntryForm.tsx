@@ -46,6 +46,13 @@ interface ReadingEntryFormProps {
   targetGpp?: number | null;
   units: UnitSystem;
   temperatureUnit?: 'F' | 'C';
+  /** Latest prior reading for this chamber (used for smart defaults). Temperatures here are stored °F. */
+  previousReading?: {
+    temperature: number;
+    relative_humidity: number;
+    gpp: number;
+    recorded_at?: string | Date;
+  } | null;
   onSubmit: (data: {
     readingType: 'ambient' | 'material';
     temperature: number;
@@ -64,6 +71,7 @@ export function ReadingEntryForm({
   targetGpp,
   units,
   temperatureUnit = 'F',
+  previousReading,
   onSubmit,
   isLoading,
 }: ReadingEntryFormProps) {
@@ -71,10 +79,16 @@ export function ReadingEntryForm({
   const defaultTemp = temperatureUnit === 'C' ? 22 : 72;
   const tempMin = temperatureUnit === 'C' ? 0 : 32;
   const tempMax = temperatureUnit === 'C' ? 50 : 120;
-  
+
+  // Convert previous reading (stored °F) into the user's display unit
+  const prevTempInDisplayUnit = previousReading
+    ? (temperatureUnit === 'C' ? Math.round((previousReading.temperature - 32) * 5 / 9) : Math.round(previousReading.temperature))
+    : null;
+  const prevRH = previousReading ? Math.round(previousReading.relative_humidity) : null;
+
   const [readingType, setReadingType] = useState<'ambient' | 'material'>('ambient');
-  const [temperature, setTemperature] = useState(defaultTemp);
-  const [relativeHumidity, setRelativeHumidity] = useState(50);
+  const [temperature, setTemperature] = useState(prevTempInDisplayUnit ?? defaultTemp);
+  const [relativeHumidity, setRelativeHumidity] = useState(prevRH ?? 50);
   const [materialType, setMaterialType] = useState('');
   const [moistureContent, setMoistureContent] = useState<string>('');
 
@@ -83,15 +97,16 @@ export function ReadingEntryForm({
   const gpp = calculateGPP(tempForCalc, relativeHumidity);
   const status = targetGpp ? getHumidityRatioStatus(gpp, targetGpp) : null;
 
-  // Reset form when dialog opens
+  // Reset form when dialog opens — prefill from previous reading when available.
   useEffect(() => {
     if (open) {
-      setTemperature(defaultTemp);
-      setRelativeHumidity(50);
+      setTemperature(prevTempInDisplayUnit ?? defaultTemp);
+      setRelativeHumidity(prevRH ?? 50);
       setMaterialType('');
       setMoistureContent('');
     }
-  }, [open, defaultTemp]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleSubmit = () => {
     // Convert temperature to Fahrenheit for storage if entered in Celsius

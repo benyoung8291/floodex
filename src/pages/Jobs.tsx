@@ -1,13 +1,39 @@
+import { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Filter, Briefcase, Layers, Droplets } from 'lucide-react';
+import { Plus, Briefcase, Layers, Droplets, ArrowUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useJobsWithChambers } from '@/hooks/useAllReadings';
 import { useTenant } from '@/hooks/useTenant';
 import { formatHumidityRatio, type UnitSystem } from '@/lib/psychrometrics';
 import { differenceInDays } from 'date-fns';
+import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+type FilterId = 'all' | 'emergency' | 'drying' | 'ready' | 'completed';
+type SortId = 'recent' | 'days_drying_desc' | 'days_drying_asc' | 'name';
+
+const FILTERS: { id: FilterId; label: string }[] = [
+  { id: 'all',       label: 'All' },
+  { id: 'emergency', label: 'Emergency' },
+  { id: 'drying',    label: 'Drying' },
+  { id: 'ready',     label: 'Ready' },
+  { id: 'completed', label: 'Completed' },
+];
+
+const SORTS: { id: SortId; label: string }[] = [
+  { id: 'recent',            label: 'Most recent' },
+  { id: 'days_drying_desc',  label: 'Drying (longest)' },
+  { id: 'days_drying_asc',   label: 'Drying (shortest)' },
+  { id: 'name',              label: 'Customer A→Z' },
+];
 
 export default function Jobs() {
   const navigate = useNavigate();
@@ -16,37 +42,56 @@ export default function Jobs() {
 
   const units: UnitSystem = tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial';
 
+  const [filter, setFilter] = useState<FilterId>('all');
+  const [sort, setSort] = useState<SortId>('recent');
+
+  const counts = useMemo(() => {
+    const c: Record<FilterId, number> = { all: 0, emergency: 0, drying: 0, ready: 0, completed: 0 };
+    if (!jobs) return c;
+    c.all = jobs.length;
+    for (const j of jobs) {
+      if (j.status === 'emergency') c.emergency++;
+      else if (j.status === 'drying') c.drying++;
+      else if (j.status === 'ready') c.ready++;
+      else if (j.status === 'completed') c.completed++;
+    }
+    return c;
+  }, [jobs]);
+
+  const visibleJobs = useMemo(() => {
+    if (!jobs) return [];
+    let list = filter === 'all' ? jobs : jobs.filter((j) => j.status === filter);
+    list = [...list];
+    switch (sort) {
+      case 'days_drying_desc':
+        list.sort((a, b) => differenceInDays(new Date(), new Date(b.start_date)) - differenceInDays(new Date(), new Date(a.start_date)));
+        break;
+      case 'days_drying_asc':
+        list.sort((a, b) => differenceInDays(new Date(), new Date(a.start_date)) - differenceInDays(new Date(), new Date(b.start_date)));
+        break;
+      case 'name':
+        list.sort((a, b) => a.customer_name.localeCompare(b.customer_name));
+        break;
+      case 'recent':
+      default:
+        // Hook returns by created_at desc already; keep order.
+        break;
+    }
+    return list;
+  }, [jobs, filter, sort]);
+
   const getStatusStyles = (status: string) => {
     switch (status) {
-      case 'emergency':
-        return 'bg-emergency/20 text-emergency border-emergency/30';
-      case 'drying':
-        return 'bg-warning/20 text-warning border-warning/30';
-      case 'ready':
-        return 'bg-success/20 text-success border-success/30';
-      case 'completed':
-        return 'bg-muted text-muted-foreground border-muted';
-      default:
-        return 'bg-muted text-muted-foreground';
+      case 'emergency': return 'bg-emergency/20 text-emergency border-emergency/30';
+      case 'drying':    return 'bg-warning/20 text-warning border-warning/30';
+      case 'ready':     return 'bg-success/20 text-success border-success/30';
+      case 'completed': return 'bg-muted text-muted-foreground border-muted';
+      default:          return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getLossTypeLabel = (type: string) => {
-    switch (type) {
-      case 'cat1':
-        return 'Cat 1';
-      case 'cat2':
-        return 'Cat 2';
-      case 'cat3':
-        return 'Cat 3';
-      default:
-        return type;
-    }
-  };
-
-  const calculateDaysDrying = (startDate: string) => {
-    return differenceInDays(new Date(), new Date(startDate));
-  };
+  const getLossTypeLabel = (type: string) => ({ cat1: 'Cat 1', cat2: 'Cat 2', cat3: 'Cat 3' } as Record<string, string>)[type] ?? type;
+  const calculateDaysDrying = (startDate: string) => differenceInDays(new Date(), new Date(startDate));
 
   if (isLoading) {
     return (
@@ -65,16 +110,8 @@ export default function Jobs() {
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <Skeleton className="h-5 w-40 mb-2" />
-                    <Skeleton className="h-4 w-56" />
-                  </div>
-                  <div className="text-right">
-                    <Skeleton className="h-4 w-24 mb-1" />
-                    <Skeleton className="h-3 w-16" />
-                  </div>
-                </div>
+                <Skeleton className="h-5 w-40 mb-2" />
+                <Skeleton className="h-4 w-56" />
               </CardContent>
             </Card>
           ))}
@@ -93,24 +130,64 @@ export default function Jobs() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Jobs</h1>
-          <p className="text-muted-foreground">
-            {jobs?.length || 0} active job{jobs?.length !== 1 ? 's' : ''}
+          <p className="text-muted-foreground text-sm">
+            {visibleJobs.length} of {counts.all} job{counts.all !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon">
-            <Filter className="w-4 h-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <ArrowUpDown className="w-4 h-4" />
+                <span className="hidden sm:inline">{SORTS.find(s => s.id === sort)?.label}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {SORTS.map((s) => (
+                <DropdownMenuItem key={s.id} onClick={() => setSort(s.id)}>
+                  {s.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button onClick={() => navigate('/jobs/new')} className="gap-2">
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">New Job</span>
           </Button>
         </div>
+      </div>
+
+      {/* Filter chips */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
+        {FILTERS.map(({ id, label }) => {
+          const active = filter === id;
+          const n = counts[id];
+          return (
+            <button
+              key={id}
+              onClick={() => setFilter(id)}
+              className={cn(
+                'flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all active:scale-[0.97]',
+                active
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card text-foreground border-border hover:bg-accent',
+              )}
+            >
+              {label}
+              <span className={cn(
+                'px-1.5 py-0.5 rounded-full text-[10px] tabular-nums',
+                active ? 'bg-primary-foreground/20' : 'bg-muted'
+              )}>
+                {n}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Jobs List */}
@@ -130,14 +207,23 @@ export default function Jobs() {
             </Button>
           </CardContent>
         </Card>
+      ) : visibleJobs.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="py-10 text-center">
+            <p className="text-muted-foreground mb-3">No jobs match this filter.</p>
+            <Button variant="outline" size="sm" onClick={() => setFilter('all')}>
+              Clear filter
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-3">
-          {jobs.map((job) => {
+          {visibleJobs.map((job) => {
             const daysDrying = calculateDaysDrying(job.start_date);
             return (
               <Card
                 key={job.id}
-                className="cursor-pointer hover:bg-accent/50 transition-colors"
+                className="cursor-pointer hover:bg-accent/50 active:scale-[0.997] transition-all"
                 onClick={() => navigate(`/jobs/${job.id}`)}
               >
                 <CardContent className="p-4">
@@ -145,11 +231,7 @@ export default function Jobs() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold truncate">{job.customer_name}</h3>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(
-                            job.status
-                          )}`}
-                        >
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(job.status)}`}>
                           {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                         </span>
                       </div>
@@ -158,8 +240,7 @@ export default function Jobs() {
                         {job.city && `, ${job.city}`}
                         {job.state && `, ${job.state}`}
                       </p>
-                      {/* Reading indicators */}
-                      <div className="flex items-center gap-3 mt-2">
+                      <div className="flex items-center gap-3 mt-2 flex-wrap">
                         <Badge variant="secondary" className="gap-1 text-xs">
                           <Layers className="h-3 w-3" />
                           {job.chamber_count} chamber{job.chamber_count !== 1 ? 's' : ''}
