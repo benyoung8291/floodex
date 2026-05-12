@@ -79,6 +79,8 @@ import { ShareJobDialog } from '@/components/sharing/ShareJobDialog';
 import { JobCostingTab } from '@/components/costing/JobCostingTab';
 import { useJobCostItems } from '@/hooks/useJobCostItems';
 import { useJobForms } from '@/hooks/useJobForms';
+import { useJobReadingsAll } from '@/hooks/useJobReadingsAll';
+import { JobTimeline } from '@/components/jobs/JobTimeline';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -167,6 +169,7 @@ export default function JobDetail() {
   const { data: damageAssessments = [] } = useJobDamageAssessments(id);
   const { data: jobForms = [] } = useJobForms(id || '');
   const { data: costItems = [] } = useJobCostItems(id);
+  const { data: allReadings = [] } = useJobReadingsAll(id);
   
   // Mutations
   const createChamber = useCreateChamber();
@@ -420,7 +423,7 @@ export default function JobDetail() {
         {(() => {
           // Map current tab → lifecycle section
           const tabToSection: Record<string, string> = {
-            overview: 'summary', safety: 'summary',
+            overview: 'summary', timeline: 'summary', safety: 'summary',
             chambers: 'drying', readings: 'drying', plans: 'drying',
             photos: 'docs', worklogs: 'docs', damage: 'docs', forms: 'docs',
             costing: 'billing',
@@ -435,6 +438,7 @@ export default function JobDetail() {
           const subTabs: Record<string, { value: string; label: string; count?: number }[]> = {
             summary: [
               { value: 'overview', label: 'Overview' },
+              { value: 'timeline', label: 'Timeline' },
               { value: 'safety',   label: 'Safety' },
             ],
             drying: [
@@ -800,6 +804,21 @@ export default function JobDetail() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Safety Tab */}
+        {/* Timeline Tab */}
+        <TabsContent value="timeline" className="space-y-4 mt-4">
+          <JobTimeline
+            job={job}
+            readings={allReadings as any}
+            photos={jobPhotos as any}
+            workLogs={workLogs as any}
+            damage={damageAssessments as any}
+            forms={jobForms as any}
+            costItems={costItems as any}
+            safetyChecks={safetyChecks as any}
+          />
         </TabsContent>
 
         {/* Safety Tab */}
