@@ -225,10 +225,10 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
             </Button>
           )}
 
-          {state === 'cancel_pending' && hasStripeCustomer && (
+          {state === 'cancel_pending' && (
             <Button
-              onClick={openCustomerPortal}
-              disabled={isPortalLoading}
+              onClick={handleReactivate}
+              disabled={isMutating}
               className="gap-2"
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -239,6 +239,18 @@ export function SubscriptionStatusCard({ onChangePlan }: SubscriptionStatusCardP
           {state !== 'cancelled' && (
             <Button variant="outline" onClick={onChangePlan}>
               Change plan
+            </Button>
+          )}
+
+          {state === 'active' && (
+            <Button
+              variant="outline"
+              onClick={() => setConfirmCancelOpen(true)}
+              disabled={isMutating}
+              className="gap-2 text-destructive hover:text-destructive"
+            >
+              <Ban className="w-4 h-4" />
+              Cancel subscription
             </Button>
           )}
 
