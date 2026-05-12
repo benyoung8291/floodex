@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -137,22 +137,22 @@ export default function JobDetail() {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   // Capture deep-link from FAB (?capture=readings|photo|worklog)
-  const captureParam = searchParams.get('capture');
-  if (captureParam) {
-    // run effect-like: clear, then trigger appropriate dialog/tab
-    setTimeout(() => {
-      const next = new URLSearchParams(searchParams);
-      next.delete('capture');
-      setSearchParams(next, { replace: true });
-      if (captureParam === 'photo') setPhotoCaptureOpen(true);
-      else if (captureParam === 'worklog') {
-        setEditingWorkLog(null);
-        setWorkLogDialogOpen(true);
-      } else if (captureParam === 'readings') {
-        setActiveTab('chambers');
-      }
-    }, 0);
-  }
+  useEffect(() => {
+    const captureParam = searchParams.get('capture');
+    if (!captureParam) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('capture');
+    setSearchParams(next, { replace: true });
+    if (captureParam === 'photo') setPhotoCaptureOpen(true);
+    else if (captureParam === 'worklog') {
+      setEditingWorkLog(null);
+      setWorkLogDialogOpen(true);
+    } else if (captureParam === 'readings') {
+      setActiveTab('chambers');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('capture')]);
+
 
   // Queries
   const { data: job, isLoading: jobLoading } = useJob(id);
