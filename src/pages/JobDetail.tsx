@@ -79,6 +79,8 @@ import { ShareJobDialog } from '@/components/sharing/ShareJobDialog';
 import { JobCostingTab } from '@/components/costing/JobCostingTab';
 import { useJobCostItems } from '@/hooks/useJobCostItems';
 import { useJobForms } from '@/hooks/useJobForms';
+import { useJobReadingsAll } from '@/hooks/useJobReadingsAll';
+import { JobTimeline } from '@/components/jobs/JobTimeline';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
