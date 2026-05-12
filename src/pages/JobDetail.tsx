@@ -169,6 +169,7 @@ export default function JobDetail() {
   const { data: damageAssessments = [] } = useJobDamageAssessments(id);
   const { data: jobForms = [] } = useJobForms(id || '');
   const { data: costItems = [] } = useJobCostItems(id);
+  const { data: allReadings = [] } = useJobReadingsAll(id);
   
   // Mutations
   const createChamber = useCreateChamber();
