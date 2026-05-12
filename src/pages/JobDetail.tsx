@@ -890,15 +890,8 @@ export default function JobDetail() {
         </TabsContent>
       </Tabs>
 
-      {/* Floating Action Button for Photos */}
-      {activeTab === 'photos' && (
-        <Button
-          className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-50"
-          onClick={() => setPhotoCaptureOpen(true)}
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      )}
+      {/* Photo capture is now triggered by the global Capture FAB (?capture=photo) */}
+
 
       {/* Dialogs */}
       <ChamberCreateDialog
