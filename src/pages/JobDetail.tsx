@@ -909,6 +909,7 @@ export default function JobDetail() {
           targetGpp={selectedChamber.target_gpp}
           units={units}
           temperatureUnit={temperatureUnit}
+          previousReading={latestReadings.get(selectedChamber.id) ?? null}
           onSubmit={handleSubmitReading}
           isLoading={createReading.isPending}
         />
