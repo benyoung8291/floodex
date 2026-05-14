@@ -1,0 +1,21 @@
+# FloodEx
+
+> Australia's flood restoration software for tracking moisture readings, documenting water damage with photos, and generating IICRC-compliant PDF reports.
+
+FloodEx is a mobile-first SaaS platform built for water damage restoration technicians. It handles the full job lifecycle: psychrometric calculations, equipment tracking, drying logs, floor plan mud maps, damage assessments, digital forms with e-signatures, and insurance-ready reports. Operated by Local Carpet Cleaning Pty Ltd (ABN 15 682 871 192).
+
+## Pages
+
+- [Home](/): Product overview and starting point.
+- [Features](/features): Full feature list — moisture tracking, photo annotation, reporting, equipment, forms.
+- [Pricing](/pricing): Plans from Free (2 jobs) to Pro (unlimited), AUD pricing.
+- [Compare](/compare): How FloodEx compares to other restoration software.
+- [About](/about): Company background and mission.
+- [Contact](/contact): Sales and support enquiries.
+
+## Solutions
+
+- [Water Damage Restoration Software](/water-damage-restoration-software): Purpose-built workflow for water damage jobs.
+- [Moisture Tracking Software](/moisture-tracking-software): Readings, g/kg calculations, drying trend charts.
+- [Restoration Reporting Software](/restoration-reporting-software): One-click IICRC-compliant PDF reports.
+- [Encircle Alternative](/encircle-alternative): Side-by-side comparison with Encircle.
