@@ -100,7 +100,7 @@ export function generateBreadcrumbData(items: { name: string; path: string }[]) 
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `https://floodex.lovable.app${item.path}`,
+      item: `https://floodex.com.au${item.path}`,
     })),
   };
 }
