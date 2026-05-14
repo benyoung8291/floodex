@@ -11,7 +11,7 @@ interface SEOHeadProps {
   noindex?: boolean;
 }
 
-const BASE_URL = 'https://floodex.lovable.app';
+const BASE_URL = 'https://floodex.com.au';
 const DEFAULT_OG_IMAGE = 'https://storage.googleapis.com/gpt-engineer-file-uploads/RwmqWhMNuWM4qLvUg9bDvOvPNKg1/social-images/social-1775804156427-Screenshot_2026-04-10_at_4.55.29_pm.webp';
 
 export function SEOHead({
