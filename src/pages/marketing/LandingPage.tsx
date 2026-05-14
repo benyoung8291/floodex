@@ -35,8 +35,8 @@ export default function LandingPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="FloodEx – #1 Flood Restoration Software Australia | Water Damage Documentation & Reporting"
-        description="Australia's leading flood restoration software. Track moisture readings with auto g/kg calculations, document water damage with annotated photos, generate IICRC-compliant PDF reports. Free to start. Purpose-built for restoration technicians."
+        title="FloodEx — Flood Restoration Software Australia"
+        description="Track moisture, annotate damage photos, and generate IICRC-compliant PDF reports. Purpose-built for Australian restoration techs. Free to start."
         keywords="flood restoration software, water damage restoration software, moisture tracking app, drying log software, IICRC compliant reports, water damage documentation, restoration management software, psychrometric calculator, flood restoration app Australia"
         canonicalPath="/"
         structuredData={generateFAQData(faqData)}

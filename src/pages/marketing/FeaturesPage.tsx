@@ -80,7 +80,7 @@ export default function FeaturesPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="Flood Restoration Software Features | FloodEx – Moisture Tracking, Reports, Equipment & More"
+        title="Features | FloodEx Flood Restoration Software"
         description="Explore FloodEx features: moisture tracking with auto g/kg calculations, photo documentation with annotations, one-click IICRC-compliant PDF reports, equipment tracking, psychrometric calculations, and team collaboration."
         keywords="flood restoration software features, moisture tracking features, photo documentation restoration, one-click PDF reports, equipment tracking software, psychrometric calculator, team collaboration restoration, drying trend charts, IICRC compliant documentation"
         canonicalPath="/features"
