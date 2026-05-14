@@ -1,5 +1,5 @@
 # FloodEx - Flood Restoration Software
-# https://floodex.lovable.app
+# https://floodex.com.au
 
 User-agent: Googlebot
 Allow: /
@@ -36,4 +36,4 @@ Disallow: /admin
 Disallow: /auth
 Disallow: /share/
 
-Sitemap: https://floodex.lovable.app/sitemap.xml
+Sitemap: https://floodex.com.au/sitemap.xml
