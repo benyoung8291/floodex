@@ -86,8 +86,8 @@ export default function ComparePage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="FloodEx vs Encircle vs Xactimate vs DASH – Restoration Software Comparison 2026"
-        description="Compare FloodEx with Encircle, Xactimate, and DASH. Feature-by-feature comparison of water damage restoration software. See why FloodEx offers more value with transparent pricing and a free tier."
+        title="FloodEx vs Encircle, Xactimate & DASH | Compare 2026"
+        description="Feature-by-feature comparison of FloodEx vs Encircle, Xactimate and DASH. Transparent AUD pricing and a free tier for restoration teams."
         keywords="FloodEx vs Encircle, FloodEx vs Xactimate, FloodEx vs DASH, restoration software comparison, water damage software comparison, best restoration software 2026, Encircle alternative, Xactimate alternative"
         canonicalPath="/compare"
         structuredData={generateBreadcrumbData([
