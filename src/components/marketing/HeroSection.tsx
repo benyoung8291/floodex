@@ -21,11 +21,11 @@ export function HeroSection() {
         </div>
       </motion.div>
 
-      <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.5 }} className="text-[clamp(44px,7vw,88px)] font-black leading-[0.98] tracking-[-0.04em] text-foreground max-w-[850px] mb-7">
+      <h1 className="text-[clamp(44px,7vw,88px)] font-black leading-[0.98] tracking-[-0.04em] text-foreground max-w-[850px] mb-7">
         Document faster.<br />
         <span className="bg-accent text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">Report smarter.</span><br />
         Get paid quicker.
-      </motion.h1>
+      </h1>
 
       <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-muted-foreground max-w-[540px] leading-[1.7] font-medium mb-12">
         Stop wrestling with paper forms and spreadsheets. FloodEx is the mobile-first <strong>flood restoration software</strong> that helps restoration technicians track moisture readings, capture photo evidence, and generate <strong>IICRC-compliant reports</strong> — all from the field.
