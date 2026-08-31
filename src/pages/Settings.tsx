@@ -191,7 +191,7 @@ export default function Settings() {
                           {...field} 
                           type="tel"
                           disabled={!isTenantAdmin || isPending}
-                          placeholder="(555) 123-4567"
+                          placeholder="0412 345 678"
                         />
                       </FormControl>
                       <FormMessage />
@@ -210,7 +210,7 @@ export default function Settings() {
                       <Input 
                         {...field} 
                         disabled={!isTenantAdmin || isPending}
-                        placeholder="123 Main St, City, State 12345"
+                        placeholder="24 Example St, Melbourne VIC 3000"
                       />
                     </FormControl>
                     <FormMessage />
@@ -409,7 +409,7 @@ export default function Settings() {
                         <Input 
                           {...field} 
                           disabled={isPending}
-                          placeholder="e.g., www.yourcompany.com | (555) 123-4567"
+                          placeholder="e.g., www.yourcompany.com | 0412 345 678"
                         />
                       </FormControl>
                       <FormDescription>

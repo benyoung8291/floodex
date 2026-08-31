@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,9 +13,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Download, Loader2, Calendar as CalendarIcon } from 'lucide-react';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format, startOfDay, endOfDay } from 'date-fns';
 import { generatePDF } from '@/lib/pdfGenerator';
 import { formatDisplayDateKey } from '@/lib/datetime';
+import { computeReportPeriod } from '@/lib/reportPeriod';
 import { toast } from 'sonner';
 import { useJobReportData, JobReportData } from '@/hooks/useReportData';
 import { DryingLogReport } from './DryingLogReport';
@@ -65,21 +66,35 @@ export function ReportPreviewDialog({
   const [includeDetailedReadings, setIncludeDetailedReadings] = useState(true);
   const [showNonBillable, setShowNonBillable] = useState(true);
   
-  // Date range for custom log
-  const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>(() => {
-    const end = endOfDay(new Date());
-    const start = startOfDay(subDays(new Date(), reportType === 'drying-log-3day' ? 2 : 6));
-    return { start, end };
-  });
+  // Date range — default to today until job data loads so day-0 reports
+  // do not show a backwards-looking week of drying that never happened.
+  const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>(() =>
+    computeReportPeriod(reportType)
+  );
+  const [userPickedRange, setUserPickedRange] = useState(false);
   
   const [datePickerOpen, setDatePickerOpen] = useState<'start' | 'end' | null>(null);
 
   // Fetch data
   const useDateRange = reportType === 'drying-log-3day' || reportType === 'drying-log-custom';
   const { data, isLoading, error } = useJobReportData(
-    jobId,
+    open ? jobId : undefined,
     useDateRange ? dateRange : undefined
   );
+
+  useEffect(() => {
+    if (!open) {
+      setUserPickedRange(false);
+      return;
+    }
+    setDateRange(computeReportPeriod(reportType));
+    setUserPickedRange(false);
+  }, [open, reportType, jobId]);
+
+  useEffect(() => {
+    if (!open || userPickedRange || !data?.job) return;
+    setDateRange(computeReportPeriod(reportType, data.job));
+  }, [open, reportType, userPickedRange, data?.job?.id, data?.job?.start_date, data?.job?.days_drying]);
 
   // Cost data for cost summary report
   const { data: costItems = [] } = useJobCostItems(reportType === 'cost-summary' ? jobId : undefined);
@@ -250,6 +265,7 @@ export function ReportPreviewDialog({
                         selected={dateRange.start}
                         onSelect={(d) => {
                           if (d) {
+                            setUserPickedRange(true);
                             setDateRange(prev => ({ ...prev, start: startOfDay(d) }));
                             setDatePickerOpen(null);
                           }
@@ -274,6 +290,7 @@ export function ReportPreviewDialog({
                         selected={dateRange.end}
                         onSelect={(d) => {
                           if (d) {
+                            setUserPickedRange(true);
                             setDateRange(prev => ({ ...prev, end: endOfDay(d) }));
                             setDatePickerOpen(null);
                           }

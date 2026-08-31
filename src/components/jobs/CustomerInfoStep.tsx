@@ -54,7 +54,7 @@ export function CustomerInfoStep({ form }: CustomerInfoStepProps) {
                 <Input
                   {...field}
                   type="tel"
-                  placeholder="(555) 123-4567"
+                  placeholder="0412 345 678"
                   className="pl-11 h-12 text-base"
                 />
               </div>

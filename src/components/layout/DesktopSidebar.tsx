@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { displayNameFromUser, initialsFromName, primaryRole, roleLabel } from '@/lib/roles';
 
 const technicianLinks = [
   { to: '/dashboard', icon: Map, label: 'Dashboard' },
@@ -38,7 +39,10 @@ const superAdminLinks = [
 ];
 
 export function DesktopSidebar() {
-  const { isSuperAdmin, isTenantAdmin } = useAuth();
+  const { isSuperAdmin, isTenantAdmin, user, roles, fullName } = useAuth();
+  const name = displayNameFromUser(user, fullName);
+  const role = roleLabel(primaryRole(roles));
+  const initials = initialsFromName(name);
 
   return (
     <aside className="hidden md:flex w-64 flex-col bg-sidebar border-r border-sidebar-border">
@@ -130,14 +134,14 @@ export function DesktopSidebar() {
       <div className="p-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-2">
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="text-xs font-semibold text-primary">FE</span>
+            <span className="text-xs font-semibold text-primary">{initials}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">
-              Field Tech
+              {name}
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              Technician
+              {role}
             </p>
           </div>
         </div>
