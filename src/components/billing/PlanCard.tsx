@@ -115,7 +115,7 @@ export function PlanCard({
 
         {!tier.is_free_tier && (
           <p className="text-xs text-center text-muted-foreground">
-            +${Number(tier.overage_price_per_job).toFixed(2)}/job over limit
+            Fair-use guide: {tier.jobs_included} jobs &amp; {tier.readings_included.toLocaleString()} readings included
           </p>
         )}
       </CardContent>
