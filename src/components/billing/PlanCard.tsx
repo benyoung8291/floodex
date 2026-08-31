@@ -108,7 +108,7 @@ export function PlanCard({
               onClick={() => lookupKey && onSelect(lookupKey)}
               disabled={!canCheckout}
             >
-              {canCheckout ? 'Upgrade' : 'Unavailable'}
+              {canCheckout ? actionLabel : 'Unavailable'}
             </Button>
           )}
         </div>
