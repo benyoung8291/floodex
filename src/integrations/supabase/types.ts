@@ -1462,6 +1462,7 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string
           current_period_end: string | null
+          current_period_start: string | null
           environment: string
           id: string
           price_lookup_key: string | null
@@ -1477,6 +1478,7 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          current_period_start?: string | null
           environment?: string
           id?: string
           price_lookup_key?: string | null
@@ -1492,6 +1494,7 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          current_period_start?: string | null
           environment?: string
           id?: string
           price_lookup_key?: string | null
@@ -1585,6 +1588,7 @@ export type Database = {
       tenants: {
         Row: {
           address: string | null
+          billing_exempt: boolean
           contact_email: string | null
           contact_phone: string | null
           created_at: string
@@ -1608,6 +1612,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          billing_exempt?: boolean
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -1631,6 +1636,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          billing_exempt?: boolean
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -1778,6 +1784,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      tenant_billing_active: { Args: { _tenant_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "super_admin" | "tenant_admin" | "supervisor" | "technician"
