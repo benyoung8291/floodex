@@ -353,6 +353,81 @@ Deno.serve(async (req) => {
         await upsertSubscription(env, sub, tenantId, eventId);
         break;
       }
+      case "invoice.paid":
+      case "invoice.payment_succeeded":
+      case "invoice.payment_failed": {
+        // Renewal outcomes: re-read the subscription from Stripe so the DB
+        // reflects the authoritative status (active / past_due) immediately
+        // rather than waiting for a later customer.subscription.updated event.
+        const invoice = event.data.object;
+        const subscriptionId: string | undefined =
+          typeof invoice.subscription === "string"
+            ? invoice.subscription
+            : invoice.subscription?.id ??
+              invoice.parent?.subscription_details?.subscription ??
+              invoice.lines?.data?.[0]?.parent?.subscription_item_details?.subscription;
+
+        log("info", "invoice.event", "Invoice event received", {
+          eventId,
+          type: event.type,
+          invoiceId: invoice.id,
+          subscriptionId: subscriptionId ?? null,
+          amountDue: invoice.amount_due,
+          attemptCount: invoice.attempt_count,
+        });
+
+        if (!subscriptionId) {
+          log("info", "invoice.event", "Invoice not tied to a subscription — skipping", {
+            eventId,
+            invoiceId: invoice.id,
+          });
+          break;
+        }
+
+        const { data: existing } = await supabase
+          .from("subscriptions")
+          .select("tenant_id")
+          .eq("stripe_subscription_id", subscriptionId)
+          .maybeSingle();
+
+        const stripe = createStripeClient(env);
+        const sub = await stripe.subscriptions.retrieve(subscriptionId);
+        const tenantId: string | undefined = sub.metadata?.tenantId ?? existing?.tenant_id ?? undefined;
+
+        if (!tenantId) {
+          log("warn", "invoice.event", "Cannot resolve tenant for invoice — skipping", {
+            eventId,
+            invoiceId: invoice.id,
+            subscriptionId,
+          });
+          break;
+        }
+
+        await upsertSubscription(env, sub, tenantId, eventId);
+
+        if (event.type === "invoice.payment_failed") {
+          log("warn", "invoice.event", "Renewal payment failed — tenant may lose access", {
+            eventId,
+            tenantId,
+            subscriptionId,
+            stripeStatus: sub.status,
+            attemptCount: invoice.attempt_count,
+            nextPaymentAttempt: invoice.next_payment_attempt ?? null,
+          });
+        }
+        break;
+      }
+      case "customer.subscription.trial_will_end": {
+        const sub = event.data.object;
+        log("info", "trial_will_end", "Trial ending soon", {
+          eventId,
+          subscriptionId: sub.id,
+          tenantId: sub.metadata?.tenantId ?? null,
+          trialEnd: sub.trial_end ?? null,
+        });
+        break;
+      }
+
       default:
         log("info", "event", "Ignored event type", { eventId, type: event.type });
         break;
