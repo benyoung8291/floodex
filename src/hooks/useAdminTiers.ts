@@ -23,10 +23,13 @@ export interface SubscriptionTier {
   id: string;
   name: string;
   monthly_price: number;
+  yearly_price: number;
   jobs_included: number;
   readings_included: number;
   overage_price_per_job: number;
   overage_price_per_reading: number;
+  monthly_lookup_key: string | null;
+  yearly_lookup_key: string | null;
   is_free_tier: boolean;
   is_active: boolean;
   sort_order: number;
@@ -44,14 +47,18 @@ export interface TierWithStats extends SubscriptionTier {
 export interface TierFormData {
   name: string;
   monthly_price: number;
+  yearly_price: number;
   jobs_included: number;
   readings_included: number;
   overage_price_per_job: number;
   overage_price_per_reading: number;
+  monthly_lookup_key: string | null;
+  yearly_lookup_key: string | null;
   is_free_tier: boolean;
   is_active: boolean;
   sort_order: number;
 }
+
 
 export function useAdminTiers() {
   return useQuery({
