@@ -216,9 +216,24 @@ export default function JobCreate() {
 
   const isLastStep = currentStep === steps.length - 1;
 
+  if (!billingLoading && billingAccess && !billingAccess.canWrite) {
+    return (
+      <div className="min-h-full bg-background">
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
+          <Button type="button" variant="ghost" onClick={() => navigate(-1)} className="min-h-[44px]">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <BillingLockedNotice action="Creating a new loss" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full bg-background">
       {/* Header */}
+
       <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-4">
         <div className="max-w-lg mx-auto">
           <h1 className="text-lg font-semibold text-foreground text-center mb-4">
