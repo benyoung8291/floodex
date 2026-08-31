@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
 
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("stripe_subscription_id")
+      .select("id, stripe_subscription_id")
       .eq("tenant_id", profile.tenant_id)
       .eq("environment", env)
       .order("created_at", { ascending: false })
@@ -89,6 +89,39 @@ Deno.serve(async (req) => {
         cancel_at_period_end: true,
       });
     }
+
+    // Write state back immediately so the UI is correct without waiting on the
+    // webhook round-trip. The webhook remains the authoritative reconciler.
+    const item = updated.items?.data?.[0];
+    const periodEndUnix = item?.current_period_end ?? updated.current_period_end ?? null;
+    const { error: syncError } = await supabase
+      .from("subscriptions")
+      .update({
+        status: updated.status,
+        cancel_at_period_end: !!updated.cancel_at_period_end,
+        current_period_end: periodEndUnix
+          ? new Date(periodEndUnix * 1000).toISOString()
+          : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", sub.id);
+    if (syncError) {
+      console.error("cancel-subscription: local sync failed:", syncError.message);
+    }
+
+    if (updated.status === "canceled") {
+      await supabase
+        .from("tenants")
+        .update({ subscription_status: "cancelled" })
+        .eq("id", profile.tenant_id);
+    } else if (reactivate && updated.status === "active") {
+      await supabase
+        .from("tenants")
+        .update({ subscription_status: "active" })
+        .eq("id", profile.tenant_id);
+    }
+
+
 
     return new Response(
       JSON.stringify({
