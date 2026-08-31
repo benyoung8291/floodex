@@ -65,6 +65,8 @@ export default function JobCreate() {
   const [currentStep, setCurrentStep] = useState(0);
   const createJob = useCreateJob();
   const { data: tenant } = useTenant();
+  const { data: billingAccess, isLoading: billingLoading } = useBillingAccess();
+
   const { isTenantAdmin, isSupervisor } = useAuth();
 
   const form = useForm<JobFormData>({
