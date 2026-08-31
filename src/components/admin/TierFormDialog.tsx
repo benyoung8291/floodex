@@ -179,6 +179,58 @@ export function TierFormDialog({
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
+                name="yearly_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yearly Price ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormDescription>Total billed once per year.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="monthly_lookup_key"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monthly price lookup key</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., pro_monthly" {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="yearly_lookup_key"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yearly price lookup key</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., pro_yearly" {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground -mt-2">
+              Lookup keys must match the payment product prices exactly — they are how checkout finds the right price.
+            </p>
+
+
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="jobs_included"
                 render={({ field }) => (
                   <FormItem>
