@@ -17,6 +17,9 @@ import { useTenant } from '@/hooks/useTenant';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react';
+import { useBillingAccess } from '@/hooks/useBillingAccess';
+import { BillingLockedNotice } from '@/components/billing/BillingLockedNotice';
+
 
 const safetyCheckSchema = z.object({
   hazardType: z.string(),
