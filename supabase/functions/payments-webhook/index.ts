@@ -107,6 +107,9 @@ async function upsertSubscription(env: StripeEnv, sub: any, tenantId: string, ev
   const periodEndUnix: number | null =
     item?.current_period_end ?? sub.current_period_end ?? null;
   const periodEnd = periodEndUnix ? new Date(periodEndUnix * 1000).toISOString() : null;
+  const periodStartUnix: number | null =
+    item?.current_period_start ?? sub.current_period_start ?? null;
+  const periodStart = periodStartUnix ? new Date(periodStartUnix * 1000).toISOString() : null;
 
   const subRow = {
     tenant_id: tenantId,
@@ -117,10 +120,12 @@ async function upsertSubscription(env: StripeEnv, sub: any, tenantId: string, ev
     status: sub.status as string,
     price_lookup_key: priceLookupKey,
     product_lookup_key: typeof productId === "string" ? productId : null,
+    current_period_start: periodStart,
     current_period_end: periodEnd,
     cancel_at_period_end: !!sub.cancel_at_period_end,
     updated_at: new Date().toISOString(),
   };
+
 
   log("info", "upsertSubscription", "Writing subscription row", {
     eventId,
