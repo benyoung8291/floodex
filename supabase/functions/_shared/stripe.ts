@@ -92,14 +92,31 @@ export function createStripeClient(env: StripeEnv) {
       cancel: (id: string) => request(env, "DELETE", `/subscriptions/${id}`),
     },
     webhooks: {
-      // Stripe-style HMAC verification
-      verify: async (payload: string, signatureHeader: string, secret: string) => {
+      // Stripe-style HMAC verification with replay protection.
+      verify: async (
+        payload: string,
+        signatureHeader: string,
+        secret: string,
+        toleranceSeconds = 300,
+      ) => {
         const parts = Object.fromEntries(
-          signatureHeader.split(",").map((p) => p.split("=") as [string, string]),
+          signatureHeader.split(",").map((p) => {
+            const idx = p.indexOf("=");
+            return [p.slice(0, idx).trim(), p.slice(idx + 1).trim()] as [string, string];
+          }),
         );
         const t = parts.t;
         const v1 = parts.v1;
         if (!t || !v1) throw new Error("Invalid stripe-signature header");
+
+        // Replay protection: reject signatures outside the tolerance window.
+        const timestamp = Number(t);
+        if (!Number.isFinite(timestamp)) throw new Error("Invalid signature timestamp");
+        const ageSeconds = Math.abs(Date.now() / 1000 - timestamp);
+        if (ageSeconds > toleranceSeconds) {
+          throw new Error(`Webhook timestamp outside tolerance (${Math.round(ageSeconds)}s)`);
+        }
+
         const enc = new TextEncoder();
         const key = await crypto.subtle.importKey(
           "raw",
@@ -112,8 +129,16 @@ export function createStripeClient(env: StripeEnv) {
         const expected = Array.from(new Uint8Array(sig))
           .map((b) => b.toString(16).padStart(2, "0"))
           .join("");
-        if (expected !== v1) throw new Error("Webhook signature mismatch");
+
+        // Constant-time comparison
+        if (expected.length !== v1.length) throw new Error("Webhook signature mismatch");
+        let diff = 0;
+        for (let i = 0; i < expected.length; i++) {
+          diff |= expected.charCodeAt(i) ^ v1.charCodeAt(i);
+        }
+        if (diff !== 0) throw new Error("Webhook signature mismatch");
       },
     },
+
   };
 }

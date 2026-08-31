@@ -11,14 +11,37 @@ interface PlanCardProps {
   isCurrentPlan: boolean;
   isPopular?: boolean;
   interval: BillingInterval;
+  /** Monthly-equivalent price of the plan the tenant is on, for upgrade/downgrade labelling. */
+  currentMonthlyEquivalent?: number | null;
+  /** True when the tenant has a live Stripe subscription that can be swapped in place. */
+  hasActiveSubscription?: boolean;
   onSelect: (priceId: string) => void;
 }
 
-export function PlanCard({ tier, isCurrentPlan, isPopular, interval, onSelect }: PlanCardProps) {
+export function PlanCard({
+  tier,
+  isCurrentPlan,
+  isPopular,
+  interval,
+  currentMonthlyEquivalent,
+  hasActiveSubscription,
+  onSelect,
+}: PlanCardProps) {
   const price = interval === 'yearly' ? Number(tier.yearly_price) : Number(tier.monthly_price);
   const lookupKey = interval === 'yearly' ? tier.yearly_lookup_key : tier.monthly_lookup_key;
   const monthlyEquivalent = interval === 'yearly' ? price / 12 : price;
   const canCheckout = !tier.is_free_tier && !!lookupKey;
+
+  let actionLabel = 'Subscribe';
+  if (hasActiveSubscription && typeof currentMonthlyEquivalent === 'number') {
+    actionLabel =
+      monthlyEquivalent > currentMonthlyEquivalent
+        ? 'Upgrade'
+        : monthlyEquivalent < currentMonthlyEquivalent
+          ? 'Downgrade'
+          : 'Switch billing';
+  }
+
 
   const features = [
     `${tier.jobs_included} jobs/month`,
@@ -85,14 +108,14 @@ export function PlanCard({ tier, isCurrentPlan, isPopular, interval, onSelect }:
               onClick={() => lookupKey && onSelect(lookupKey)}
               disabled={!canCheckout}
             >
-              {canCheckout ? 'Upgrade' : 'Unavailable'}
+              {canCheckout ? actionLabel : 'Unavailable'}
             </Button>
           )}
         </div>
 
         {!tier.is_free_tier && (
           <p className="text-xs text-center text-muted-foreground">
-            +${Number(tier.overage_price_per_job).toFixed(2)}/job over limit
+            Fair-use guide: {tier.jobs_included} jobs &amp; {tier.readings_included.toLocaleString()} readings included
           </p>
         )}
       </CardContent>

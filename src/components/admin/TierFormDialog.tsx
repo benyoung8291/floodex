@@ -25,17 +25,33 @@ import { Switch } from '@/components/ui/switch';
 import { TierFormData, TierWithStats } from '@/hooks/useAdminTiers';
 import { Loader2 } from 'lucide-react';
 
+const lookupKeySchema = z
+  .string()
+  .trim()
+  .max(100, 'Lookup key must be 100 characters or less')
+  .regex(/^[a-z0-9_-]*$/, 'Use lowercase letters, numbers, underscores or dashes only');
+
 const tierSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name must be 50 characters or less'),
   monthly_price: z.coerce.number().min(0, 'Price must be 0 or greater'),
+  yearly_price: z.coerce.number().min(0, 'Price must be 0 or greater'),
   jobs_included: z.coerce.number().int().min(0, 'Must be 0 or greater'),
   readings_included: z.coerce.number().int().min(0, 'Must be 0 or greater'),
   overage_price_per_job: z.coerce.number().min(0, 'Must be 0 or greater'),
   overage_price_per_reading: z.coerce.number().min(0, 'Must be 0 or greater'),
+  monthly_lookup_key: lookupKeySchema,
+  yearly_lookup_key: lookupKeySchema,
   is_free_tier: z.boolean(),
   is_active: z.boolean(),
   sort_order: z.coerce.number().int().min(0, 'Must be 0 or greater'),
-});
+}).refine(
+  (d) => d.is_free_tier || (!!d.monthly_lookup_key && !!d.yearly_lookup_key),
+  {
+    message: 'Paid tiers need both price lookup keys, or customers cannot check out',
+    path: ['monthly_lookup_key'],
+  },
+);
+
 
 interface TierFormDialogProps {
   open: boolean;
@@ -54,50 +70,49 @@ export function TierFormDialog({
 }: TierFormDialogProps) {
   const isEditing = !!tier;
 
+  const emptyValues: TierFormData = {
+    name: '',
+    monthly_price: 0,
+    yearly_price: 0,
+    jobs_included: 0,
+    readings_included: 0,
+    overage_price_per_job: 0,
+    overage_price_per_reading: 0,
+    monthly_lookup_key: '',
+    yearly_lookup_key: '',
+    is_free_tier: false,
+    is_active: true,
+    sort_order: 0,
+  };
+
   const form = useForm<TierFormData>({
     resolver: zodResolver(tierSchema),
-    defaultValues: {
-      name: '',
-      monthly_price: 0,
-      jobs_included: 0,
-      readings_included: 0,
-      overage_price_per_job: 0,
-      overage_price_per_reading: 0,
-      is_free_tier: false,
-      is_active: true,
-      sort_order: 0,
-    },
+    defaultValues: emptyValues,
   });
 
   useEffect(() => {
-    if (open) {
-      if (tier) {
-        form.reset({
-          name: tier.name,
-          monthly_price: Number(tier.monthly_price),
-          jobs_included: tier.jobs_included,
-          readings_included: tier.readings_included,
-          overage_price_per_job: Number(tier.overage_price_per_job),
-          overage_price_per_reading: Number(tier.overage_price_per_reading),
-          is_free_tier: tier.is_free_tier,
-          is_active: tier.is_active,
-          sort_order: tier.sort_order,
-        });
-      } else {
-        form.reset({
-          name: '',
-          monthly_price: 0,
-          jobs_included: 0,
-          readings_included: 0,
-          overage_price_per_job: 0,
-          overage_price_per_reading: 0,
-          is_free_tier: false,
-          is_active: true,
-          sort_order: 0,
-        });
-      }
+    if (!open) return;
+    if (tier) {
+      form.reset({
+        name: tier.name,
+        monthly_price: Number(tier.monthly_price),
+        yearly_price: Number(tier.yearly_price ?? 0),
+        jobs_included: tier.jobs_included,
+        readings_included: tier.readings_included,
+        overage_price_per_job: Number(tier.overage_price_per_job),
+        overage_price_per_reading: Number(tier.overage_price_per_reading),
+        monthly_lookup_key: tier.monthly_lookup_key ?? '',
+        yearly_lookup_key: tier.yearly_lookup_key ?? '',
+        is_free_tier: tier.is_free_tier,
+        is_active: tier.is_active,
+        sort_order: tier.sort_order,
+      });
+    } else {
+      form.reset(emptyValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tier, form]);
+
 
   const handleSubmit = (data: TierFormData) => {
     onSubmit(data);
@@ -160,6 +175,58 @@ export function TierFormDialog({
                 )}
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="yearly_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yearly Price ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormDescription>Total billed once per year.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="monthly_lookup_key"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monthly price lookup key</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., pro_monthly" {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="yearly_lookup_key"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Yearly price lookup key</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., pro_yearly" {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground -mt-2">
+              Lookup keys must match the payment product prices exactly — they are how checkout finds the right price.
+            </p>
+
+
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
