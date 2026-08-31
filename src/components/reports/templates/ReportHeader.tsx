@@ -1,5 +1,6 @@
 import { formatDateForReport } from '@/lib/pdfGenerator';
 import { Job } from '@/hooks/useReportData';
+import { formatReportPeriodRange } from '@/lib/reportPeriod';
 
 interface ReportHeaderProps {
   job: Job;
@@ -133,7 +134,7 @@ export function ReportHeader({
             <div>
               <span className="font-semibold text-gray-700">Report Period:</span>
               <span className="ml-2 text-gray-900">
-                {formatDateForReport(dateRange.start)} - {formatDateForReport(dateRange.end)}
+                {formatReportPeriodRange(dateRange.start, dateRange.end, formatDateForReport)}
               </span>
             </div>
           )}

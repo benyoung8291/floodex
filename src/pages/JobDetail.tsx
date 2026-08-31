@@ -164,7 +164,7 @@ export default function JobDetail() {
   const { data: chambers = [], isLoading: chambersLoading } = useJobChambers(id);
   const { data: latestReadings = new Map() } = useLatestReadings(id);
   const { data: safetyChecks = [] } = useJobSafetyChecks(id);
-  const { data: chamberReadings = [] } = useChamberReadings(viewingChamberId ?? undefined);
+  const { data: chamberReadings } = useChamberReadings(viewingChamberId ?? undefined);
   const { data: allEquipment = [] } = useEquipment();
   const { data: equipmentAssignments = [] } = useEquipmentAssignments(id);
   const { data: jobPhotos = [] } = useJobPhotos(id || '');
@@ -172,7 +172,7 @@ export default function JobDetail() {
   const { data: damageAssessments = [] } = useJobDamageAssessments(id);
   const { data: jobForms = [] } = useJobForms(id || '');
   const { data: costItems = [] } = useJobCostItems(id);
-  const { data: allReadings = [] } = useJobReadingsAll(id);
+  const { data: allReadings } = useJobReadingsAll(id);
   
   // Mutations
   const createChamber = useCreateChamber();
@@ -691,7 +691,9 @@ export default function JobDetail() {
                 <div>
                   <h3 className="font-semibold">{viewingChamber.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {chamberReadings.length} readings
+                    {chamberReadings === undefined
+                      ? 'Loading readings…'
+                      : `${chamberReadings.length} reading${chamberReadings.length !== 1 ? 's' : ''}`}
                   </p>
                 </div>
                 <Button 
@@ -702,18 +704,21 @@ export default function JobDetail() {
                 </Button>
               </div>
 
-              <GPPTrendChart
-                readings={chamberReadings}
-                targetGpp={viewingChamber.target_gpp}
-                outdoorGpp={job.outdoor_gpp}
-                units={units}
-              />
+              {chamberReadings && chamberReadings.length >= 2 && (
+                <GPPTrendChart
+                  readings={chamberReadings}
+                  targetGpp={viewingChamber.target_gpp}
+                  outdoorGpp={job.outdoor_gpp}
+                  units={units}
+                />
+              )}
 
               <ReadingsList
-                readings={chamberReadings}
+                readings={chamberReadings ?? []}
                 targetGpp={viewingChamber.target_gpp}
                 units={units}
                 temperatureUnit={temperatureUnit}
+                isLoading={chamberReadings === undefined}
               />
 
               <Button 
@@ -725,14 +730,32 @@ export default function JobDetail() {
               </Button>
             </>
           ) : (
-            <div className="text-center py-8">
-              <Droplets className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground mb-4">
-                Select a chamber to view readings
-              </p>
-              <Button variant="outline" onClick={() => setActiveTab('chambers')}>
-                Go to Chambers
-              </Button>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">Job readings</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {allReadings === undefined
+                      ? 'Loading readings…'
+                      : `${allReadings.length} reading${allReadings.length !== 1 ? 's' : ''}`}
+                  </p>
+                </div>
+                {chambers.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveTab('chambers')}
+                  >
+                    View by chamber
+                  </Button>
+                )}
+              </div>
+              <ReadingsList
+                readings={allReadings ?? []}
+                units={units}
+                temperatureUnit={temperatureUnit}
+                isLoading={allReadings === undefined}
+              />
             </div>
           )}
         </TabsContent>
@@ -830,7 +853,7 @@ export default function JobDetail() {
         <TabsContent value="timeline" className="space-y-4 mt-4">
           <JobTimeline
             job={job}
-            readings={allReadings as any}
+            readings={(allReadings ?? []) as any}
             photos={jobPhotos as any}
             workLogs={workLogs as any}
             damage={damageAssessments as any}

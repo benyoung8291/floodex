@@ -306,7 +306,7 @@ export default function Readings() {
               targetGpp={chambers?.[0]?.target_gpp}
               units={units}
               temperatureUnit={temperatureUnit}
-              isLoading={readingsLoading}
+              isLoading={readingsLoading || allJobReadings === undefined}
             />
           </div>
         </>

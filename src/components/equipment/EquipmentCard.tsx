@@ -75,11 +75,9 @@ export function EquipmentCard({ equipment, assignedTo, onEdit, onDelete }: Equip
           {equipment.serial_number && (
             <p>S/N: {equipment.serial_number}</p>
           )}
-          {equipment.daily_rate && Number(equipment.daily_rate) > 0 && (
-            <p className="font-medium text-foreground">
-              ${Number(equipment.daily_rate).toFixed(2)}/day
-            </p>
-          )}
+          <p className="font-medium text-foreground">
+            ${Number(equipment.daily_rate ?? 0).toFixed(2)} / day
+          </p>
         </div>
 
         {equipment.is_available ? (

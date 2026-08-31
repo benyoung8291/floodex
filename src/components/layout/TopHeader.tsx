@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Settings, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { primaryRole, roleLabel } from '@/lib/roles';
 
 interface TopHeaderProps {
   onOpenSearch?: () => void;
@@ -104,8 +105,8 @@ export function TopHeader({ onOpenSearch }: TopHeaderProps = {}) {
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5">
               <p className="text-sm font-medium">{user?.email}</p>
-              <p className="text-xs text-muted-foreground capitalize">
-                {roles[0]?.replace('_', ' ') || 'User'}
+              <p className="text-xs text-muted-foreground">
+                {roleLabel(primaryRole(roles))}
               </p>
             </div>
             <DropdownMenuSeparator />

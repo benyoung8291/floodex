@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Briefcase, Layers, Droplets, ArrowUpDown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useJobsWithChambers } from '@/hooks/useAllReadings';
 import { useTenant } from '@/hooks/useTenant';
 import { formatHumidityRatio, type UnitSystem } from '@/lib/psychrometrics';
@@ -221,47 +221,49 @@ export default function Jobs() {
           {visibleJobs.map((job) => {
             const daysDrying = calculateDaysDrying(job.start_date);
             return (
-              <Card
+              <Link
                 key={job.id}
-                className="cursor-pointer hover:bg-accent/50 active:scale-[0.997] transition-all"
-                onClick={() => navigate(`/jobs/${job.id}`)}
+                to={`/jobs/${job.id}`}
+                className="block rounded-lg text-inherit no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold truncate">{job.customer_name}</h3>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(job.status)}`}>
-                          {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {job.address}
-                        {job.city && `, ${job.city}`}
-                        {job.state && `, ${job.state}`}
-                      </p>
-                      <div className="flex items-center gap-3 mt-2 flex-wrap">
-                        <Badge variant="secondary" className="gap-1 text-xs">
-                          <Layers className="h-3 w-3" />
-                          {job.chamber_count} chamber{job.chamber_count !== 1 ? 's' : ''}
-                        </Badge>
-                        {job.latest_gpp && (
-                          <Badge variant="outline" className="gap-1 text-xs">
-                            <Droplets className="h-3 w-3" />
-                            {formatHumidityRatio(job.latest_gpp, units)}
+                <Card className="hover:bg-accent/50 active:scale-[0.997] transition-all">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold truncate">{job.customer_name}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(job.status)}`}>
+                            {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {job.address}
+                          {job.city && `, ${job.city}`}
+                          {job.state && `, ${job.state}`}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
+                          <Badge variant="secondary" className="gap-1 text-xs">
+                            <Layers className="h-3 w-3" />
+                            {job.chamber_count} chamber{job.chamber_count !== 1 ? 's' : ''}
                           </Badge>
-                        )}
+                          {job.latest_gpp && (
+                            <Badge variant="outline" className="gap-1 text-xs">
+                              <Droplets className="h-3 w-3" />
+                              {formatHumidityRatio(job.latest_gpp, units)}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-medium">{getLossTypeLabel(job.loss_type)}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {daysDrying === 0 ? 'New' : `${daysDrying} day${daysDrying !== 1 ? 's' : ''} drying`}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-medium">{getLossTypeLabel(job.loss_type)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {daysDrying === 0 ? 'New' : `${daysDrying} day${daysDrying !== 1 ? 's' : ''} drying`}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>

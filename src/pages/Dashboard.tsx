@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2, Droplets, TrendingUp, Gauge, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useJobsWithChambers, useReadingsStats } from '@/hooks/useAllReadings';
 import { formatHumidityRatio, getHumidityRatioUnit, type UnitSystem } from '@/lib/psychrometrics';
 import { useOnboarding } from '@/hooks/useOnboarding';
@@ -279,37 +279,39 @@ export default function Dashboard() {
               </Card>
             ) : (
               recentJobs.map((job) => (
-                <Card
+                <Link
                   key={job.id}
-                  className="cursor-pointer hover:bg-accent/50 transition-colors"
-                  onClick={() => navigate(`/jobs/${job.id}`)}
+                  to={`/jobs/${job.id}`}
+                  className="block rounded-lg text-inherit no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold truncate">{job.customer_name}</h3>
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(
-                              job.status
-                            )}`}
-                          >
-                            {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                          </span>
+                  <Card className="hover:bg-accent/50 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold truncate">{job.customer_name}</h3>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(
+                                job.status
+                              )}`}
+                            >
+                              {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground truncate">{job.address}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground truncate">{job.address}</p>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-sm font-medium">{getLossTypeLabel(job.loss_type)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {calculateDaysDrying(job.start_date) === 0 
+                              ? 'New' 
+                              : `${calculateDaysDrying(job.start_date)} days drying`}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-medium">{getLossTypeLabel(job.loss_type)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {calculateDaysDrying(job.start_date) === 0 
-                            ? 'New' 
-                            : `${calculateDaysDrying(job.start_date)} days drying`}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))
             )}
           </div>

@@ -30,6 +30,18 @@ const acceptInviteSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
 });
 
+const resetRequestSchema = z.object({
+  email: z.string().email('Please enter a valid email'),
+});
+
+const newPasswordSchema = z.object({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
 // Password strength indicator component
 function PasswordStrengthIndicator({ password }: { password: string }) {
   const hasMinLength = password.length >= 6;
@@ -53,8 +65,12 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
 export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, resetPassword, updatePassword, isPasswordRecovery, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [authView, setAuthView] = useState<'form' | 'forgot' | 'forgot-sent'>('form');
+  const [resetEmail, setResetEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Check for invitation token and marketing CTA tab
   const inviteToken = searchParams.get('invite');
@@ -86,12 +102,13 @@ export default function Auth() {
   const [acceptFullName, setAcceptFullName] = useState('');
   const [acceptPassword, setAcceptPassword] = useState('');
 
-  // Redirect if already logged in (only if not accepting an invitation)
+  // Redirect if already logged in (only if not accepting an invitation
+  // or finishing a password-recovery session)
   useEffect(() => {
-    if (user && !inviteToken) {
+    if (user && !inviteToken && !isPasswordRecovery) {
       navigate('/dashboard');
     }
-  }, [user, inviteToken, navigate]);
+  }, [user, inviteToken, navigate, isPasswordRecovery]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,6 +165,56 @@ export default function Auth() {
       } else {
         setConfirmationEmail(validated.email);
         setShowEmailConfirmation(true);
+      }
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        toast.error(err.errors[0].message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const validated = resetRequestSchema.parse({ email: resetEmail });
+      const { error } = await resetPassword(validated.email);
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        setAuthView('forgot-sent');
+      }
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        toast.error(err.errors[0].message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const validated = newPasswordSchema.parse({
+        password: newPassword,
+        confirmPassword,
+      });
+      const { error } = await updatePassword(validated.password);
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password updated. You can now sign in.');
+        setNewPassword('');
+        setConfirmPassword('');
+        navigate('/dashboard');
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -422,6 +489,149 @@ export default function Auth() {
     );
   }
 
+  if (isPasswordRecovery) {
+    return (
+      <div className="marketing-theme min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(204_98%_37%/0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,hsl(204_98%_37%/0.05),transparent_50%)]" />
+        <div className="w-full max-w-md relative z-10">
+          <div className="flex flex-col items-center mb-8">
+            <img src={floodexLogo} alt="FloodEx" className="h-12 w-auto" />
+          </div>
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="text-xl">Set a new password</CardTitle>
+              <CardDescription>
+                Choose a new password for your FloodEx account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="At least 6 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="h-12"
+                  />
+                  {newPassword.length > 0 && (
+                    <PasswordStrengthIndicator password={newPassword} />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Re-enter your new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="h-12"
+                  />
+                </div>
+                <Button type="submit" className="w-full h-12" disabled={loading || newPassword.length < 6}>
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Update password'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (authView === 'forgot' || authView === 'forgot-sent') {
+    return (
+      <div className="marketing-theme min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(204_98%_37%/0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,hsl(204_98%_37%/0.05),transparent_50%)]" />
+        <div className="w-full max-w-md relative z-10">
+          <div className="flex flex-col items-center mb-8">
+            <img src={floodexLogo} alt="FloodEx" className="h-12 w-auto" />
+          </div>
+          <Card className="border-border">
+            {authView === 'forgot-sent' ? (
+              <>
+                <CardHeader className="text-center">
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                    <Mail className="w-8 h-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Check your email</CardTitle>
+                  <CardDescription className="mt-2">
+                    If an account exists for{' '}
+                    <strong className="text-foreground">{resetEmail}</strong>,
+                    we sent a link to reset your password.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert>
+                    <Mail className="h-4 w-4" />
+                    <AlertDescription>
+                      Didn&apos;t receive the email? Check your spam folder or try again.
+                    </AlertDescription>
+                  </Alert>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setAuthView('forgot')}
+                  >
+                    Try a different email
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setAuthView('form')}
+                  >
+                    Back to Sign In
+                  </Button>
+                </CardContent>
+              </>
+            ) : (
+              <>
+                <CardHeader>
+                  <CardTitle className="text-xl">Forgot password</CardTitle>
+                  <CardDescription>
+                    Enter your email and we&apos;ll send you a reset link.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="you@company.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        required
+                        className="h-12"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full h-12" disabled={loading}>
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send reset link'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setAuthView('form')}
+                    >
+                      Back to Sign In
+                    </Button>
+                  </form>
+                </CardContent>
+              </>
+            )}
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="marketing-theme min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Subtle background pattern */}
@@ -477,6 +687,16 @@ export default function Auth() {
                       required
                       className="h-12"
                     />
+                    <button
+                      type="button"
+                      className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                      onClick={() => {
+                        setResetEmail(loginEmail);
+                        setAuthView('forgot');
+                      }}
+                    >
+                      Forgot password?
+                    </button>
                   </div>
                   <Button type="submit" className="w-full h-12" disabled={loading}>
                     {loading ? (

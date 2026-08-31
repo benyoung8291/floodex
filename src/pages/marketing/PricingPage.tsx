@@ -51,18 +51,18 @@ export default function PricingPage() {
         </motion.p>
 
         {isLoading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="h-[400px] rounded-3xl bg-secondary animate-pulse" />
             ))}
           </div>
         ) : (
-          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-[960px]">
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 max-w-[960px]">
             {sortedTiers.map((tier) => {
               const isFeatured = tier.name.toLowerCase() === 'pro';
               return (
-                <StaggerItem key={tier.id}>
-                  <div className={`border rounded-3xl p-6 lg:p-8 flex flex-col relative h-full min-w-0 transition-shadow hover:shadow-lg ${
+                <StaggerItem key={tier.id} className="min-w-0">
+                  <div className={`border rounded-3xl p-6 lg:p-8 flex flex-col relative h-full min-w-0 overflow-visible transition-shadow hover:shadow-lg ${
                     isFeatured
                       ? "bg-foreground border-foreground/80 shadow-xl"
                       : "bg-white border-border/50"
@@ -71,9 +71,9 @@ export default function PricingPage() {
                       <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 bg-accent text-white text-[11px] font-black px-4 py-[3px] rounded-full whitespace-nowrap uppercase tracking-[0.04em]">Most popular</div>
                     )}
                     <div className={`text-2xl font-black tracking-tight mb-[6px] ${isFeatured ? "text-white" : "text-foreground"}`}>{tier.name}</div>
-                    <div className="flex items-baseline gap-[3px] mb-[6px] whitespace-nowrap">
-                      <span className={`text-4xl lg:text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-white" : ""}`}>${tier.monthly_price}</span>
-                      <span className={`text-[15px] font-semibold ${isFeatured ? "text-white/40" : "text-muted-foreground"}`}>/ month</span>
+                    <div className="flex items-baseline gap-[3px] mb-[6px] whitespace-nowrap overflow-visible shrink-0">
+                      <span className={`text-4xl xl:text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-white" : ""}`}>${tier.monthly_price}</span>
+                      <span className={`text-[15px] font-semibold shrink-0 ${isFeatured ? "text-white/40" : "text-muted-foreground"}`}>/ month</span>
                     </div>
                     <div className={`text-[13px] font-medium leading-[1.65] mb-6 pb-6 border-b ${isFeatured ? "text-white/40 border-white/10" : "text-muted-foreground border-border/40"}`}>
                       {tier.jobs_included} jobs · {tier.readings_included.toLocaleString()} readings/mo

@@ -134,7 +134,7 @@ export function LocationStep({ form }: LocationStepProps) {
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   {...field}
-                  placeholder="123 Main Street"
+                  placeholder="24 Example St"
                   className="pl-11 h-12 text-base"
                   onChange={(e) => {
                     field.onChange(e);
@@ -158,7 +158,7 @@ export function LocationStep({ form }: LocationStepProps) {
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="City"
+                  placeholder="Melbourne"
                   className="h-12 text-base"
                   onChange={(e) => {
                     field.onChange(e);
