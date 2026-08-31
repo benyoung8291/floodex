@@ -169,15 +169,19 @@ async function upsertSubscription(env: StripeEnv, sub: any, tenantId: string, ev
     status: upsertData.status,
   });
 
-  // Map Stripe -> tenant subscription_status enum
+  // Map Stripe -> tenant subscription_status enum.
+  // past_due is surfaced as-is so access enforcement can react to failed payments.
   const tenantStatus =
     sub.status === "trialing"
       ? "trial"
-      : sub.status === "active" || sub.status === "past_due"
+      : sub.status === "active"
         ? "active"
-        : sub.status === "canceled" || sub.status === "unpaid" || sub.status === "incomplete_expired"
-          ? "cancelled"
-          : null;
+        : sub.status === "past_due"
+          ? "past_due"
+          : sub.status === "canceled" || sub.status === "unpaid" || sub.status === "incomplete_expired"
+            ? "cancelled"
+            : null;
+
 
   if (!tenantStatus) {
     log("warn", "syncTenant", "Unmapped Stripe status — leaving tenant.subscription_status unchanged", {
