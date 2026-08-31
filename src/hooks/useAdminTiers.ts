@@ -116,16 +116,20 @@ export function useCreateTier() {
         .insert({
           name: data.name,
           monthly_price: data.monthly_price,
+          yearly_price: data.yearly_price,
           jobs_included: data.jobs_included,
           readings_included: data.readings_included,
           overage_price_per_job: data.overage_price_per_job,
           overage_price_per_reading: data.overage_price_per_reading,
+          monthly_lookup_key: data.monthly_lookup_key || null,
+          yearly_lookup_key: data.yearly_lookup_key || null,
           is_free_tier: data.is_free_tier,
           is_active: data.is_active,
           sort_order: data.sort_order,
         })
         .select()
         .single();
+
 
       if (error) throw error;
       return tier;
