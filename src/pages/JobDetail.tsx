@@ -27,7 +27,8 @@ import {
   Share2,
   DollarSign,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDisplayDate } from '@/lib/datetime';
+import { QuickLogDialog } from '@/components/readings/QuickLogDialog';
 import { 
   useJob, 
   useJobChambers, 
@@ -137,6 +138,8 @@ export default function JobDetail() {
   
   // Share dialog state
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [quickLogOpen, setQuickLogOpen] = useState(false);
+  const [pendingCapture, setPendingCapture] = useState<string | null>(null);
 
   // Capture deep-link from FAB (?capture=readings|photo|worklog)
   useEffect(() => {
@@ -151,10 +154,10 @@ export default function JobDetail() {
       setWorkLogDialogOpen(true);
     } else if (captureParam === 'readings') {
       setActiveTab('chambers');
+      setPendingCapture('readings');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams.get('capture')]);
-
 
   // Queries
   const { data: job, isLoading: jobLoading } = useJob(id);
@@ -185,7 +188,23 @@ export default function JobDetail() {
   const deleteDamageAssessment = useDeleteDamageAssessment();
 
   // Filter available equipment
-  const availableEquipment = allEquipment.filter(e => e.is_available);
+  const availableEquipment = allEquipment.filter(
+    e => e.is_available || !equipmentAssignments.some(a => a.equipment_id === e.id)
+  );
+
+  useEffect(() => {
+    if (pendingCapture !== 'readings') return;
+    if (chambersLoading) return;
+    setPendingCapture(null);
+    if (chambers.length === 1) {
+      setSelectedChamber(chambers[0]);
+      setReadingFormOpen(true);
+    } else if (chambers.length > 1) {
+      setQuickLogOpen(true);
+    } else {
+      setCreateChamberOpen(true);
+    }
+  }, [pendingCapture, chambersLoading, chambers]);
 
   // Handlers
   const handleAddChamber = () => setCreateChamberOpen(true);
@@ -579,12 +598,12 @@ export default function JobDetail() {
               )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Start Date</span>
-                <span>{format(new Date(job.start_date), 'MMM d, yyyy')}</span>
+                <span>{formatDisplayDate(job.start_date)}</span>
               </div>
               {jobWithNewFields.date_of_loss && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Date of Loss</span>
-                  <span>{format(new Date(jobWithNewFields.date_of_loss), 'MMM d, yyyy')}</span>
+                  <span>{formatDisplayDate(jobWithNewFields.date_of_loss)}</span>
                 </div>
               )}
               <div className="flex justify-between">
@@ -930,6 +949,25 @@ export default function JobDetail() {
           temperatureUnit={temperatureUnit}
           previousReading={latestReadings.get(selectedChamber.id) ?? null}
           onSubmit={handleSubmitReading}
+          isLoading={createReading.isPending}
+        />
+      )}
+
+      {id && (
+        <QuickLogDialog
+          open={quickLogOpen}
+          onOpenChange={setQuickLogOpen}
+          chambers={chambers}
+          latestReadings={latestReadings}
+          units={units}
+          temperatureUnit={temperatureUnit}
+          onSubmitReading={async (chamberId, data) => {
+            await createReading.mutateAsync({
+              chamberId,
+              jobId: id,
+              ...data,
+            });
+          }}
           isLoading={createReading.isPending}
         />
       )}

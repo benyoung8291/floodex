@@ -633,6 +633,7 @@ export const FloorPlanEditor = ({
                 onOpenChange={setPopoverOpen}
                 markerNumber={selectedMarker.readingNumber}
                 linkedReading={linkedReading}
+                units={units}
                 onLinkClick={() => setLinkDialogOpen(true)}
                 onAddNewReading={() => {
                   setPopoverOpen(false);
@@ -668,6 +669,7 @@ export const FloorPlanEditor = ({
             chambers={chambers}
             linkedReadingIds={linkedReadingIds}
             onLink={handleLinkReading}
+            units={units}
           />
         )}
 

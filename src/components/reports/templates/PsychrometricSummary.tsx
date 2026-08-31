@@ -1,12 +1,15 @@
 import { ReportReading, groupReadingsByChamber, Chamber } from '@/hooks/useReportData';
+import { formatHumidityRatio, getHumidityRatioUnit, type UnitSystem } from '@/lib/psychrometrics';
 
 interface PsychrometricSummaryProps {
   readings: ReportReading[];
   chambers: Chamber[];
   outdoorGpp?: number | null;
+  units?: UnitSystem;
 }
 
-export function PsychrometricSummary({ readings, chambers, outdoorGpp }: PsychrometricSummaryProps) {
+export function PsychrometricSummary({ readings, chambers, outdoorGpp, units = 'imperial' }: PsychrometricSummaryProps) {
+  const humidityUnit = getHumidityRatioUnit(units);
   const byChamber = groupReadingsByChamber(readings);
   
   const chamberStats = chambers.map(chamber => {
@@ -62,9 +65,9 @@ export function PsychrometricSummary({ readings, chambers, outdoorGpp }: Psychro
       {outdoorGpp != null && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-sm">
           <span className="font-semibold text-blue-800">Outdoor Reference:</span>
-          <span className="ml-2 text-blue-900">{outdoorGpp.toFixed(1)} GPP</span>
+          <span className="ml-2 text-blue-900">{formatHumidityRatio(outdoorGpp, units)}</span>
           <p className="text-xs text-blue-600 mt-1">
-            Indoor chambers should reach within 10-15 GPP of outdoor conditions for drying to be considered complete.
+            Indoor chambers should reach near outdoor {humidityUnit} for drying to be considered complete.
           </p>
         </div>
       )}
@@ -73,9 +76,9 @@ export function PsychrometricSummary({ readings, chambers, outdoorGpp }: Psychro
         <thead>
           <tr className="bg-gray-100">
             <th className="border border-gray-300 px-2 py-1 text-left">Chamber</th>
-            <th className="border border-gray-300 px-2 py-1 text-right">Initial GPP</th>
-            <th className="border border-gray-300 px-2 py-1 text-right">Current GPP</th>
-            <th className="border border-gray-300 px-2 py-1 text-right">Target GPP</th>
+            <th className="border border-gray-300 px-2 py-1 text-right">Initial {humidityUnit}</th>
+            <th className="border border-gray-300 px-2 py-1 text-right">Current {humidityUnit}</th>
+            <th className="border border-gray-300 px-2 py-1 text-right">Target {humidityUnit}</th>
             <th className="border border-gray-300 px-2 py-1 text-right">Progress</th>
             <th className="border border-gray-300 px-2 py-1 text-center">Trend</th>
           </tr>
@@ -87,13 +90,13 @@ export function PsychrometricSummary({ readings, chambers, outdoorGpp }: Psychro
                 {chamber.name}
               </td>
               <td className="border border-gray-300 px-2 py-1 text-right">
-                {initial?.toFixed(1) || '--'}
+                {initial != null ? formatHumidityRatio(initial, units) : '--'}
               </td>
               <td className="border border-gray-300 px-2 py-1 text-right font-medium">
-                {current?.toFixed(1) || '--'}
+                {current != null ? formatHumidityRatio(current, units) : '--'}
               </td>
               <td className="border border-gray-300 px-2 py-1 text-right">
-                {target?.toFixed(1) || '--'}
+                {target != null ? formatHumidityRatio(target, units) : '--'}
               </td>
               <td className="border border-gray-300 px-2 py-1 text-right">
                 {progress != null ? (
@@ -123,12 +126,14 @@ export function PsychrometricSummary({ readings, chambers, outdoorGpp }: Psychro
       </table>
 
       <div className="p-3 bg-gray-100 rounded-md text-xs">
-        <h4 className="font-semibold text-gray-700 mb-2">Understanding GPP (Grains Per Pound)</h4>
+        <h4 className="font-semibold text-gray-700 mb-2">
+          Understanding {units === 'metric' ? 'g/kg (grams per kilogram)' : 'GPP (Grains Per Pound)'}
+        </h4>
         <ul className="space-y-1 text-gray-600">
-          <li>• GPP measures absolute humidity - the actual moisture content in air</li>
-          <li>• Lower GPP values indicate drier conditions</li>
-          <li>• Target is typically outdoor GPP + 10-15 grains</li>
-          <li>• Drying is complete when indoor GPP stabilizes near target</li>
+          <li>• {humidityUnit} measures absolute humidity — the actual moisture content in air</li>
+          <li>• Lower {humidityUnit} values indicate drier conditions</li>
+          <li>• Target is typically near outdoor {humidityUnit}</li>
+          <li>• Drying is complete when indoor {humidityUnit} stabilizes near target</li>
         </ul>
       </div>
     </div>

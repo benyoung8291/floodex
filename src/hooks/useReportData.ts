@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { getPhotoUrl } from '@/hooks/useJobPhotos';
 import { FloorPlan, getFloorPlanThumbnailUrl } from '@/hooks/useFloorPlans';
+import { formatDisplayDate } from '@/lib/datetime';
 
 export type Job = Tables<'jobs'> & {
   claim_id?: string | null;
@@ -219,7 +220,7 @@ export function groupReadingsByDay(readings: ReportReading[]): Map<string, Repor
   const groups = new Map<string, ReportReading[]>();
   
   readings.forEach(reading => {
-    const date = new Date(reading.logged_at).toLocaleDateString('en-US');
+    const date = formatDisplayDate(reading.logged_at);
     const existing = groups.get(date) || [];
     existing.push(reading);
     groups.set(date, existing);

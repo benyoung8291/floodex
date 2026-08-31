@@ -1,5 +1,5 @@
-import { format } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatDisplayDateKey, formatDisplayDateLong, formatDisplayTime } from '@/lib/datetime';
 import { Badge } from '@/components/ui/badge';
 import { Droplets, ThermometerSun, Layers, MapPin } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
@@ -48,7 +48,7 @@ export function ReadingsList({
 
   // Group readings by date
   const groupedByDate = readings.reduce((acc, reading) => {
-    const date = format(new Date(reading.logged_at), 'yyyy-MM-dd');
+    const date = formatDisplayDateKey(reading.logged_at);
     if (!acc[date]) acc[date] = [];
     acc[date].push(reading);
     return acc;
@@ -65,7 +65,7 @@ export function ReadingsList({
       {Object.entries(groupedByDate).map(([date, dayReadings]) => (
         <div key={date}>
           <h4 className="text-sm font-medium text-muted-foreground mb-3">
-            {format(new Date(date), 'EEEE, MMMM d')}
+            {formatDisplayDateLong(date)}
           </h4>
           
           <div className="space-y-2">
@@ -103,7 +103,7 @@ export function ReadingsList({
                         )}
                         
                         <span className="text-sm text-muted-foreground">
-                          {format(new Date(reading.logged_at), 'h:mm a')}
+                          {formatDisplayTime(reading.logged_at)}
                         </span>
                       </div>
 

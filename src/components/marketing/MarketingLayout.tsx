@@ -43,13 +43,13 @@ export function MarketingLayout({ children }: MarketingLayoutProps) {
 
   return (
     <div className="marketing-theme min-h-screen flex flex-col">
-      <div className="sticky top-0 z-50">
+      <div className="sticky top-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/30">
         <MarketingNav />
       </div>
       <AnimatePresence mode="wait">
         <motion.main
           key={pathname}
-          className="flex-1"
+          className="flex-1 scroll-mt-24 [&_h1]:scroll-mt-28 [&_h2]:scroll-mt-28 [&_h3]:scroll-mt-24 [&_input]:scroll-mt-28 [&_textarea]:scroll-mt-28 [&_label]:scroll-mt-28"
           variants={pageVariants}
           initial="initial"
           animate="animate"

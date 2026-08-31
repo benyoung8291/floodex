@@ -16,7 +16,7 @@ export async function geocodeAddress(
   state: string,
   zipCode: string
 ): Promise<GeocodingResult | null> {
-  const fullAddress = `${address}, ${city}, ${state} ${zipCode}, USA`;
+  const fullAddress = `${address}, ${city}, ${state} ${zipCode}, Australia`;
   const encodedAddress = encodeURIComponent(fullAddress);
 
   try {

@@ -91,6 +91,22 @@ export function getHumidityRatioUnit(units: UnitSystem): string {
 }
 
 /**
+ * Convert a humidity-ratio value entered in the tenant display unit to stored GPP.
+ */
+export function humidityRatioToGpp(value: number, units: UnitSystem): number {
+  return units === 'metric' ? gramsPerKgToGpp(value) : value;
+}
+
+export function unitsFromTenant(
+  tenant?: { humidity_ratio_unit?: string | null; temperature_unit?: string | null } | null
+): { humidity: UnitSystem; temperature: 'F' | 'C' } {
+  return {
+    humidity: tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial',
+    temperature: tenant?.temperature_unit === 'C' ? 'C' : 'F',
+  };
+}
+
+/**
  * Format temperature for display based on unit system
  */
 export function formatTemperature(tempF: number, units: UnitSystem): string {

@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { StepperInput } from '@/components/readings/StepperInput';
-import { calculateGPP, formatHumidityRatio, getHumidityRatioStatus } from '@/lib/psychrometrics';
+import { calculateGPP, formatHumidityRatio, getHumidityRatioStatus, getHumidityRatioUnit } from '@/lib/psychrometrics';
 import { cn } from '@/lib/utils';
 import { Thermometer, Droplets, Target } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
@@ -161,7 +161,7 @@ export function FloorPlanReadingDialog({
                     {chamber.name}
                     {chamber.target_gpp && (
                       <span className="ml-2 text-muted-foreground text-xs">
-                        (Target: {chamber.target_gpp} GPP)
+                        (Target: {formatHumidityRatio(chamber.target_gpp, units)})
                       </span>
                     )}
                   </SelectItem>
@@ -278,7 +278,7 @@ export function FloorPlanReadingDialog({
           >
             <div className="space-y-1">
               <div className="text-sm font-medium uppercase tracking-wide opacity-80">
-                Calculated GPP
+                Calculated {getHumidityRatioUnit(units)}
               </div>
               <div className="text-3xl font-bold tabular-nums">
                 {formatHumidityRatio(gpp, units)}
@@ -291,7 +291,7 @@ export function FloorPlanReadingDialog({
               {selectedChamber?.target_gpp && (
                 <div className="flex items-center gap-1 text-xs opacity-70">
                   <Target className="h-3 w-3" />
-                  Target: {selectedChamber.target_gpp} GPP
+                  Target: {formatHumidityRatio(selectedChamber.target_gpp, units)}
                 </div>
               )}
             </div>

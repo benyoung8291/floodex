@@ -1,15 +1,16 @@
 import { FloorPlan, getFloorPlanThumbnailUrl } from '@/hooks/useFloorPlans';
 import type { Tables } from '@/integrations/supabase/types';
-import { formatHumidityRatio } from '@/lib/psychrometrics';
+import { formatHumidityRatio, formatTemperature, type UnitSystem } from '@/lib/psychrometrics';
 
 type MoistureReading = Tables<'moisture_readings'>;
 
 interface FloorPlanSectionProps {
   floorPlans: FloorPlan[];
   linkedReadings?: MoistureReading[];
+  units?: UnitSystem;
 }
 
-export const FloorPlanSection = ({ floorPlans, linkedReadings = [] }: FloorPlanSectionProps) => {
+export const FloorPlanSection = ({ floorPlans, linkedReadings = [], units = 'imperial' }: FloorPlanSectionProps) => {
   if (!floorPlans || floorPlans.length === 0) {
     return null;
   }
@@ -73,10 +74,10 @@ export const FloorPlanSection = ({ floorPlans, linkedReadings = [] }: FloorPlanS
                           </div>
                           <div className="flex-1">
                             <span className="font-medium">
-                              {reading.gpp ? formatHumidityRatio(reading.gpp, 'imperial') : 'N/A'}
+                              {reading.gpp ? formatHumidityRatio(reading.gpp, units) : 'N/A'}
                             </span>
                             <span className="text-muted-foreground ml-1">
-                              ({reading.temperature}°F / {reading.relative_humidity}%)
+                              ({formatTemperature(reading.temperature, units)} / {reading.relative_humidity}%)
                             </span>
                           </div>
                         </div>

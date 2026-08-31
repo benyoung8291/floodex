@@ -21,7 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Search, Thermometer, Droplets, Check } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
-import { formatHumidityRatio } from '@/lib/psychrometrics';
+import { formatHumidityRatio, formatTemperature, type UnitSystem } from '@/lib/psychrometrics';
 import { cn } from '@/lib/utils';
 
 type MoistureReading = Tables<'moisture_readings'>;
@@ -35,6 +35,7 @@ interface ReadingLinkDialogProps {
   chambers: DryingChamber[];
   linkedReadingIds: string[];
   onLink: (readingId: string) => void;
+  units?: UnitSystem;
 }
 
 export const ReadingLinkDialog = ({
@@ -45,6 +46,7 @@ export const ReadingLinkDialog = ({
   chambers,
   linkedReadingIds,
   onLink,
+  units = 'imperial',
 }: ReadingLinkDialogProps) => {
   const [selectedChamberId, setSelectedChamberId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,14 +162,14 @@ export const ReadingLinkDialog = ({
                         </div>
                         <span className="font-semibold">
                           {reading.gpp
-                            ? formatHumidityRatio(reading.gpp, 'imperial')
+                            ? formatHumidityRatio(reading.gpp, units)
                             : 'N/A'}
                         </span>
                       </div>
                       <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Thermometer className="h-3 w-3" />
-                          {reading.temperature}°F
+                          {formatTemperature(reading.temperature, units)}
                         </span>
                         <span className="flex items-center gap-1">
                           <Droplets className="h-3 w-3" />

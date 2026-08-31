@@ -10,20 +10,18 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { lazy, Suspense } from "react";
 
-// Marketing Pages (eager: SEO + landing performance)
+// Marketing + trial CTA pages (eager: avoid a blank “Loading…” first paint)
 import LandingPage from "./pages/marketing/LandingPage";
+import PricingPage from "./pages/marketing/PricingPage";
+import ContactPage from "./pages/marketing/ContactPage";
+import Auth from "./pages/Auth";
 const FeaturesPage = lazy(() => import("./pages/marketing/FeaturesPage"));
-const PricingPage = lazy(() => import("./pages/marketing/PricingPage"));
 const AboutPage = lazy(() => import("./pages/marketing/AboutPage"));
-const ContactPage = lazy(() => import("./pages/marketing/ContactPage"));
 const ComparePage = lazy(() => import("./pages/marketing/ComparePage"));
 const WaterDamageRestorationSoftwarePage = lazy(() => import("./pages/marketing/WaterDamageRestorationSoftwarePage"));
 const MoistureTrackingSoftwarePage = lazy(() => import("./pages/marketing/MoistureTrackingSoftwarePage"));
 const EncircleAlternativePage = lazy(() => import("./pages/marketing/EncircleAlternativePage"));
 const RestorationReportingSoftwarePage = lazy(() => import("./pages/marketing/RestorationReportingSoftwarePage"));
-
-// App pages (lazy)
-const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Jobs = lazy(() => import("./pages/Jobs"));
 const JobCreate = lazy(() => import("./pages/JobCreate"));
@@ -55,8 +53,19 @@ const queryClient = new QueryClient({
 });
 
 const RouteFallback = () => (
-  <div className="min-h-dvh flex items-center justify-center text-sm text-muted-foreground">
-    Loading…
+  <div className="min-h-dvh flex flex-col bg-background">
+    <div className="h-16 border-b border-border/40 flex items-center px-6 shrink-0">
+      <div className="h-8 w-28 rounded-md bg-muted animate-pulse" />
+    </div>
+    <div className="flex-1 w-full max-w-6xl mx-auto px-6 pt-16 space-y-5">
+      <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+      <div className="h-14 w-3/4 max-w-lg rounded-xl bg-muted animate-pulse" />
+      <div className="h-5 w-1/2 max-w-md rounded bg-muted/70 animate-pulse" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
+        <div className="h-40 rounded-2xl bg-muted/60 animate-pulse" />
+        <div className="h-40 rounded-2xl bg-muted/60 animate-pulse hidden sm:block" />
+      </div>
+    </div>
   </div>
 );
 
@@ -89,7 +98,7 @@ const App = () => (
               {/* Protected routes with layout */}
               <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
               <Route path="/jobs" element={<ProtectedRoute><AppLayout><Jobs /></AppLayout></ProtectedRoute>} />
-              <Route path="/jobs/new" element={<ProtectedRoute><JobCreate /></ProtectedRoute>} />
+              <Route path="/jobs/new" element={<ProtectedRoute><AppLayout><JobCreate /></AppLayout></ProtectedRoute>} />
               <Route path="/jobs/:id" element={<ProtectedRoute><AppLayout><JobDetail /></AppLayout></ProtectedRoute>} />
               <Route path="/readings" element={<ProtectedRoute><AppLayout><Readings /></AppLayout></ProtectedRoute>} />
               <Route path="/equipment" element={<ProtectedRoute><AppLayout><Equipment /></AppLayout></ProtectedRoute>} />

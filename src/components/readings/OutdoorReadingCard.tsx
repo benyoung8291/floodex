@@ -10,7 +10,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Sun, Thermometer, Droplets, RefreshCw } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDisplayDateTimeShort } from '@/lib/datetime';
 import { StepperInput } from './StepperInput';
 import { 
   calculateGPP, 
@@ -130,7 +130,7 @@ export function OutdoorReadingCard({
               
               <div className="flex items-center justify-between pt-2 border-t border-amber-500/20">
                 <span className="text-xs text-muted-foreground">
-                  {readingAt ? format(new Date(readingAt), 'MMM d, h:mm a') : 'No date'}
+                  {readingAt ? formatDisplayDateTimeShort(readingAt) : 'No date'}
                 </span>
                 <Button 
                   variant="ghost" 

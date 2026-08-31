@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,10 +7,11 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Fan, Droplets, Wind, X } from 'lucide-react';
+import { Fan, Droplets, Wind, X, Plus } from 'lucide-react';
+import { EquipmentCreateDialog } from '@/components/equipment/EquipmentCreateDialog';
+import { useCreateEquipment, useEquipment } from '@/hooks/useEquipment';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Equipment = Tables<'equipment'>;
@@ -46,7 +47,6 @@ export function EquipmentAssignDialog({
   onOpenChange,
   chamberName,
   chamberId,
-  jobId,
   availableEquipment,
   currentAssignments,
   onAssign,
@@ -54,8 +54,25 @@ export function EquipmentAssignDialog({
   isLoading,
 }: EquipmentAssignDialogProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [createOpen, setCreateOpen] = useState(false);
+  const createEquipment = useCreateEquipment();
+  const { data: inventory = [] } = useEquipment();
 
   const chamberAssignments = currentAssignments.filter(a => a.chamber_id === chamberId);
+  const assignedIds = useMemo(
+    () => new Set(currentAssignments.map(a => a.equipment_id)),
+    [currentAssignments]
+  );
+
+  // Prefer live inventory so units just added on the Equipment page (or here) appear.
+  // Treat unassigned-on-this-job + available as assignable; also include parent list.
+  const assignableEquipment = useMemo(() => {
+    const pool = inventory.length > 0 ? inventory : availableEquipment;
+    const byId = new Map<string, Equipment>();
+    for (const item of pool) byId.set(item.id, item);
+    for (const item of availableEquipment) byId.set(item.id, item);
+    return Array.from(byId.values()).filter((eq) => !assignedIds.has(eq.id));
+  }, [inventory, availableEquipment, assignedIds]);
 
   const handleToggle = (equipmentId: string) => {
     setSelectedIds(prev =>
@@ -79,7 +96,6 @@ export function EquipmentAssignDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Currently Assigned */}
           {chamberAssignments.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground">Currently Assigned</p>
@@ -91,12 +107,12 @@ export function EquipmentAssignDialog({
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-primary">
-                        {typeIcons[assignment.equipment.type]}
+                        {typeIcons[assignment.equipment.type] ?? <Fan className="h-4 w-4" />}
                       </span>
                       <div>
                         <p className="text-sm font-medium">{assignment.equipment.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {typeLabels[assignment.equipment.type]}
+                          {typeLabels[assignment.equipment.type] || assignment.equipment.type}
                         </p>
                       </div>
                     </div>
@@ -115,17 +131,22 @@ export function EquipmentAssignDialog({
             </div>
           )}
 
-          {/* Available Equipment */}
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground">Available Equipment</p>
-            {availableEquipment.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No available equipment
-              </p>
+            {assignableEquipment.length === 0 ? (
+              <div className="py-4 text-center space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  No available equipment. Add a unit to assign it to this chamber.
+                </p>
+                <Button type="button" variant="outline" size="sm" onClick={() => setCreateOpen(true)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add equipment
+                </Button>
+              </div>
             ) : (
               <ScrollArea className="max-h-60">
                 <div className="space-y-2">
-                  {availableEquipment.map((equipment) => (
+                  {assignableEquipment.map((equipment) => (
                     <label
                       key={equipment.id}
                       className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer"
@@ -135,12 +156,12 @@ export function EquipmentAssignDialog({
                         onCheckedChange={() => handleToggle(equipment.id)}
                       />
                       <span className="text-primary">
-                        {typeIcons[equipment.type]}
+                        {typeIcons[equipment.type] ?? <Fan className="h-4 w-4" />}
                       </span>
                       <div className="flex-1">
                         <p className="text-sm font-medium">{equipment.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {typeLabels[equipment.type]}
+                          {typeLabels[equipment.type] || equipment.type}
                           {equipment.serial_number && ` • ${equipment.serial_number}`}
                         </p>
                       </div>
@@ -151,11 +172,16 @@ export function EquipmentAssignDialog({
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
+            {assignableEquipment.length > 0 && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4 mr-1" />
+                Add new
+              </Button>
+            )}
             {selectedIds.length > 0 && (
               <Button onClick={handleAssignSelected} disabled={isLoading}>
                 Assign {selectedIds.length} Item{selectedIds.length > 1 ? 's' : ''}
@@ -164,6 +190,24 @@ export function EquipmentAssignDialog({
           </div>
         </div>
       </DialogContent>
+
+      <EquipmentCreateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        isLoading={createEquipment.isPending}
+        onSubmit={(data) => {
+          createEquipment.mutate(data, {
+            onSuccess: (created) => {
+              setCreateOpen(false);
+              if (created?.id) {
+                setSelectedIds((prev) =>
+                  prev.includes(created.id) ? prev : [...prev, created.id]
+                );
+              }
+            },
+          });
+        }}
+      />
     </Dialog>
   );
 }

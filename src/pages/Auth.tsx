@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,8 +56,15 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Check for invitation token
+  // Check for invitation token and marketing CTA tab
   const inviteToken = searchParams.get('invite');
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<string>(tabParam === 'signup' ? 'signup' : 'login');
+
+  useEffect(() => {
+    setActiveTab(tabParam === 'signup' ? 'signup' : 'login');
+  }, [tabParam]);
+
   const { data: invitation, isLoading: inviteLoading } = useValidateInvitation(inviteToken);
   const acceptInvitation = useAcceptInvitation();
 
@@ -430,7 +437,7 @@ export default function Auth() {
         </div>
 
         <Card className="border-border">
-          <Tabs defaultValue="login">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <CardHeader className="pb-0">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Sign In</TabsTrigger>
@@ -551,7 +558,10 @@ export default function Auth() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          By signing up, you agree to our Terms of Service and Privacy Policy
+          Need help?{' '}
+          <Link to="/contact" className="underline underline-offset-2 hover:text-foreground">
+            Contact us
+          </Link>
         </p>
       </div>
     </div>

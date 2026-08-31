@@ -13,6 +13,9 @@ import { LossTypeStep } from '@/components/jobs/LossTypeStep';
 import { ClaimInfoStep } from '@/components/jobs/ClaimInfoStep';
 import { SafetyCheckStep } from '@/components/jobs/SafetyCheckStep';
 import { useCreateJob } from '@/hooks/useCreateJob';
+import { useTenant } from '@/hooks/useTenant';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react';
 
 const safetyCheckSchema = z.object({
@@ -29,7 +32,7 @@ const jobSchema = z.object({
   address: z.string().min(1, 'Address is required').max(255),
   city: z.string().min(1, 'City is required').max(100),
   state: z.string().min(1, 'State is required').max(50),
-  zipCode: z.string().min(1, 'ZIP code is required').max(20),
+  zipCode: z.string().regex(/^\d{4}$/, 'Enter a 4-digit postcode'),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   lossType: z.enum(['cat1', 'cat2', 'cat3']),
@@ -43,9 +46,10 @@ const jobSchema = z.object({
   affectedMaterials: z.string().max(500).optional(),
   claimSummary: z.string().max(2000).optional(),
   safetyChecks: z.array(safetyCheckSchema).default([]),
+  supervisorOverrideCode: z.string().optional(),
+  supervisorAuthorized: z.boolean().optional(),
 });
 
-type SafetyCheck = z.infer<typeof safetyCheckSchema>;
 type JobFormData = z.infer<typeof jobSchema>;
 
 const steps = [
@@ -60,6 +64,8 @@ export default function JobCreate() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const createJob = useCreateJob();
+  const { data: tenant } = useTenant();
+  const { isTenantAdmin, isSupervisor } = useAuth();
 
   const form = useForm<JobFormData>({
     resolver: zodResolver(jobSchema),
@@ -80,6 +86,8 @@ export default function JobCreate() {
       affectedMaterials: '',
       claimSummary: '',
       safetyChecks: [],
+      supervisorOverrideCode: '',
+      supervisorAuthorized: false,
     },
   });
 
@@ -122,7 +130,39 @@ export default function JobCreate() {
     }
   };
 
+  const safetyChecks = form.watch('safetyChecks');
+  const supervisorOverrideCode = form.watch('supervisorOverrideCode');
+  const supervisorAuthorized = form.watch('supervisorAuthorized');
+  const hasCriticalHazards = (safetyChecks ?? []).some(
+    (c) => c.isPresent && c.requiresStopWork
+  );
+  const canBypassCritical = (() => {
+    if (!hasCriticalHazards) return true;
+    const stored = tenant?.supervisor_override_code;
+    if (stored) return supervisorOverrideCode === stored;
+    if (isTenantAdmin || isSupervisor) return !!supervisorAuthorized;
+    return false;
+  })();
+
   const onSubmit = async (data: JobFormData) => {
+    const critical = data.safetyChecks.some((c) => c.isPresent && c.requiresStopWork);
+    if (critical) {
+      const stored = tenant?.supervisor_override_code;
+      if (stored) {
+        if (data.supervisorOverrideCode !== stored) {
+          toast.error('Enter the supervisor override code to create this job.');
+          return;
+        }
+      } else if (!(isTenantAdmin || isSupervisor) || !data.supervisorAuthorized) {
+        toast.error(
+          isTenantAdmin || isSupervisor
+            ? 'Confirm supervisor authorisation to create this job.'
+            : 'A supervisor override is required for critical hazards.'
+        );
+        return;
+      }
+    }
+
     try {
       const job = await createJob.mutateAsync({
         customerName: data.customerName,
@@ -149,6 +189,7 @@ export default function JobCreate() {
           requiresStopWork: check.requiresStopWork,
           notes: check.notes,
         })),
+        safetyOverrideAuthorized: critical,
       });
       navigate(`/jobs/${job.id}`);
     } catch (error) {
@@ -176,7 +217,7 @@ export default function JobCreate() {
   const isLastStep = currentStep === steps.length - 1;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-full bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-4">
         <div className="max-w-lg mx-auto">
@@ -201,7 +242,7 @@ export default function JobCreate() {
       </div>
 
       {/* Fixed Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background border-t border-border p-4 z-20">
         <div className="max-w-lg mx-auto flex gap-4">
           <Button
             type="button"
@@ -219,7 +260,7 @@ export default function JobCreate() {
               type="button"
               size="lg"
               className="flex-1 h-14"
-              disabled={createJob.isPending}
+              disabled={createJob.isPending || (hasCriticalHazards && !canBypassCritical)}
               onClick={form.handleSubmit(onSubmit)}
             >
               {createJob.isPending ? (

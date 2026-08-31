@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { formatDisplayDate, formatDisplayTime } from '@/lib/datetime';
 
 export interface GeneratePDFOptions {
   title: string;
@@ -20,14 +21,19 @@ export async function generatePDF(
     margin = 10,
   } = options;
 
-  // Create canvas from HTML element
   const canvas = await html2canvas(element, {
-    scale: 2, // Higher quality
+    scale: 2,
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#ffffff',
     logging: false,
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight,
   });
+
+  if (!canvas.width || !canvas.height) {
+    throw new Error('Could not capture the report preview');
+  }
 
   const imgData = canvas.toDataURL('image/png');
 
@@ -95,19 +101,11 @@ export async function generatePDF(
 }
 
 export function formatDateForReport(date: Date | string): string {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return formatDisplayDate(date);
 }
 
 export function formatTimeForReport(date: Date | string): string {
-  return new Date(date).toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
+  return formatDisplayTime(date);
 }
 
 export function formatDateTimeForReport(date: Date | string): string {

@@ -43,9 +43,14 @@ export function TopHeader({ onOpenSearch }: TopHeaderProps = {}) {
   return (
     <header className="h-14 md:h-16 flex items-center justify-between px-4 border-b border-border bg-card/50 backdrop-blur-sm safe-top">
       {/* Mobile Logo */}
-      <div className="md:hidden flex items-center">
+      <button
+        type="button"
+        className="md:hidden flex items-center"
+        onClick={() => navigate('/dashboard')}
+        aria-label="Go to dashboard"
+      >
         <img src={floodexLogo} alt="FloodEx" className="h-10 w-auto" />
-      </div>
+      </button>
 
       {/* Search trigger (desktop wide, mobile icon-only) */}
       <button

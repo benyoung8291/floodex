@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link2, Unlink, ExternalLink, Thermometer, Droplets, Plus } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
-import { formatHumidityRatio, getHumidityRatioStatus } from '@/lib/psychrometrics';
+import { formatHumidityRatio, formatTemperature, getHumidityRatioStatus, getHumidityRatioUnit, type UnitSystem } from '@/lib/psychrometrics';
 import { cn } from '@/lib/utils';
 
 type MoistureReading = Tables<'moisture_readings'>;
@@ -23,6 +23,7 @@ interface ReadingMarkerPopoverProps {
   onAddNewReading: () => void;
   onUnlink: () => void;
   onViewReading: () => void;
+  units?: UnitSystem;
 }
 
 export const ReadingMarkerPopover = ({
@@ -35,6 +36,7 @@ export const ReadingMarkerPopover = ({
   onAddNewReading,
   onUnlink,
   onViewReading,
+  units = 'imperial',
 }: ReadingMarkerPopoverProps) => {
   const statusColors = {
     success: 'text-success',
@@ -65,7 +67,7 @@ export const ReadingMarkerPopover = ({
             <>
               <div className="bg-muted rounded-lg p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">GPP</span>
+                  <span className="text-sm text-muted-foreground">{getHumidityRatioUnit(units)}</span>
                   <span
                     className={cn(
                       'text-lg font-semibold',
@@ -75,14 +77,14 @@ export const ReadingMarkerPopover = ({
                     )}
                   >
                     {linkedReading.gpp
-                      ? formatHumidityRatio(linkedReading.gpp, 'imperial')
+                      ? formatHumidityRatio(linkedReading.gpp, units)
                       : 'N/A'}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Thermometer className="h-3 w-3" />
-                    {linkedReading.temperature}°F
+                    {formatTemperature(linkedReading.temperature, units)}
                   </div>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Droplets className="h-3 w-3" />

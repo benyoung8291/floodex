@@ -1,5 +1,5 @@
 import { JobPhoto, getPhotoUrl, PHOTO_TAGS } from '@/hooks/useJobPhotos';
-import { format } from 'date-fns';
+import { formatDisplayDateTimeShort } from '@/lib/datetime';
 import { Pencil } from 'lucide-react';
 
 interface PhotoCardProps {
@@ -47,7 +47,7 @@ export const PhotoCard = ({ photo, onClick }: PhotoCardProps) => {
       {/* Timestamp */}
       <div className="absolute bottom-2 left-2 right-2">
         <span className="text-xs text-white/90">
-          {format(new Date(photo.taken_at), 'MMM d, h:mm a')}
+          {formatDisplayDateTimeShort(photo.taken_at)}
         </span>
         {photo.caption && (
           <p className="text-xs text-white/80 truncate mt-0.5">

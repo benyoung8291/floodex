@@ -1,9 +1,11 @@
 import { motion, type Variants } from "framer-motion";
 import { type ReactNode } from "react";
 
+// Keep content readable even if IntersectionObserver never fires (iPad/Safari).
+// Only translate — never start at opacity 0.
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  hidden: { opacity: 1, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
 };
 
 const stagger: Variants = {
@@ -12,16 +14,18 @@ const stagger: Variants = {
 };
 
 const scaleIn: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
+  hidden: { opacity: 1, scale: 0.98 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.35, ease: "easeOut" } },
 };
+
+const inView = { once: true, amount: 0, margin: "80px 0px 80px 0px" } as const;
 
 export const AnimateIn = ({ children, className }: { children: ReactNode; className?: string }) => (
   <motion.div
     variants={fadeUp}
     initial="hidden"
     whileInView="visible"
-    viewport={{ once: true, amount: 0.15 }}
+    viewport={inView}
     className={className}
   >
     {children}
@@ -33,7 +37,7 @@ export const StaggerContainer = ({ children, className }: { children: ReactNode;
     variants={stagger}
     initial="hidden"
     whileInView="visible"
-    viewport={{ once: true, amount: 0.1 }}
+    viewport={inView}
     className={className}
   >
     {children}
@@ -51,7 +55,7 @@ export const ScaleIn = ({ children, className }: { children: ReactNode; classNam
     variants={scaleIn}
     initial="hidden"
     whileInView="visible"
-    viewport={{ once: true, amount: 0.2 }}
+    viewport={inView}
     className={className}
   >
     {children}

@@ -256,6 +256,11 @@
   background-color: hsl(0 0% 98%);
   color: hsl(0 0% 7%);
   font-family: 'Figtree', sans-serif;
+  scroll-padding-top: 6rem;
+}
+
+html {
+  scroll-padding-top: 5.5rem;
 }
 
 @layer utilities {

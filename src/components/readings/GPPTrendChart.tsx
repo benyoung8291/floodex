@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { format } from 'date-fns';
+import { formatDisplayDateTimeShort } from '@/lib/datetime';
 import {
   LineChart,
   Line,
@@ -36,7 +36,7 @@ export function GPPTrendChart({
       .sort((a, b) => new Date(a.logged_at).getTime() - new Date(b.logged_at).getTime());
 
     return ambientReadings.map((reading) => ({
-      time: format(new Date(reading.logged_at), 'MMM d, h:mm a'),
+      time: formatDisplayDateTimeShort(reading.logged_at),
       value: units === 'metric' && reading.gpp 
         ? gppToGramsPerKg(reading.gpp) 
         : reading.gpp,

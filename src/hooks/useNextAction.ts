@@ -16,6 +16,7 @@ export type NextAction = {
 
 interface JobLike extends Job {
   last_reading_at?: string | null;
+  latest_reading_at?: string | null;
   chambers_count?: number | null;
 }
 
@@ -45,7 +46,8 @@ export function computeNextActionsForJobs(jobs: JobLike[]): NextAction[] {
 
     // Drying jobs without recent readings
     if (job.status === 'drying') {
-      const lastReading = job.last_reading_at ? new Date(job.last_reading_at) : null;
+      const lastReadingAt = job.last_reading_at ?? job.latest_reading_at ?? null;
+      const lastReading = lastReadingAt ? new Date(lastReadingAt) : null;
       const hoursSince = lastReading ? differenceInHours(now, lastReading) : Infinity;
 
       if (!lastReading) {

@@ -1,18 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Plus, MapPin, AlertTriangle, Clock, CheckCircle2, Droplets, TrendingUp, Gauge, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useJobs } from '@/hooks/useJobs';
+import { useJobsWithChambers, useReadingsStats } from '@/hooks/useAllReadings';
+import { formatHumidityRatio, getHumidityRatioUnit, type UnitSystem } from '@/lib/psychrometrics';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
 import { useNextActions } from '@/hooks/useNextAction';
 import { NextActionCard } from '@/components/jobs/NextActionCard';
-import { useReadingsStats } from '@/hooks/useAllReadings';
 import { useTenant } from '@/hooks/useTenant';
-import { formatHumidityRatio, getHumidityRatioStatus, type UnitSystem } from '@/lib/psychrometrics';
+import { getDisplayHour } from '@/lib/datetime';
 
 const getLossTypeLabel = (type: string) => {
   switch (type) {
@@ -32,7 +31,7 @@ const calculateDaysDrying = (startDate: string) => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { data: jobs, isLoading } = useJobs();
+  const { data: jobs, isLoading } = useJobsWithChambers();
   const { isOnboardingComplete, isLoading: onboardingLoading } = useOnboarding();
   const { data: readingsStats, isLoading: statsLoading } = useReadingsStats();
   const { data: tenant } = useTenant();
@@ -65,7 +64,7 @@ export default function Dashboard() {
       color: 'text-primary' 
     },
     { 
-      label: 'Avg GPP', 
+      label: `Avg ${getHumidityRatioUnit(units)}`, 
       value: readingsStats?.avgGpp ? formatHumidityRatio(readingsStats.avgGpp, units) : '-', 
       icon: Gauge, 
       color: 'text-warning' 
@@ -97,8 +96,13 @@ export default function Dashboard() {
   };
 
   const showOnboarding = !onboardingLoading && !isOnboardingComplete;
-  const nextActions = useNextActions(jobs);
+  const jobsForActions = useMemo(
+    () => jobs?.map((job) => ({ ...job, last_reading_at: job.latest_reading_at })),
+    [jobs]
+  );
+  const nextActions = useNextActions(jobsForActions);
   const topActions = nextActions.slice(0, 5);
+  const hasNoJobs = !isLoading && (jobs?.length ?? 0) === 0;
 
   return (
     <>
@@ -110,7 +114,12 @@ export default function Dashboard() {
           <div>
             <h1 className="text-2xl font-bold">Today</h1>
             <p className="text-muted-foreground">
-              Good {new Date().getHours() < 12 ? 'morning' : 'afternoon'} — here's what needs you
+              Good {(() => {
+                const hour = getDisplayHour();
+                if (hour < 12) return 'morning';
+                if (hour < 18) return 'afternoon';
+                return 'evening';
+              })()} — here's what needs you
             </p>
           </div>
           <Button onClick={() => navigate('/jobs/new')} className="gap-2">
@@ -133,7 +142,19 @@ export default function Dashboard() {
                 </Button>
               )}
             </div>
-            {topActions.length === 0 ? (
+            {hasNoJobs ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground mb-4">
+                    No jobs yet. Create your first loss to start documenting.
+                  </p>
+                  <Button onClick={() => navigate('/jobs/new')} className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Create first job
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : topActions.length === 0 ? (
               <Card className="border-success/30 bg-success/5">
                 <CardContent className="p-4 flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-success" />
