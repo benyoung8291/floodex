@@ -31,6 +31,7 @@ interface CreateJobData {
   affectedMaterials?: string;
   claimSummary?: string;
   safetyChecks: SafetyCheck[];
+  safetyOverrideAuthorized?: boolean;
 }
 
 export function useCreateJob() {
@@ -43,10 +44,15 @@ export function useCreateJob() {
         throw new Error('User must be authenticated');
       }
 
-      // Check if any safety checks require stop work
       const requiresStopWork = data.safetyChecks.some(
         (check) => check.isPresent && check.requiresStopWork
       );
+
+      if (requiresStopWork && !data.safetyOverrideAuthorized) {
+        throw new Error('Supervisor override required for critical hazards');
+      }
+
+      const nowIso = new Date().toISOString();
 
       // Insert the job
       const { data: job, error: jobError } = await supabase
@@ -74,9 +80,11 @@ export function useCreateJob() {
           affected_materials: data.affectedMaterials || null,
           claim_summary: data.claimSummary || null,
           status: 'drying',
-          safety_completed: !requiresStopWork,
-          safety_completed_at: !requiresStopWork ? new Date().toISOString() : null,
-          safety_completed_by: !requiresStopWork ? user.id : null,
+          safety_completed: !requiresStopWork || !!data.safetyOverrideAuthorized,
+          safety_completed_at:
+            !requiresStopWork || data.safetyOverrideAuthorized ? nowIso : null,
+          safety_completed_by:
+            !requiresStopWork || data.safetyOverrideAuthorized ? user.id : null,
         })
         .select()
         .single();
@@ -94,6 +102,14 @@ export function useCreateJob() {
           is_hazard_present: check.isPresent,
           requires_stop_work: check.isPresent && check.requiresStopWork,
           notes: check.notes || null,
+          supervisor_override_at:
+            check.isPresent && check.requiresStopWork && data.safetyOverrideAuthorized
+              ? nowIso
+              : null,
+          supervisor_override_by:
+            check.isPresent && check.requiresStopWork && data.safetyOverrideAuthorized
+              ? user.id
+              : null,
         }));
 
       if (safetyChecksToInsert.length > 0) {

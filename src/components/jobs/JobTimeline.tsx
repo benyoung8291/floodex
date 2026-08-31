@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDisplayDate, formatDisplayDateLong, formatDisplayTime } from '@/lib/datetime';
 import {
   Droplets,
   Camera,
@@ -81,7 +81,7 @@ export function JobTimeline({
       kind: 'job_created',
       at: job.created_at,
       title: 'Job created',
-      detail: job.start_date ? `Start date ${format(new Date(job.start_date), 'MMM d, yyyy')}` : undefined,
+      detail: job.start_date ? `Start date ${formatDisplayDate(job.start_date)}` : undefined,
     });
   }
 
@@ -114,7 +114,7 @@ export function JobTimeline({
       at: w.created_at,
       title: `Work log · ${w.log_type.replace(/_/g, ' ')}`,
       detail: w.summary || undefined,
-      meta: format(new Date(w.attendance_date), 'MMM d'),
+      meta: formatDisplayDate(w.attendance_date),
     });
   }
 
@@ -174,7 +174,7 @@ export function JobTimeline({
   // Group by day label
   const groups = new Map<string, TimelineEvent[]>();
   for (const e of events) {
-    const key = format(new Date(e.at), 'EEEE, MMM d, yyyy');
+    const key = formatDisplayDateLong(e.at);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(e);
   }
@@ -213,7 +213,7 @@ export function JobTimeline({
                       )}
                     </div>
                     <time className="text-[11px] text-muted-foreground whitespace-nowrap shrink-0">
-                      {format(new Date(e.at), 'h:mm a')}
+                      {formatDisplayTime(e.at)}
                     </time>
                   </div>
                 </li>

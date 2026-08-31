@@ -11,6 +11,7 @@ import { useMemo } from 'react';
 import { useNextActions } from '@/hooks/useNextAction';
 import { NextActionCard } from '@/components/jobs/NextActionCard';
 import { useTenant } from '@/hooks/useTenant';
+import { getDisplayHour } from '@/lib/datetime';
 
 const getLossTypeLabel = (type: string) => {
   switch (type) {
@@ -113,7 +114,12 @@ export default function Dashboard() {
           <div>
             <h1 className="text-2xl font-bold">Today</h1>
             <p className="text-muted-foreground">
-              Good {new Date().getHours() < 12 ? 'morning' : 'afternoon'} — here's what needs you
+              Good {(() => {
+                const hour = getDisplayHour();
+                if (hour < 12) return 'morning';
+                if (hour < 18) return 'afternoon';
+                return 'evening';
+              })()} — here's what needs you
             </p>
           </div>
           <Button onClick={() => navigate('/jobs/new')} className="gap-2">

@@ -45,6 +45,7 @@ import {
 } from '@/hooks/useEquipment';
 import { useTenant } from '@/hooks/useTenant';
 import { formatHumidityRatio, getHumidityRatioUnit, type UnitSystem } from '@/lib/psychrometrics';
+import { formatDisplayDate } from '@/lib/datetime';
 
 export default function Readings() {
   const navigate = useNavigate();
@@ -345,7 +346,7 @@ export default function Readings() {
                           {reading.gpp ? formatHumidityRatio(reading.gpp, units) : '-'}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(reading.logged_at).toLocaleDateString()}
+                          {formatDisplayDate(reading.logged_at)}
                         </p>
                       </div>
                     </div>

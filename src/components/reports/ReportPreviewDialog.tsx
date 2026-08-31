@@ -15,6 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Download, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { generatePDF } from '@/lib/pdfGenerator';
+import { formatDisplayDateKey } from '@/lib/datetime';
+import { toast } from 'sonner';
 import { useJobReportData, JobReportData } from '@/hooks/useReportData';
 import { DryingLogReport } from './DryingLogReport';
 import { EquipmentReport } from './EquipmentReport';
@@ -84,21 +86,44 @@ export function ReportPreviewDialog({
   const costSummary = useJobCostSummary(reportType === 'cost-summary' ? jobId : undefined);
 
   const handleDownload = async () => {
-    if (!reportRef.current || !data) return;
-    
+    if (!data) {
+      toast.error('Report data is not ready yet.');
+      return;
+    }
+    const source = reportRef.current;
+    if (!source) {
+      toast.error('Preview is not ready. Try again in a moment.');
+      return;
+    }
+
     setGenerating(true);
+    const clone = source.cloneNode(true) as HTMLElement;
+    clone.style.position = 'fixed';
+    clone.style.left = '-10000px';
+    clone.style.top = '0';
+    clone.style.width = `${Math.max(source.scrollWidth, 800)}px`;
+    clone.style.maxHeight = 'none';
+    clone.style.height = 'auto';
+    clone.style.overflow = 'visible';
+    clone.style.transform = 'none';
+    clone.style.zIndex = '-1';
+    document.body.appendChild(clone);
+
     try {
-      const filename = `${REPORT_TITLES[reportType].replace(/\s+/g, '-').toLowerCase()}-${data.job.customer_name.replace(/\s+/g, '-').toLowerCase()}-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-      
-      await generatePDF(reportRef.current, {
+      const filename = `${REPORT_TITLES[reportType].replace(/\s+/g, '-').toLowerCase()}-${data.job.customer_name.replace(/\s+/g, '-').toLowerCase()}-${formatDisplayDateKey(new Date())}.pdf`;
+
+      await generatePDF(clone, {
         title: REPORT_TITLES[reportType],
         filename,
         orientation: reportType === 'photos' && showFullSizePhotos ? 'landscape' : 'portrait',
         format: 'letter',
       });
+      toast.success('PDF downloaded');
     } catch (err) {
       console.error('PDF generation failed:', err);
+      toast.error(err instanceof Error ? err.message : 'Could not generate PDF');
     } finally {
+      clone.remove();
       setGenerating(false);
     }
   };

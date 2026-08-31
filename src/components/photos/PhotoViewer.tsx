@@ -3,7 +3,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { JobPhoto, getPhotoUrl, PHOTO_TAGS, useUpdatePhoto, useDeletePhoto } from '@/hooks/useJobPhotos';
-import { format } from 'date-fns';
+import { formatDisplayDateTime } from '@/lib/datetime';
 import {
   ChevronLeft,
   ChevronRight,
@@ -207,7 +207,7 @@ export const PhotoViewer = ({
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      {format(new Date(photo.taken_at), 'MMM d, yyyy h:mm a')}
+                      {formatDisplayDateTime(photo.taken_at)}
                     </span>
                     {photo.latitude && photo.longitude && (
                       <button
