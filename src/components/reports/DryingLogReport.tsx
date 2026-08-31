@@ -5,6 +5,7 @@ import { DryingLogTable, DryingLogSummaryTable } from './templates/DryingLogTabl
 import { EquipmentTable } from './templates/EquipmentTable';
 import { SignatureBlock } from './templates/SignatureBlock';
 import { JobReportData, groupReadingsByChamber } from '@/hooks/useReportData';
+import { unitsFromTenant } from '@/lib/psychrometrics';
 
 interface DryingLogReportProps {
   data: JobReportData;
@@ -17,6 +18,7 @@ export const DryingLogReport = forwardRef<HTMLDivElement, DryingLogReportProps>(
   ({ data, dateRange, includeEquipment = true, includeSignature = true }, ref) => {
     const { job, chambers, readings, equipmentAssignments, tenant } = data;
     const byChamber = groupReadingsByChamber(readings);
+    const { humidity: units } = unitsFromTenant(tenant);
 
     return (
       <div 
@@ -33,7 +35,7 @@ export const DryingLogReport = forwardRef<HTMLDivElement, DryingLogReportProps>(
           dateRange={dateRange}
         />
 
-        <DryingLogSummaryTable readings={readings} />
+        <DryingLogSummaryTable readings={readings} units={units} />
 
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">
@@ -48,6 +50,7 @@ export const DryingLogReport = forwardRef<HTMLDivElement, DryingLogReportProps>(
                 readings={chamberReadings}
                 chamberName={chamber.name}
                 targetGpp={chamber.target_gpp}
+                units={units}
               />
             );
           })}

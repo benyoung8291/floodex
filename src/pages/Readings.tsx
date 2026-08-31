@@ -44,7 +44,7 @@ import {
   useUnassignEquipment,
 } from '@/hooks/useEquipment';
 import { useTenant } from '@/hooks/useTenant';
-import { formatHumidityRatio, type UnitSystem } from '@/lib/psychrometrics';
+import { formatHumidityRatio, getHumidityRatioUnit, type UnitSystem } from '@/lib/psychrometrics';
 
 export default function Readings() {
   const navigate = useNavigate();
@@ -180,7 +180,7 @@ export default function Readings() {
       color: 'text-primary',
     },
     {
-      label: 'Avg GPP',
+      label: `Avg ${getHumidityRatioUnit(units)}`,
       value: stats?.avgGpp ? formatHumidityRatio(stats.avgGpp, units) : '-',
       icon: Gauge,
       color: 'text-warning',

@@ -89,7 +89,7 @@ const App = () => (
               {/* Protected routes with layout */}
               <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
               <Route path="/jobs" element={<ProtectedRoute><AppLayout><Jobs /></AppLayout></ProtectedRoute>} />
-              <Route path="/jobs/new" element={<ProtectedRoute><JobCreate /></ProtectedRoute>} />
+              <Route path="/jobs/new" element={<ProtectedRoute><AppLayout><JobCreate /></AppLayout></ProtectedRoute>} />
               <Route path="/jobs/:id" element={<ProtectedRoute><AppLayout><JobDetail /></AppLayout></ProtectedRoute>} />
               <Route path="/readings" element={<ProtectedRoute><AppLayout><Readings /></AppLayout></ProtectedRoute>} />
               <Route path="/equipment" element={<ProtectedRoute><AppLayout><Equipment /></AppLayout></ProtectedRoute>} />

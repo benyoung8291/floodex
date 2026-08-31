@@ -73,7 +73,7 @@ export function useCreateJob() {
           affected_areas: data.affectedAreas || null,
           affected_materials: data.affectedMaterials || null,
           claim_summary: data.claimSummary || null,
-          status: 'emergency',
+          status: 'drying',
           safety_completed: !requiresStopWork,
           safety_completed_at: !requiresStopWork ? new Date().toISOString() : null,
           safety_completed_by: !requiresStopWork ? user.id : null,

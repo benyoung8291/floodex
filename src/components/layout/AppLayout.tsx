@@ -22,8 +22,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { user, isTenantAdmin, isImpersonating } = useAuth();
   const palette = useCommandPalette();
 
-  // Hide global FAB on routes that have their own primary capture (e.g. wizards)
-  const hideFab = /\/jobs\/new/.test(location.pathname);
+  // Wizard routes keep their own Cancel/Back/Next — hide overlapping chrome
+  const isJobWizard = /\/jobs\/new/.test(location.pathname);
 
   return (
     <div className="min-h-dvh flex w-full bg-background max-w-full">
@@ -44,14 +44,17 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         <TopHeader onOpenSearch={() => palette.setOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto p-4 pb-24 md:pb-4 min-w-0">
+        <main className={cn(
+          "flex-1 overflow-y-auto min-w-0",
+          isJobWizard ? "p-0" : "p-4 pb-24 md:pb-4"
+        )}>
           {children}
         </main>
 
-        {isMobile && <MobileBottomNav />}
+        {isMobile && !isJobWizard && <MobileBottomNav />}
       </div>
 
-      {!hideFab && <CaptureFAB />}
+      {!isJobWizard && <CaptureFAB />}
       <CommandPalette open={palette.open} onOpenChange={palette.setOpen} />
     </div>
   );

@@ -12,6 +12,7 @@ import { ThermalReadingsSection } from './templates/ThermalReadingsSection';
 import { OverviewPhotosSection } from './templates/OverviewPhotosSection';
 import { SignatureBlock } from './templates/SignatureBlock';
 import { ReportFooter } from './templates/ReportFooter';
+import { unitsFromTenant } from '@/lib/psychrometrics';
 
 interface ComprehensiveReportProps {
   data: JobReportData;
@@ -43,6 +44,7 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
   }, ref) => {
     const chamberReadings = groupReadingsByChamber(data.readings);
     const logoUrl = data.tenant?.logo_url || undefined;
+    const { humidity: units } = unitsFromTenant(data.tenant);
     
     // Filter photos by category
     const thermalPhotos = data.photos.filter(p => p.tag === 'thermal');
@@ -85,7 +87,7 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
 
         {/* Floor Plans */}
         {includeFloorPlans && data.floorPlans && data.floorPlans.length > 0 && (
-          <FloorPlanSection floorPlans={data.floorPlans} linkedReadings={data.linkedReadings} />
+          <FloorPlanSection floorPlans={data.floorPlans} linkedReadings={data.linkedReadings} units={units} />
         )}
 
         {/* Moisture Readings */}
@@ -94,7 +96,7 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
             <h2 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
               Moisture Readings
             </h2>
-            <DryingLogSummaryTable readings={data.readings} />
+            <DryingLogSummaryTable readings={data.readings} units={units} />
             {data.chambers.map((chamber) => {
               const readings = chamberReadings.get(chamber.id) || [];
               if (readings.length === 0) return null;
@@ -104,6 +106,7 @@ export const ComprehensiveReport = forwardRef<HTMLDivElement, ComprehensiveRepor
                   readings={readings}
                   chamberName={chamber.name}
                   targetGpp={chamber.target_gpp}
+                  units={units}
                 />
               );
             })}

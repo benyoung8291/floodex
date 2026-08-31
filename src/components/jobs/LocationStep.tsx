@@ -180,7 +180,7 @@ export function LocationStep({ form }: LocationStepProps) {
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="State"
+                  placeholder="NSW"
                   className="h-12 text-base"
                   onChange={(e) => {
                     field.onChange(e);
@@ -199,11 +199,14 @@ export function LocationStep({ form }: LocationStepProps) {
         name="zipCode"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-base">ZIP Code *</FormLabel>
+            <FormLabel className="text-base">Postcode *</FormLabel>
             <FormControl>
               <Input
                 {...field}
-                placeholder="12345"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                maxLength={4}
+                placeholder="2000"
                 className="h-12 text-base"
                 onChange={(e) => {
                   field.onChange(e);

@@ -10,6 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { useTenant } from '@/hooks/useTenant';
+import {
+  getHumidityRatioUnit,
+  humidityRatioToGpp,
+  type UnitSystem,
+} from '@/lib/psychrometrics';
 
 const PRESET_NAMES = [
   'Living Room',
@@ -35,23 +41,29 @@ export function ChamberCreateDialog({
   onSubmit,
   isLoading,
 }: ChamberCreateDialogProps) {
+  const { data: tenant } = useTenant();
+  const units: UnitSystem = tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial';
+  const humidityUnit = getHumidityRatioUnit(units);
   const [name, setName] = useState('');
-  const [targetGpp, setTargetGpp] = useState<string>('');
+  const [targetHumidity, setTargetHumidity] = useState<string>('');
   const [dryStandard, setDryStandard] = useState<string>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
+    const enteredTarget = targetHumidity ? parseFloat(targetHumidity) : undefined;
     onSubmit({
       name: name.trim(),
-      targetGpp: targetGpp ? parseFloat(targetGpp) : undefined,
+      targetGpp: enteredTarget != null && !Number.isNaN(enteredTarget)
+        ? humidityRatioToGpp(enteredTarget, units)
+        : undefined,
       dryStandardPercent: dryStandard ? parseFloat(dryStandard) : undefined,
     });
 
     // Reset form
     setName('');
-    setTargetGpp('');
+    setTargetHumidity('');
     setDryStandard('');
   };
 
@@ -92,14 +104,14 @@ export function ChamberCreateDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="target-gpp">Target GPP</Label>
+              <Label htmlFor="target-humidity">Target {humidityUnit}</Label>
               <Input
-                id="target-gpp"
+                id="target-humidity"
                 type="number"
                 step="0.1"
-                value={targetGpp}
-                onChange={(e) => setTargetGpp(e.target.value)}
-                placeholder="e.g., 45"
+                value={targetHumidity}
+                onChange={(e) => setTargetHumidity(e.target.value)}
+                placeholder={units === 'metric' ? 'e.g., 6.4' : 'e.g., 45'}
               />
               <p className="text-xs text-muted-foreground">Optional drying goal</p>
             </div>

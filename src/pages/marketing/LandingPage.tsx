@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { SEOHead, generateFAQData } from '@/components/marketing/SEOHead';
@@ -29,8 +30,13 @@ const whyReasons = [
 ];
 
 export default function LandingPage() {
+  const { user } = useAuth();
   const { data: tiers, isLoading: tiersLoading } = useSubscriptionTiers();
   const sortedTiers = tiers?.sort((a, b) => a.monthly_price - b.monthly_price) || [];
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <MarketingLayout>

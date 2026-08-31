@@ -5,6 +5,7 @@ import { PsychrometricSummary } from './templates/PsychrometricSummary';
 import { DryingLogTable } from './templates/DryingLogTable';
 import { SignatureBlock } from './templates/SignatureBlock';
 import { JobReportData, groupReadingsByChamber } from '@/hooks/useReportData';
+import { unitsFromTenant } from '@/lib/psychrometrics';
 
 interface PsychrometricReportProps {
   data: JobReportData;
@@ -16,6 +17,7 @@ export const PsychrometricReport = forwardRef<HTMLDivElement, PsychrometricRepor
   ({ data, includeDetailedReadings = true, includeSignature = true }, ref) => {
     const { job, chambers, readings, tenant } = data;
     const byChamber = groupReadingsByChamber(readings);
+    const { humidity: units } = unitsFromTenant(tenant);
 
     return (
       <div 
@@ -35,6 +37,7 @@ export const PsychrometricReport = forwardRef<HTMLDivElement, PsychrometricRepor
           readings={readings}
           chambers={chambers}
           outdoorGpp={job.outdoor_gpp}
+          units={units}
         />
 
         {includeDetailedReadings && (
@@ -51,6 +54,7 @@ export const PsychrometricReport = forwardRef<HTMLDivElement, PsychrometricRepor
                   readings={chamberReadings}
                   chamberName={chamber.name}
                   targetGpp={chamber.target_gpp}
+                  units={units}
                 />
               );
             })}

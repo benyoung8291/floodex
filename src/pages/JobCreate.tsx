@@ -29,7 +29,7 @@ const jobSchema = z.object({
   address: z.string().min(1, 'Address is required').max(255),
   city: z.string().min(1, 'City is required').max(100),
   state: z.string().min(1, 'State is required').max(50),
-  zipCode: z.string().min(1, 'ZIP code is required').max(20),
+  zipCode: z.string().regex(/^\d{4}$/, 'Enter a 4-digit postcode'),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   lossType: z.enum(['cat1', 'cat2', 'cat3']),
@@ -176,7 +176,7 @@ export default function JobCreate() {
   const isLastStep = currentStep === steps.length - 1;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-full bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-4">
         <div className="max-w-lg mx-auto">
@@ -201,7 +201,7 @@ export default function JobCreate() {
       </div>
 
       {/* Fixed Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background border-t border-border p-4 z-20">
         <div className="max-w-lg mx-auto flex gap-4">
           <Button
             type="button"

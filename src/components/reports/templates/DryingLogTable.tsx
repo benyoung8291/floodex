@@ -1,13 +1,21 @@
 import { ReportReading, groupReadingsByDay } from '@/hooks/useReportData';
 import { formatDateForReport, formatTimeForReport } from '@/lib/pdfGenerator';
+import {
+  formatHumidityRatio,
+  formatTemperature,
+  getHumidityRatioUnit,
+  type UnitSystem,
+} from '@/lib/psychrometrics';
 
 interface DryingLogTableProps {
   readings: ReportReading[];
   chamberName: string;
   targetGpp?: number | null;
+  units?: UnitSystem;
 }
 
-export function DryingLogTable({ readings, chamberName, targetGpp }: DryingLogTableProps) {
+export function DryingLogTable({ readings, chamberName, targetGpp, units = 'imperial' }: DryingLogTableProps) {
+  const humidityUnit = getHumidityRatioUnit(units);
   const groupedByDay = groupReadingsByDay(readings);
   const days = Array.from(groupedByDay.entries());
 
@@ -25,7 +33,7 @@ export function DryingLogTable({ readings, chamberName, targetGpp }: DryingLogTa
       <div className="flex justify-between items-baseline mb-2">
         <h3 className="text-lg font-semibold text-gray-800">{chamberName}</h3>
         {targetGpp && (
-          <span className="text-sm text-gray-600">Target: {targetGpp} GPP</span>
+          <span className="text-sm text-gray-600">Target: {formatHumidityRatio(targetGpp, units)}</span>
         )}
       </div>
 
@@ -41,7 +49,7 @@ export function DryingLogTable({ readings, chamberName, targetGpp }: DryingLogTa
                 <th className="border border-gray-300 px-2 py-1 text-left">Type</th>
                 <th className="border border-gray-300 px-2 py-1 text-right">Temp</th>
                 <th className="border border-gray-300 px-2 py-1 text-right">RH%</th>
-                <th className="border border-gray-300 px-2 py-1 text-right">GPP</th>
+                <th className="border border-gray-300 px-2 py-1 text-right">{humidityUnit}</th>
                 {dayReadings.some(r => r.reading_type === 'material') && (
                   <>
                     <th className="border border-gray-300 px-2 py-1 text-left">Material</th>
@@ -60,13 +68,13 @@ export function DryingLogTable({ readings, chamberName, targetGpp }: DryingLogTa
                     {reading.reading_type}
                   </td>
                   <td className="border border-gray-300 px-2 py-1 text-right">
-                    {reading.temperature}°F
+                    {formatTemperature(reading.temperature, units)}
                   </td>
                   <td className="border border-gray-300 px-2 py-1 text-right">
                     {reading.relative_humidity}%
                   </td>
                   <td className="border border-gray-300 px-2 py-1 text-right font-medium">
-                    {reading.gpp?.toFixed(1) || '--'}
+                    {reading.gpp != null ? formatHumidityRatio(reading.gpp, units) : '--'}
                   </td>
                   {dayReadings.some(r => r.reading_type === 'material') && (
                     <>
@@ -90,9 +98,11 @@ export function DryingLogTable({ readings, chamberName, targetGpp }: DryingLogTa
 
 interface DryingLogSummaryTableProps {
   readings: ReportReading[];
+  units?: UnitSystem;
 }
 
-export function DryingLogSummaryTable({ readings }: DryingLogSummaryTableProps) {
+export function DryingLogSummaryTable({ readings, units = 'imperial' }: DryingLogSummaryTableProps) {
+  const humidityUnit = getHumidityRatioUnit(units);
   const groupedByDay = groupReadingsByDay(readings);
   const days = Array.from(groupedByDay.entries());
 
@@ -106,7 +116,7 @@ export function DryingLogSummaryTable({ readings }: DryingLogSummaryTableProps) 
             <th className="border border-gray-300 px-2 py-1 text-right">Readings</th>
             <th className="border border-gray-300 px-2 py-1 text-right">Avg Temp</th>
             <th className="border border-gray-300 px-2 py-1 text-right">Avg RH%</th>
-            <th className="border border-gray-300 px-2 py-1 text-right">Avg GPP</th>
+            <th className="border border-gray-300 px-2 py-1 text-right">Avg {humidityUnit}</th>
           </tr>
         </thead>
         <tbody>
@@ -122,10 +132,10 @@ export function DryingLogSummaryTable({ readings }: DryingLogSummaryTableProps) 
               <tr key={dateStr}>
                 <td className="border border-gray-300 px-2 py-1">{dateStr}</td>
                 <td className="border border-gray-300 px-2 py-1 text-right">{dayReadings.length}</td>
-                <td className="border border-gray-300 px-2 py-1 text-right">{avgTemp.toFixed(1)}°F</td>
+                <td className="border border-gray-300 px-2 py-1 text-right">{formatTemperature(avgTemp, units)}</td>
                 <td className="border border-gray-300 px-2 py-1 text-right">{avgRh.toFixed(1)}%</td>
                 <td className="border border-gray-300 px-2 py-1 text-right font-medium">
-                  {avgGpp?.toFixed(1) || '--'}
+                  {avgGpp != null ? formatHumidityRatio(avgGpp, units) : '--'}
                 </td>
               </tr>
             );
