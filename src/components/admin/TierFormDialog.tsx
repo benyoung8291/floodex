@@ -25,17 +25,33 @@ import { Switch } from '@/components/ui/switch';
 import { TierFormData, TierWithStats } from '@/hooks/useAdminTiers';
 import { Loader2 } from 'lucide-react';
 
+const lookupKeySchema = z
+  .string()
+  .trim()
+  .max(100, 'Lookup key must be 100 characters or less')
+  .regex(/^[a-z0-9_-]*$/, 'Use lowercase letters, numbers, underscores or dashes only');
+
 const tierSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name must be 50 characters or less'),
   monthly_price: z.coerce.number().min(0, 'Price must be 0 or greater'),
+  yearly_price: z.coerce.number().min(0, 'Price must be 0 or greater'),
   jobs_included: z.coerce.number().int().min(0, 'Must be 0 or greater'),
   readings_included: z.coerce.number().int().min(0, 'Must be 0 or greater'),
   overage_price_per_job: z.coerce.number().min(0, 'Must be 0 or greater'),
   overage_price_per_reading: z.coerce.number().min(0, 'Must be 0 or greater'),
+  monthly_lookup_key: lookupKeySchema,
+  yearly_lookup_key: lookupKeySchema,
   is_free_tier: z.boolean(),
   is_active: z.boolean(),
   sort_order: z.coerce.number().int().min(0, 'Must be 0 or greater'),
-});
+}).refine(
+  (d) => d.is_free_tier || (!!d.monthly_lookup_key && !!d.yearly_lookup_key),
+  {
+    message: 'Paid tiers need both price lookup keys, or customers cannot check out',
+    path: ['monthly_lookup_key'],
+  },
+);
+
 
 interface TierFormDialogProps {
   open: boolean;
