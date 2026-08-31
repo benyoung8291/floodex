@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -558,7 +558,10 @@ export default function Auth() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          By signing up, you agree to our Terms of Service and Privacy Policy
+          Need help?{' '}
+          <Link to="/contact" className="underline underline-offset-2 hover:text-foreground">
+            Contact us
+          </Link>
         </p>
       </div>
     </div>

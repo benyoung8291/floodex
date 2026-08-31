@@ -182,12 +182,12 @@ export default function LandingPage() {
             ))}
           </div>
         ) : (
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-[960px]">
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-[960px]">
             {sortedTiers.map((tier) => {
               const isFeatured = tier.name.toLowerCase() === 'pro';
               return (
                 <StaggerItem key={tier.id}>
-                  <div className={`border rounded-3xl p-8 flex flex-col relative h-full transition-shadow hover:shadow-lg ${
+                  <div className={`border rounded-3xl p-6 lg:p-8 flex flex-col relative h-full min-w-0 transition-shadow hover:shadow-lg ${
                     isFeatured
                       ? "bg-foreground border-foreground/80 shadow-xl"
                       : "bg-white border-border/50"
@@ -196,8 +196,8 @@ export default function LandingPage() {
                       <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 bg-accent text-white text-[11px] font-black px-4 py-[3px] rounded-full whitespace-nowrap uppercase tracking-[0.04em]">Most popular</div>
                     )}
                     <div className={`text-2xl font-black tracking-tight mb-[6px] ${isFeatured ? "text-white" : "text-foreground"}`}>{tier.name}</div>
-                    <div className="flex items-baseline gap-[3px] mb-[6px]">
-                      <span className={`text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-white" : ""}`}>${tier.monthly_price}</span>
+                    <div className="flex items-baseline gap-[3px] mb-[6px] whitespace-nowrap">
+                      <span className={`text-4xl lg:text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-white" : ""}`}>${tier.monthly_price}</span>
                       <span className={`text-[15px] font-semibold ${isFeatured ? "text-white/40" : "text-muted-foreground"}`}>/ month</span>
                     </div>
                     <div className={`text-[13px] font-medium leading-[1.65] mb-6 pb-6 border-b ${isFeatured ? "text-white/40 border-white/10" : "text-muted-foreground border-border/40"}`}>
@@ -252,7 +252,7 @@ export default function LandingPage() {
               <Button className="rounded-full shadow-none border-none bg-accent text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
             </Link>
             <Link to="/auth">
-              <Button variant="outline" className="rounded-full border-white/30 text-white font-bold hover:bg-white/10 text-base py-4 px-8">Go to dashboard</Button>
+              <Button variant="outline" className="rounded-full border-white/30 text-white font-bold hover:bg-white/10 text-base py-4 px-8">Log in</Button>
             </Link>
           </div>
           <p className="mt-8 text-xs text-white/25 font-medium">No credit card required · 14-day free trial · Cancel anytime</p>
