@@ -70,50 +70,49 @@ export function TierFormDialog({
 }: TierFormDialogProps) {
   const isEditing = !!tier;
 
+  const emptyValues: TierFormData = {
+    name: '',
+    monthly_price: 0,
+    yearly_price: 0,
+    jobs_included: 0,
+    readings_included: 0,
+    overage_price_per_job: 0,
+    overage_price_per_reading: 0,
+    monthly_lookup_key: '',
+    yearly_lookup_key: '',
+    is_free_tier: false,
+    is_active: true,
+    sort_order: 0,
+  };
+
   const form = useForm<TierFormData>({
     resolver: zodResolver(tierSchema),
-    defaultValues: {
-      name: '',
-      monthly_price: 0,
-      jobs_included: 0,
-      readings_included: 0,
-      overage_price_per_job: 0,
-      overage_price_per_reading: 0,
-      is_free_tier: false,
-      is_active: true,
-      sort_order: 0,
-    },
+    defaultValues: emptyValues,
   });
 
   useEffect(() => {
-    if (open) {
-      if (tier) {
-        form.reset({
-          name: tier.name,
-          monthly_price: Number(tier.monthly_price),
-          jobs_included: tier.jobs_included,
-          readings_included: tier.readings_included,
-          overage_price_per_job: Number(tier.overage_price_per_job),
-          overage_price_per_reading: Number(tier.overage_price_per_reading),
-          is_free_tier: tier.is_free_tier,
-          is_active: tier.is_active,
-          sort_order: tier.sort_order,
-        });
-      } else {
-        form.reset({
-          name: '',
-          monthly_price: 0,
-          jobs_included: 0,
-          readings_included: 0,
-          overage_price_per_job: 0,
-          overage_price_per_reading: 0,
-          is_free_tier: false,
-          is_active: true,
-          sort_order: 0,
-        });
-      }
+    if (!open) return;
+    if (tier) {
+      form.reset({
+        name: tier.name,
+        monthly_price: Number(tier.monthly_price),
+        yearly_price: Number(tier.yearly_price ?? 0),
+        jobs_included: tier.jobs_included,
+        readings_included: tier.readings_included,
+        overage_price_per_job: Number(tier.overage_price_per_job),
+        overage_price_per_reading: Number(tier.overage_price_per_reading),
+        monthly_lookup_key: tier.monthly_lookup_key ?? '',
+        yearly_lookup_key: tier.yearly_lookup_key ?? '',
+        is_free_tier: tier.is_free_tier,
+        is_active: tier.is_active,
+        sort_order: tier.sort_order,
+      });
+    } else {
+      form.reset(emptyValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tier, form]);
+
 
   const handleSubmit = (data: TierFormData) => {
     onSubmit(data);
