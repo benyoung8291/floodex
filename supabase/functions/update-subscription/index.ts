@@ -18,36 +18,26 @@ function json(body: unknown, status = 200) {
   });
 }
 
-/**
- * Swaps the price on an existing Stripe subscription (true upgrade/downgrade)
- * instead of creating a second parallel subscription via Checkout.
- *
- * - Upgrades   -> prorated and invoiced immediately (`always_invoice`).
- * - Downgrades -> prorated as a credit applied to the next invoice
- *                 (`create_prorations`), so no refund is issued.
- *
- * Pass `preview: true` to get the resulting change described without applying it.
- */
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
+
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userErr } = await supabase.auth.getUser(token);
     if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
     const user = userData.user;
 
     const body = await req.json().catch(() => ({}));
-    const { priceId, environment, preview } = body ?? {};
-    if (!priceId || typeof priceId !== "string" || !/^[a-zA-Z0-9_-]+$/.test(priceId)) {
-      return json({ error: "Invalid priceId" }, 400);
+    const priceId = typeof body?.priceId === "string" ? body.priceId.trim() : "";
+    if (!priceId || priceId.length > 200) {
+      return json({ error: "A valid priceId (price lookup key) is required" }, 400);
     }
-    const env: StripeEnv = environment === "live" ? "live" : "sandbox";
+    const env: StripeEnv = body?.environment === "live" ? "live" : "sandbox";
 
-    // Resolve tenant
+    // Resolve tenant + require admin role
     const { data: profile } = await supabase
       .from("profiles")
       .select("tenant_id")
@@ -55,7 +45,6 @@ Deno.serve(async (req) => {
       .single();
     if (!profile?.tenant_id) return json({ error: "No tenant" }, 400);
 
-    // Only tenant admins may change the plan
     const { data: roleRow } = await supabase
       .from("user_roles")
       .select("role")
@@ -65,130 +54,99 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!roleRow) return json({ error: "Only tenant admins can change the plan" }, 403);
 
-    const { data: subRow } = await supabase
+    // The target price must belong to a tier we actually sell.
+    const { data: targetTier } = await supabase
+      .from("subscription_tiers")
+      .select("id, name, monthly_lookup_key, yearly_lookup_key, is_active")
+      .or(`monthly_lookup_key.eq.${priceId},yearly_lookup_key.eq.${priceId}`)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (!targetTier) return json({ error: "Unknown plan" }, 400);
+
+    const { data: sub } = await supabase
       .from("subscriptions")
-      .select("id, stripe_subscription_id, price_lookup_key")
+      .select("id, stripe_subscription_id, price_lookup_key, status")
       .eq("tenant_id", profile.tenant_id)
       .eq("environment", env)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (!subRow?.stripe_subscription_id) {
-      // No subscription to modify — the caller should run Checkout instead.
-      return json({ error: "No existing subscription", requiresCheckout: true }, 409);
+    // Nothing to modify — the caller should run a fresh checkout instead.
+    if (!sub?.stripe_subscription_id || !["active", "past_due", "trialing"].includes(sub.status)) {
+      return json({ requiresCheckout: true });
+    }
+    if (sub.price_lookup_key === priceId) {
+      return json({ error: "You are already on this plan" }, 400);
     }
 
     const stripe = createStripeClient(env);
 
-    // Resolve the target price by lookup key
-    const prices = await stripe.prices.list({ lookup_keys: [priceId], limit: 1 });
-    if (!prices.data?.length) return json({ error: "Price not found" }, 404);
-    const targetPrice = prices.data[0];
+    // Resolve the lookup key to a Stripe price id.
+    const priceList = await stripe.prices.list({ lookup_keys: [priceId], limit: 1 });
+    const price = priceList?.data?.[0];
+    if (!price?.id) return json({ error: `No Stripe price found for "${priceId}"` }, 400);
 
-    const current = await stripe.subscriptions.retrieve(subRow.stripe_subscription_id);
-    if (current.status === "canceled") {
-      return json({ error: "Subscription is cancelled", requiresCheckout: true }, 409);
-    }
+    const current = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+    const currentItem = current?.items?.data?.[0];
+    if (!currentItem?.id) return json({ error: "Subscription has no billable item" }, 500);
 
-    const currentItem = current.items?.data?.[0];
-    if (!currentItem?.id) return json({ error: "Subscription has no billable item" }, 400);
-
-    if (currentItem.price?.id === targetPrice.id) {
-      return json({ error: "Already on this plan" }, 400);
-    }
-
-    // Compare in a common unit (per-month) so monthly<->yearly switches are judged fairly.
-    const perMonth = (p: any) => {
-      const amount = Number(p?.unit_amount ?? 0);
-      const interval = p?.recurring?.interval;
-      const count = Number(p?.recurring?.interval_count ?? 1) || 1;
-      if (interval === "year") return amount / (12 * count);
-      if (interval === "week") return (amount * 52) / (12 * count);
-      if (interval === "day") return (amount * 365) / (12 * count);
-      return amount / count;
-    };
-    const isUpgrade = perMonth(targetPrice) > perMonth(currentItem.price);
-
-    if (preview) {
-      return json({
-        ok: true,
-        preview: true,
-        isUpgrade,
-        currentLookupKey: currentItem.price?.lookup_key ?? subRow.price_lookup_key ?? null,
-        targetLookupKey: targetPrice.lookup_key ?? priceId,
-        prorationBehavior: isUpgrade ? "always_invoice" : "create_prorations",
-      });
-    }
-
-    const updated = await stripe.subscriptions.update(subRow.stripe_subscription_id, {
-      items: [{ id: currentItem.id, price: targetPrice.id, quantity: 1 }],
-      proration_behavior: isUpgrade ? "always_invoice" : "create_prorations",
+    // Swap the item in place. `create_prorations` charges/credits the difference
+    // for the remainder of the current period; upgrades take effect immediately.
+    const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
+      items: [{ id: currentItem.id, price: price.id, quantity: 1 }],
+      proration_behavior: "create_prorations",
       cancel_at_period_end: false,
       payment_behavior: "pending_if_incomplete",
       metadata: {
-        ...(current.metadata || {}),
-        userId: user.id,
-        tenantId: profile.tenant_id,
-        priceLookupKey: targetPrice.lookup_key ?? priceId,
+        tenant_id: profile.tenant_id,
+        tier_id: targetTier.id,
+        price_lookup_key: priceId,
       },
     });
 
-    // Reflect the change locally right away; the webhook reconciles authoritatively.
     const newItem = updated.items?.data?.[0];
-    const newLookupKey = newItem?.price?.lookup_key ?? targetPrice.lookup_key ?? priceId;
-    const periodEndUnix = newItem?.current_period_end ?? updated.current_period_end ?? null;
-    const periodStartUnix = newItem?.current_period_start ?? updated.current_period_start ?? null;
+    const periodStart = newItem?.current_period_start ?? updated.current_period_start ?? null;
+    const periodEnd = newItem?.current_period_end ?? updated.current_period_end ?? null;
 
-    await supabase
+    // Sync immediately so the UI is correct without waiting on the webhook,
+    // which remains the authoritative reconciler.
+    const { error: syncError } = await supabase
       .from("subscriptions")
       .update({
         status: updated.status,
-        price_lookup_key: newLookupKey,
+        price_lookup_key: priceId,
         cancel_at_period_end: !!updated.cancel_at_period_end,
-        current_period_start: periodStartUnix
-          ? new Date(periodStartUnix * 1000).toISOString()
-          : null,
-        current_period_end: periodEndUnix ? new Date(periodEndUnix * 1000).toISOString() : null,
+        current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : null,
+        current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", subRow.id);
+      .eq("id", sub.id);
+    if (syncError) console.error("update-subscription: local sync failed:", syncError.message);
 
-    const { data: tier } = await supabase
-      .from("subscription_tiers")
-      .select("id, name")
-      .or(`monthly_lookup_key.eq.${newLookupKey},yearly_lookup_key.eq.${newLookupKey}`)
-      .maybeSingle();
+    const { error: tenantError } = await supabase
+      .from("tenants")
+      .update({
+        subscription_tier_id: targetTier.id,
+        subscription_status: updated.status === "active" ? "active" : undefined,
+      })
+      .eq("id", profile.tenant_id);
+    if (tenantError) console.error("update-subscription: tenant sync failed:", tenantError.message);
 
-    if (tier?.id) {
-      await supabase
-        .from("tenants")
-        .update({
-          subscription_tier_id: tier.id,
-          ...(updated.status === "active" ? { subscription_status: "active" } : {}),
-        })
-        .eq("id", profile.tenant_id);
-    }
-
-    console.log(
-      JSON.stringify({
-        scope: "update-subscription",
-        tenantId: profile.tenant_id,
-        subscriptionId: updated.id,
-        from: currentItem.price?.lookup_key ?? null,
-        to: newLookupKey,
-        isUpgrade,
-        status: updated.status,
-      }),
-    );
+    console.log(JSON.stringify({
+      fn: "update-subscription",
+      tenant_id: profile.tenant_id,
+      subscription: sub.stripe_subscription_id,
+      from: sub.price_lookup_key,
+      to: priceId,
+      status: updated.status,
+    }));
 
     return json({
       ok: true,
-      isUpgrade,
       status: updated.status,
-      tierName: tier?.name ?? null,
-      lookupKey: newLookupKey,
-      current_period_end: periodEndUnix,
+      tier: targetTier.name,
+      current_period_end: periodEnd,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
