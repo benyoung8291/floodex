@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { Job } from '@/hooks/useJobs';
 import { todayDisplayDateKey, toLocalDateKey } from '@/lib/datetime';
 
 interface SafetyCheck {
@@ -140,7 +141,15 @@ export function useCreateJob() {
 
       return job;
     },
-    onSuccess: () => {
+    onSuccess: (job) => {
+      // Seed the detail query before navigate(`/jobs/${job.id}`) so JobDetail
+      // has data immediately and does not render blank while the fetch races.
+      queryClient.setQueryData(['job', job.id], job);
+      queryClient.setQueriesData<Job[]>({ queryKey: ['jobs'] }, (existing) => {
+        if (!existing) return [job];
+        if (existing.some((item) => item.id === job.id)) return existing;
+        return [job, ...existing];
+      });
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
       toast.success('Job created successfully');
     },
