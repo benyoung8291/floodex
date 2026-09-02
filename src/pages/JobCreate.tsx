@@ -223,8 +223,8 @@ export default function JobCreate() {
 
   if (!billingLoading && billingAccess && !billingAccess.canWrite) {
     return (
-      <div className="min-h-full bg-background">
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
+      <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
+        <div className="max-w-lg mx-auto w-full px-4 py-6 space-y-4">
           <Button type="button" variant="ghost" onClick={() => navigate(-1)} className="min-h-[44px]">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
@@ -236,10 +236,8 @@ export default function JobCreate() {
   }
 
   return (
-    <div className="min-h-full bg-background">
-      {/* Header */}
-
-      <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
+      <div className="shrink-0 bg-background border-b border-border px-4 py-4">
         <div className="max-w-lg mx-auto">
           <h1 className="text-lg font-semibold text-foreground text-center mb-4">
             New Loss
@@ -248,21 +246,21 @@ export default function JobCreate() {
         </div>
       </div>
 
-      {/* Form Content */}
-      <div className="max-w-lg mx-auto px-4 py-6 pb-32">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Card className="border-border bg-card">
-              <CardContent className="pt-6">
-                {renderStep()}
-              </CardContent>
-            </Card>
-          </form>
-        </Form>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="max-w-lg mx-auto px-4 py-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <Card className="border-border bg-card">
+                <CardContent className="pt-6">
+                  {renderStep()}
+                </CardContent>
+              </Card>
+            </form>
+          </Form>
+        </div>
       </div>
 
-      {/* Fixed Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-background border-t border-border p-4 z-20">
+      <div className="shrink-0 border-t border-border bg-background p-4 pointer-events-auto">
         <div className="max-w-lg mx-auto flex gap-4">
           <Button
             type="button"

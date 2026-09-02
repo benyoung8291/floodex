@@ -26,13 +26,17 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isJobWizard = /\/jobs\/new/.test(location.pathname);
 
   return (
-    <div className="min-h-dvh flex w-full bg-background max-w-full">
+    <div className={cn(
+      "flex w-full bg-background max-w-full",
+      isJobWizard ? "h-dvh overflow-hidden" : "min-h-dvh"
+    )}>
       {isImpersonating && <ImpersonationBanner />}
 
       {!isMobile && <DesktopSidebar />}
 
       <div className={cn(
-        "flex-1 flex flex-col min-h-dvh max-w-full min-w-0",
+        "flex-1 flex flex-col max-w-full min-w-0",
+        isJobWizard ? "min-h-0 overflow-hidden" : "min-h-dvh",
         isImpersonating && "pt-10"
       )}>
         {user && isTenantAdmin && !isImpersonating && (
@@ -45,8 +49,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         <TopHeader onOpenSearch={() => palette.setOpen(true)} />
 
         <main className={cn(
-          "flex-1 overflow-y-auto min-w-0",
-          isJobWizard ? "p-0" : "p-4 pb-24 md:pb-4"
+          "flex-1 min-w-0 min-h-0",
+          isJobWizard ? "p-0 overflow-hidden flex flex-col" : "overflow-y-auto p-4 pb-24 md:pb-4"
         )}>
           {children}
         </main>
