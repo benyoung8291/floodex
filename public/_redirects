@@ -1,0 +1,4 @@
+# SPA fallback: serve the Vite shell for client-side routes.
+# Without this, a hard-reload or cold open of /jobs/:id (and other deep
+# links) can 404/500 on static preview hosts instead of loading React Router.
+/*    /index.html   200
