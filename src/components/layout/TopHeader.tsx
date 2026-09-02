@@ -19,7 +19,10 @@ interface TopHeaderProps {
 }
 
 export function TopHeader({ onOpenSearch }: TopHeaderProps = {}) {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  // navigator is undefined if a preview host prerenders AppLayout on the server.
+  const [isOnline, setIsOnline] = useState(
+    () => typeof navigator !== "undefined" && navigator.onLine,
+  );
   const { user, signOut, roles } = useAuth();
   const navigate = useNavigate();
 

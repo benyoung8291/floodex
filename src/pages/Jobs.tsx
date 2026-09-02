@@ -7,6 +7,7 @@ import { Plus, Briefcase, Layers, Droplets, ArrowUpDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useJobsWithChambers } from '@/hooks/useAllReadings';
 import { useTenant } from '@/hooks/useTenant';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatHumidityRatio, type UnitSystem } from '@/lib/psychrometrics';
 import { differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -37,7 +38,8 @@ const SORTS: { id: SortId; label: string }[] = [
 
 export default function Jobs() {
   const navigate = useNavigate();
-  const { data: jobs, isLoading, error } = useJobsWithChambers();
+  const { loading: authLoading } = useAuth();
+  const { data: jobs, isLoading, error, isFetching } = useJobsWithChambers();
   const { data: tenant } = useTenant();
 
   const units: UnitSystem = tenant?.humidity_ratio_unit === 'g/kg' ? 'metric' : 'imperial';
@@ -93,7 +95,7 @@ export default function Jobs() {
   const getLossTypeLabel = (type: string) => ({ cat1: 'Cat 1', cat2: 'Cat 2', cat3: 'Cat 3' } as Record<string, string>)[type] ?? type;
   const calculateDaysDrying = (startDate: string) => differenceInDays(new Date(), new Date(startDate));
 
-  if (isLoading) {
+  if (authLoading || isLoading || (isFetching && !jobs)) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
