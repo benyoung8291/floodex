@@ -253,8 +253,8 @@ export function QuickLogDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[min(90dvh,calc(100vh-1.5rem))] min-h-0 flex-col overflow-hidden sm:max-w-md">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
             {step === 'select' && 'Quick Log Readings'}
@@ -263,6 +263,7 @@ export function QuickLogDialog({
           </DialogTitle>
         </DialogHeader>
 
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
         {/* Step 1: Chamber Selection */}
         {step === 'select' && (
           <div className="space-y-4">
@@ -431,7 +432,9 @@ export function QuickLogDialog({
           />
         )}
 
-        <DialogFooter className="mt-4">
+        </div>
+
+        <DialogFooter className="mt-0 shrink-0 border-t bg-background pt-4">
           {step === 'select' && (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>

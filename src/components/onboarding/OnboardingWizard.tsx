@@ -11,16 +11,20 @@ import { Card } from '@/components/ui/card';
 import { OnboardingStep } from './OnboardingStep';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTenant } from '@/hooks/useTenant';
+import { getHumidityRatioLabel, unitsFromTenant } from '@/lib/psychrometrics';
 
 const TOTAL_STEPS = 5;
 
 export function OnboardingWizard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: tenant } = useTenant();
   const { currentStep, updateStep, completeOnboarding } = useOnboarding();
   const [step, setStep] = useState(currentStep);
 
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
+  const humidityLabel = getHumidityRatioLabel(unitsFromTenant(tenant).humidity);
 
   const handleNext = () => {
     if (step < TOTAL_STEPS - 1) {
@@ -98,7 +102,7 @@ export function OnboardingWizard() {
           <OnboardingStep
             icon={Thermometer}
             title="Moisture Readings"
-            description="Create drying chambers for each affected area. Log temperature and humidity readings to calculate GPP (Grains Per Pound). Track drying progress over time."
+            description={`Create drying chambers for each affected area. Log temperature and humidity readings to calculate ${humidityLabel}. Track drying progress over time.`}
             currentStep={step}
             totalSteps={TOTAL_STEPS}
             onNext={handleNext}

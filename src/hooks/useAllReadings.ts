@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Tables } from '@/integrations/supabase/types';
+import { formatDisplayDateKey } from '@/lib/datetime';
+import { parseJobStartDate } from '@/lib/reportPeriod';
 
 type MoistureReading = Tables<'moisture_readings'>;
 type Job = Tables<'jobs'>;
@@ -44,12 +46,11 @@ export function useJobsWithChambers() {
 
       if (chambersError) throw chambersError;
 
-      // Get reading counts and latest readings per job
+      // Get reading counts and latest readings per job (ambient + material)
       const { data: readings, error: readingsError } = await supabase
         .from('moisture_readings')
         .select('job_id, logged_at, gpp')
         .eq('tenant_id', effectiveTenantId)
-        .eq('reading_type', 'ambient')
         .order('logged_at', { ascending: false });
 
       if (readingsError) throw readingsError;
@@ -155,11 +156,11 @@ export function useReadingsStats() {
         return { todayCount: 0, weekCount: 0, avgGpp: null, jobsNearTarget: 0 };
       }
       
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayISO = today.toISOString();
+      const todayKey = formatDisplayDateKey(new Date());
+      const todayStart = parseJobStartDate(todayKey);
+      const todayISO = todayStart.toISOString();
 
-      const weekAgo = new Date(today);
+      const weekAgo = new Date(todayStart);
       weekAgo.setDate(weekAgo.getDate() - 7);
       const weekAgoISO = weekAgo.toISOString();
 
@@ -196,13 +197,12 @@ export function useReadingsStats() {
       let jobsNearTarget = 0;
 
       if (activeJobIds.length > 0) {
-        // Get latest ambient reading per job and calculate average
+        // Latest reading per job (ambient or material) for average humidity ratio
         const { data: latestReadings, error: readingsError } = await supabase
           .from('moisture_readings')
           .select('job_id, gpp, logged_at')
           .eq('tenant_id', effectiveTenantId)
           .in('job_id', activeJobIds)
-          .eq('reading_type', 'ambient')
           .order('logged_at', { ascending: false });
 
         if (readingsError) throw readingsError;
@@ -210,7 +210,7 @@ export function useReadingsStats() {
         // Get latest per job
         const latestByJob = new Map<string, number>();
         for (const r of latestReadings || []) {
-          if (!latestByJob.has(r.job_id) && r.gpp) {
+          if (!latestByJob.has(r.job_id) && r.gpp != null) {
             latestByJob.set(r.job_id, r.gpp);
           }
         }

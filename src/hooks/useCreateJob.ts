@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { todayDisplayDateKey, toLocalDateKey } from '@/lib/datetime';
 
 interface SafetyCheck {
   hazardType: string;
@@ -74,7 +75,8 @@ export function useCreateJob() {
           notes: data.notes || null,
           // Claim info fields
           claim_id: data.claimId || null,
-          date_of_loss: data.dateOfLoss ? data.dateOfLoss.toISOString().split('T')[0] : null,
+          start_date: todayDisplayDateKey(),
+          date_of_loss: data.dateOfLoss ? toLocalDateKey(data.dateOfLoss) : null,
           source_of_loss: data.sourceOfLoss || null,
           affected_areas: data.affectedAreas || null,
           affected_materials: data.affectedMaterials || null,

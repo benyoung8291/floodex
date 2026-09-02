@@ -132,8 +132,8 @@ export function ReadingEntryForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[min(90dvh,calc(100vh-1.5rem))] min-h-0 flex-col overflow-hidden sm:max-w-md">
+        <DialogHeader className="shrink-0">
           <DialogTitle>Log Reading - {chamberName}</DialogTitle>
           {previousReading && prevTempInDisplayUnit !== null && prevRH !== null && (
             <p className="text-xs text-muted-foreground">
@@ -142,94 +142,96 @@ export function ReadingEntryForm({
           )}
         </DialogHeader>
 
-        <Tabs value={readingType} onValueChange={(v) => setReadingType(v as 'ambient' | 'material')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="ambient">Ambient</TabsTrigger>
-            <TabsTrigger value="material">Material</TabsTrigger>
-          </TabsList>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
+          <Tabs value={readingType} onValueChange={(v) => setReadingType(v as 'ambient' | 'material')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="ambient">Ambient</TabsTrigger>
+              <TabsTrigger value="material">Material</TabsTrigger>
+            </TabsList>
 
-          <div className="mt-6 space-y-6">
-            {/* Temperature Stepper */}
-            <StepperInput
-              value={temperature}
-              onChange={setTemperature}
-              min={tempMin}
-              max={tempMax}
-              step={1}
-              fastStep={10}
-              label="Temperature"
-              unit={`°${temperatureUnit}`}
-            />
+            <div className="mt-6 space-y-6">
+              {/* Temperature Stepper */}
+              <StepperInput
+                value={temperature}
+                onChange={setTemperature}
+                min={tempMin}
+                max={tempMax}
+                step={1}
+                fastStep={10}
+                label="Temperature"
+                unit={`°${temperatureUnit}`}
+              />
 
-            {/* Relative Humidity Stepper */}
-            <StepperInput
-              value={relativeHumidity}
-              onChange={setRelativeHumidity}
-              min={0}
-              max={100}
-              step={1}
-              fastStep={10}
-              label="Relative Humidity"
-              unit="%"
-            />
+              {/* Relative Humidity Stepper */}
+              <StepperInput
+                value={relativeHumidity}
+                onChange={setRelativeHumidity}
+                min={0}
+                max={100}
+                step={1}
+                fastStep={10}
+                label="Relative Humidity"
+                unit="%"
+              />
 
-            {/* GPP Display */}
-            <div 
-              className={cn(
-                'p-4 rounded-lg border-2 text-center',
-                status ? statusColors[status] : 'bg-muted/50 border-border'
-              )}
-            >
-              <p className="text-sm font-medium uppercase tracking-wide mb-1">
-                {getHumidityRatioUnit(units)}
-              </p>
-              <p className="text-4xl font-bold tabular-nums">
-                {formatHumidityRatio(gpp, units)}
-              </p>
-              {targetGpp && (
-                <p className="text-sm mt-1 opacity-80">
-                  Target: {formatHumidityRatio(targetGpp, units)}
+              {/* GPP Display */}
+              <div 
+                className={cn(
+                  'p-4 rounded-lg border-2 text-center',
+                  status ? statusColors[status] : 'bg-muted/50 border-border'
+                )}
+              >
+                <p className="text-sm font-medium uppercase tracking-wide mb-1">
+                  {getHumidityRatioUnit(units)}
                 </p>
-              )}
+                <p className="text-4xl font-bold tabular-nums">
+                  {formatHumidityRatio(gpp, units)}
+                </p>
+                {targetGpp && (
+                  <p className="text-sm mt-1 opacity-80">
+                    Target: {formatHumidityRatio(targetGpp, units)}
+                  </p>
+                )}
+              </div>
+
+              {/* Material-specific fields */}
+              <TabsContent value="material" className="mt-0 space-y-4">
+                <div className="space-y-2">
+                  <Label>Material Type</Label>
+                  <Select value={materialType} onValueChange={setMaterialType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select material" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MATERIAL_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="moisture-content">Moisture Content %</Label>
+                  <Input
+                    id="moisture-content"
+                    type="number"
+                    step="0.1"
+                    value={moistureContent}
+                    onChange={(e) => setMoistureContent(e.target.value)}
+                    placeholder="e.g., 18.5"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Pin-type meter reading
+                  </p>
+                </div>
+              </TabsContent>
             </div>
+          </Tabs>
+        </div>
 
-            {/* Material-specific fields */}
-            <TabsContent value="material" className="mt-0 space-y-4">
-              <div className="space-y-2">
-                <Label>Material Type</Label>
-                <Select value={materialType} onValueChange={setMaterialType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select material" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MATERIAL_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="moisture-content">Moisture Content %</Label>
-                <Input
-                  id="moisture-content"
-                  type="number"
-                  step="0.1"
-                  value={moistureContent}
-                  onChange={(e) => setMoistureContent(e.target.value)}
-                  placeholder="e.g., 18.5"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Pin-type meter reading
-                </p>
-              </div>
-            </TabsContent>
-          </div>
-        </Tabs>
-
-        <DialogFooter className="mt-4">
+        <DialogFooter className="mt-0 shrink-0 border-t bg-background pt-4">
           <Button
             type="button"
             variant="outline"

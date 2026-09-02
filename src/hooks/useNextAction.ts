@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { differenceInHours, differenceInDays } from 'date-fns';
+import { differenceInHours } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
+import { daysDryingFromStart } from '@/lib/datetime';
 
 type Job = Tables<'jobs'>;
 
@@ -55,7 +56,7 @@ export function computeNextActionsForJobs(jobs: JobLike[]): NextAction[] {
           ...base,
           severity: 'warning',
           title: 'No readings logged yet',
-          detail: `Drying for ${differenceInDays(now, new Date(job.start_date))} day(s)`,
+          detail: `Drying for ${daysDryingFromStart(job.start_date, now)} day(s)`,
           cta: 'Log readings',
           href: `/jobs/${job.id}?capture=readings`,
         });

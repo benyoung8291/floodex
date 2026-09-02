@@ -67,8 +67,26 @@ export function useChamberReadings(chamberId: string | undefined) {
   });
 }
 
-// Fetch latest reading per chamber for a job (supports both ambient and all types)
-export function useLatestReadings(jobId: string | undefined, includeAllTypes: boolean = false) {
+function invalidateReadingCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  jobId: string,
+  chamberId?: string,
+) {
+  if (chamberId) {
+    queryClient.invalidateQueries({ queryKey: ['readings', chamberId] });
+  }
+  queryClient.invalidateQueries({ queryKey: ['latest-readings', jobId] });
+  queryClient.invalidateQueries({ queryKey: ['latest-material-readings', jobId] });
+  queryClient.invalidateQueries({ queryKey: ['job-readings-all', jobId] });
+  queryClient.invalidateQueries({ queryKey: ['all-job-readings', jobId] });
+  queryClient.invalidateQueries({ queryKey: ['all-readings', jobId] });
+  queryClient.invalidateQueries({ queryKey: ['jobs-with-chambers'] });
+  queryClient.invalidateQueries({ queryKey: ['readings-stats'] });
+  queryClient.invalidateQueries({ queryKey: ['recent-readings'] });
+}
+
+// Fetch latest reading per chamber for a job (ambient + material)
+export function useLatestReadings(jobId: string | undefined, includeAllTypes: boolean = true) {
   return useQuery({
     queryKey: ['latest-readings', jobId, includeAllTypes],
     queryFn: async () => {
@@ -236,8 +254,7 @@ export function useCreateReading() {
       return result;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['readings', variables.chamberId] });
-      queryClient.invalidateQueries({ queryKey: ['latest-readings', variables.jobId] });
+      invalidateReadingCaches(queryClient, variables.jobId, variables.chamberId);
       toast({
         title: 'Reading logged',
         description: `${variables.readingType === 'ambient' ? 'Ambient' : 'Material'} reading saved`,
@@ -315,10 +332,8 @@ export function useCreateAndLinkReading() {
       return result;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['readings', variables.chamberId] });
-      queryClient.invalidateQueries({ queryKey: ['latest-readings', variables.jobId] });
+      invalidateReadingCaches(queryClient, variables.jobId, variables.chamberId);
       queryClient.invalidateQueries({ queryKey: ['floor-plan-readings', variables.floorPlanId] });
-      queryClient.invalidateQueries({ queryKey: ['all-readings', variables.jobId] });
       toast({
         title: 'Reading saved & linked',
         description: 'Reading created and linked to marker',

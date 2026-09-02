@@ -462,7 +462,7 @@ export default function JobDetail() {
             ],
             drying: [
               { value: 'chambers', label: 'Chambers', count: chambers.length },
-              { value: 'readings', label: 'Readings' },
+              { value: 'readings', label: 'Readings', count: allReadings?.length },
               { value: 'plans',    label: 'Floor plans' },
             ],
             docs: [
@@ -538,7 +538,9 @@ export default function JobDetail() {
             </div>
             <div className="flex-shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-full bg-card border border-border">
               <Clock className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold tabular-nums">{latestReadings.size}</span>
+              <span className="text-sm font-semibold tabular-nums">
+                {allReadings?.length ?? latestReadings.size}
+              </span>
               <span className="text-xs text-muted-foreground">readings</span>
             </div>
           </div>
@@ -860,6 +862,7 @@ export default function JobDetail() {
             forms={jobForms as any}
             costItems={costItems as any}
             safetyChecks={safetyChecks as any}
+            units={units}
           />
         </TabsContent>
 
