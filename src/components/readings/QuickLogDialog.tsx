@@ -253,7 +253,7 @@ export function QuickLogDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90dvh] flex-col overflow-hidden sm:max-w-md">
+      <DialogContent className="flex max-h-[min(90dvh,calc(100vh-1.5rem))] min-h-0 flex-col overflow-hidden sm:max-w-md">
         <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
