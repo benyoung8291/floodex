@@ -65,7 +65,7 @@ export default function Dashboard() {
     },
     { 
       label: `Avg ${getHumidityRatioUnit(units)}`, 
-      value: readingsStats?.avgGpp ? formatHumidityRatio(readingsStats.avgGpp, units) : '-', 
+      value: readingsStats?.avgGpp != null ? formatHumidityRatio(readingsStats.avgGpp, units) : '—', 
       icon: Gauge, 
       color: 'text-warning' 
     },

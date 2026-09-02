@@ -19,6 +19,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ReportCard } from '@/components/reports/ReportCard';
 import { ReportPreviewDialog, ReportType } from '@/components/reports/ReportPreviewDialog';
 import { useJobs } from '@/hooks/useJobs';
+import { useTenant } from '@/hooks/useTenant';
+import { getHumidityRatioUnit, unitsFromTenant } from '@/lib/psychrometrics';
 
 export default function Reports() {
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -26,6 +28,8 @@ export default function Reports() {
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const { data: jobs, isLoading: jobsLoading } = useJobs();
+  const { data: tenant } = useTenant();
+  const humidityUnit = getHumidityRatioUnit(unitsFromTenant(tenant).humidity);
 
   const handleReportClick = (reportType: ReportType) => {
     if (!selectedJobId) return;
@@ -132,7 +136,7 @@ export default function Reports() {
           
           <ReportCard
             title="Psychrometric Report"
-            description="Scientific moisture analysis with GPP calculations and drying curves."
+            description={`Scientific moisture analysis with ${humidityUnit} calculations and drying curves.`}
             icon={BarChart3}
             onClick={() => handleReportClick('psychrometric')}
           />

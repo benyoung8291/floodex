@@ -182,7 +182,7 @@ export default function Readings() {
     },
     {
       label: `Avg ${getHumidityRatioUnit(units)}`,
-      value: stats?.avgGpp ? formatHumidityRatio(stats.avgGpp, units) : '-',
+      value: stats?.avgGpp != null ? formatHumidityRatio(stats.avgGpp, units) : '—',
       icon: Gauge,
       color: 'text-warning',
     },
@@ -364,7 +364,7 @@ export default function Readings() {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">No Readings Yet</h3>
                 <p className="text-muted-foreground max-w-sm mx-auto">
-                  Select a job above to start logging temperature, humidity, and GPP readings.
+                  Select a job above to start logging temperature, humidity, and {getHumidityRatioUnit(units)} readings.
                 </p>
               </CardContent>
             </Card>

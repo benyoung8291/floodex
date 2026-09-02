@@ -64,7 +64,7 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
 
 export default function Auth() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { signIn, signUp, resetPassword, updatePassword, isPasswordRecovery, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [authView, setAuthView] = useState<'form' | 'forgot' | 'forgot-sent'>('form');
@@ -91,6 +91,7 @@ export default function Auth() {
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Signup form state
   const [signupEmail, setSignupEmail] = useState('');
@@ -113,24 +114,27 @@ export default function Auth() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setLoginError(null);
 
     try {
       const validated = loginSchema.parse({ email: loginEmail, password: loginPassword });
       const { error } = await signIn(validated.email, validated.password);
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast.error('Invalid email or password');
-        } else {
-          toast.error(error.message);
-        }
+        const message = error.message.includes('Invalid login credentials')
+          ? 'Invalid email or password'
+          : error.message;
+        setLoginError(message);
+        toast.error(message);
       } else {
         toast.success('Welcome back!');
         navigate('/dashboard');
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
-        toast.error(err.errors[0].message);
+        const message = err.errors[0].message;
+        setLoginError(message);
+        toast.error(message);
       }
     } finally {
       setLoading(false);
@@ -313,8 +317,15 @@ export default function Auth() {
                 variant="outline"
                 className="w-full"
                 onClick={() => {
+                  setLoginEmail(confirmationEmail);
+                  setActiveTab('login');
+                  setLoginError(null);
                   setShowEmailConfirmation(false);
-                  setConfirmationEmail('');
+                  if (tabParam === 'signup') {
+                    const next = new URLSearchParams(searchParams);
+                    next.delete('tab');
+                    setSearchParams(next, { replace: true });
+                  }
                 }}
               >
                 Back to Sign In
@@ -671,7 +682,10 @@ export default function Auth() {
                       type="email"
                       placeholder="you@company.com"
                       value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
+                      onChange={(e) => {
+                        setLoginEmail(e.target.value);
+                        if (loginError) setLoginError(null);
+                      }}
                       required
                       className="h-12"
                     />
@@ -683,7 +697,10 @@ export default function Auth() {
                       type="password"
                       placeholder="••••••••"
                       value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
+                      onChange={(e) => {
+                        setLoginPassword(e.target.value);
+                        if (loginError) setLoginError(null);
+                      }}
                       required
                       className="h-12"
                     />
@@ -698,6 +715,12 @@ export default function Auth() {
                       Forgot password?
                     </button>
                   </div>
+                  {loginError && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{loginError}</AlertDescription>
+                    </Alert>
+                  )}
                   <Button type="submit" className="w-full h-12" disabled={loading}>
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />

@@ -1,4 +1,5 @@
 import { formatDisplayDate, formatDisplayDateLong, formatDisplayTime } from '@/lib/datetime';
+import { formatHumidityRatio, type UnitSystem } from '@/lib/psychrometrics';
 import {
   Droplets,
   Camera,
@@ -61,6 +62,7 @@ interface JobTimelineProps {
   forms: Array<{ id: string; created_at: string; title: string; status: string; signed_at?: string | null }>;
   costItems: Array<{ id: string; created_at: string; name: string; total_amount?: number | null; quantity: number; unit_rate: number }>;
   safetyChecks: Array<{ id: string; created_at: string; hazard_type: string; is_hazard_present: boolean; requires_stop_work: boolean }>;
+  units?: UnitSystem;
 }
 
 export function JobTimeline({
@@ -72,6 +74,7 @@ export function JobTimeline({
   forms,
   costItems,
   safetyChecks,
+  units = 'metric',
 }: JobTimelineProps) {
   const events: TimelineEvent[] = [];
 
@@ -92,7 +95,7 @@ export function JobTimeline({
       kind: 'reading',
       at: r.logged_at,
       title: isAmbient ? 'Ambient reading' : `Material reading${r.material_type ? ` · ${r.material_type}` : ''}`,
-      detail: `${r.temperature.toFixed(1)}° · ${r.relative_humidity.toFixed(0)}% RH${r.gpp != null ? ` · ${Number(r.gpp).toFixed(1)} GPP` : ''}`,
+      detail: `${r.temperature.toFixed(1)}° · ${r.relative_humidity.toFixed(0)}% RH${r.gpp != null ? ` · ${formatHumidityRatio(Number(r.gpp), units)}` : ''}`,
     });
   }
 
