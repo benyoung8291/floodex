@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { cn } from '@/lib/utils';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -68,13 +68,11 @@ import { ReadingEntryForm } from '@/components/readings/ReadingEntryForm';
 import { ReadingsList } from '@/components/readings/ReadingsList';
 import { GPPTrendChart } from '@/components/readings/GPPTrendChart';
 import { EquipmentAssignDialog } from '@/components/readings/EquipmentAssignDialog';
-import { PhotoGallery } from '@/components/photos/PhotoGallery';
 import { PhotoCaptureDialog } from '@/components/photos/PhotoCaptureDialog';
 import { WorkLogCard } from '@/components/jobs/WorkLogCard';
 import { WorkLogDialog } from '@/components/jobs/WorkLogDialog';
 import { DamageAssessmentCard } from '@/components/jobs/DamageAssessmentCard';
 import { DamageAssessmentDialog } from '@/components/jobs/DamageAssessmentDialog';
-import { FloorPlanGallery } from '@/components/floorplan/FloorPlanGallery';
 import { FormsList } from '@/components/forms/FormsList';
 import { ShareJobDialog } from '@/components/sharing/ShareJobDialog';
 import { JobCostingTab } from '@/components/costing/JobCostingTab';
@@ -84,6 +82,16 @@ import { useJobReadingsAll } from '@/hooks/useJobReadingsAll';
 import { JobTimeline } from '@/components/jobs/JobTimeline';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
+
+// fabric (via PhotoAnnotator / FloorPlanEditor) is browser-only. Keep it out of
+// the JobDetail module graph so a document load / prerender of /jobs/:id cannot
+// 500 if the host evaluates this route on the server.
+const PhotoGallery = lazy(() =>
+  import('@/components/photos/PhotoGallery').then((m) => ({ default: m.PhotoGallery })),
+);
+const FloorPlanGallery = lazy(() =>
+  import('@/components/floorplan/FloorPlanGallery').then((m) => ({ default: m.FloorPlanGallery })),
+);
 
 type DryingChamber = Tables<'drying_chambers'>;
 
@@ -941,16 +949,20 @@ export default function JobDetail() {
 
         {/* Plans Tab */}
         <TabsContent value="plans" className="mt-4">
-          <FloorPlanGallery jobId={id || ''} />
+          <Suspense fallback={<Skeleton className="aspect-[4/3] w-full rounded-lg" />}>
+            <FloorPlanGallery jobId={id || ''} />
+          </Suspense>
         </TabsContent>
 
         {/* Photos Tab */}
         <TabsContent value="photos" className="mt-4">
-          <PhotoGallery
-            photos={jobPhotos}
-            onAddPhoto={() => setPhotoCaptureOpen(true)}
-            showAddButton={true}
-          />
+          <Suspense fallback={<Skeleton className="aspect-[4/3] w-full rounded-lg" />}>
+            <PhotoGallery
+              photos={jobPhotos}
+              onAddPhoto={() => setPhotoCaptureOpen(true)}
+              showAddButton={true}
+            />
+          </Suspense>
         </TabsContent>
       </Tabs>
 
