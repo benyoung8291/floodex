@@ -28,7 +28,15 @@ export function useJobsWithChambers() {
     queryKey: ['jobs-with-chambers', effectiveTenantId],
     queryFn: async () => {
       if (!effectiveTenantId) return [];
-      
+
+      // Preview auth storage is async. A query that runs before the JWT is
+      // attached gets an empty RLS result, which React Query then caches as
+      // "no jobs" (staleTime 30s) — the blank list on first /jobs load.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error('Not authenticated yet');
+      }
+
       // Get all jobs for the tenant
       const { data: jobs, error: jobsError } = await supabase
         .from('jobs')
@@ -82,6 +90,8 @@ export function useJobsWithChambers() {
       })) as JobWithChambers[];
     },
     enabled: !!user && !!effectiveTenantId,
+    retry: 2,
+    retryDelay: 400,
   });
 }
 

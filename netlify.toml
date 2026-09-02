@@ -1,0 +1,6 @@
+# SPA fallback for hosts that honor Netlify-style redirects (Lovable preview
+# ignored public/_redirects after PR #7; keep this as a second format).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
