@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export type BillingBlockReason = 'trial_expired' | 'cancelled' | 'past_due' | 'no_tenant' | null;
 
 export interface BillingAccess {
-  /** Whether the tenant may create new jobs and log new readings. */
+  /** Whether the tenant may create jobs, chambers, readings, and other in-app work. */
   canWrite: boolean;
   reason: BillingBlockReason;
   status: string;
@@ -16,16 +16,16 @@ export interface BillingAccess {
 
 const REASON_COPY: Record<Exclude<BillingBlockReason, null>, { title: string; body: string }> = {
   trial_expired: {
-    title: 'Your free trial has ended',
-    body: 'Your existing jobs, readings, photos and reports are all safe and still available to view and export. Choose a plan to start creating new jobs and logging new readings again.',
+    title: 'FloodEx is free to use',
+    body: 'Creating jobs, logging readings, and previewing reports stays free. You only pay when you unlock a job to download or export a PDF.',
   },
   cancelled: {
-    title: 'Your subscription has been cancelled',
-    body: 'You still have full read-only access to your existing jobs, readings and reports. Reactivate a plan to resume creating new jobs and logging readings.',
+    title: 'FloodEx is free to use',
+    body: 'A monthly plan is optional. You can keep creating jobs and logging work. Download a PDF for AUD $29 per job — the first unlock is free.',
   },
   past_due: {
-    title: 'Your last payment failed',
-    body: 'We could not process your most recent payment, so new jobs and readings are paused. Update your payment method to restore full access immediately.',
+    title: 'Your last monthly payment failed',
+    body: 'You can keep using FloodEx as usual. Update your payment method if you still want an optional monthly plan. PDF exports are a separate $29 per-job unlock.',
   },
   no_tenant: {
     title: 'No company linked to your account',
@@ -38,13 +38,9 @@ export function billingBlockCopy(reason: BillingBlockReason) {
 }
 
 /**
- * Mirrors the server-side `public.tenant_billing_active` predicate so the UI can
- * explain a block before the database rejects the write.
- *
- * Access rules: exempt tenants, paid (`active`) and `free` tenants, and tenants
- * inside their trial window may write. Expired trials, cancelled subscriptions
- * and past-due payments are read-only. Exceeding a plan's included quota never
- * blocks writes.
+ * In-app work is free for every tenant. Expired trials, cancelled subscriptions,
+ * and past-due monthly payments no longer block writes. past_due is surfaced as
+ * a soft warning only. billing_exempt remains a stored tenant flag.
  */
 export function useBillingAccess() {
   const { tenantId } = useAuth();
@@ -81,21 +77,9 @@ export function useBillingAccess() {
       const trialDaysRemaining =
         trialMs === null ? null : Math.max(0, Math.ceil(trialMs / 86_400_000));
 
-      let canWrite: boolean;
-      let reason: BillingBlockReason = null;
-
-      if (isExempt || status === 'active' || status === 'free') {
-        canWrite = true;
-      } else if (status === 'trial') {
-        canWrite = trialMs !== null && trialMs > 0;
-        if (!canWrite) reason = 'trial_expired';
-      } else if (status === 'past_due') {
-        canWrite = false;
-        reason = 'past_due';
-      } else {
-        canWrite = false;
-        reason = 'cancelled';
-      }
+      const canWrite = true;
+      const reason: BillingBlockReason =
+        !isExempt && status === 'past_due' ? 'past_due' : null;
 
       return { canWrite, reason, status, trialEndsAt, trialDaysRemaining, isExempt };
     },

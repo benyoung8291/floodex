@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface CheckoutOptions {
-  priceId: string;
+  priceId?: string;
+  jobId?: string;
   returnUrl?: string;
 }
 

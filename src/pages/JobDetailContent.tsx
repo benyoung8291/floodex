@@ -26,6 +26,7 @@ import {
   FileSignature,
   Share2,
   DollarSign,
+  Pencil,
 } from 'lucide-react';
 import { formatDisplayDate } from '@/lib/datetime';
 import { QuickLogDialog } from '@/components/readings/QuickLogDialog';
@@ -80,6 +81,8 @@ import { useJobCostItems } from '@/hooks/useJobCostItems';
 import { useJobForms } from '@/hooks/useJobForms';
 import { useJobReadingsAll } from '@/hooks/useJobReadingsAll';
 import { JobTimeline } from '@/components/jobs/JobTimeline';
+import { JobUnlockBadge } from '@/components/jobs/JobUnlockBadge';
+import { JobEditDialog } from '@/components/jobs/JobEditDialog';
 import type { UnitSystem } from '@/lib/psychrometrics';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -148,6 +151,7 @@ export default function JobDetailContent() {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [pendingCapture, setPendingCapture] = useState<string | null>(null);
+  const [editJobOpen, setEditJobOpen] = useState(false);
 
   // Capture deep-link from FAB (?capture=readings|photo|worklog)
   useEffect(() => {
@@ -437,7 +441,12 @@ export default function JobDetailContent() {
           <Badge className={cn(statusColors[job.status], "flex-shrink-0")}>
             {job.status}
           </Badge>
+          <JobUnlockBadge jobId={job.id} unlockedAt={job.report_unlocked_at} />
           <div className="flex-1" />
+          <Button variant="outline" size="sm" className="flex-shrink-0" onClick={() => setEditJobOpen(true)}>
+            <Pencil className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Edit</span>
+          </Button>
           <Button variant="outline" size="sm" className="flex-shrink-0" onClick={() => setShareDialogOpen(true)}>
             <Share2 className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Share</span>
@@ -560,6 +569,11 @@ export default function JobDetailContent() {
                 <User className="h-4 w-4" />
                 Customer Information
               </CardTitle>
+              {job.report_unlocked_at && (
+                <p className="text-xs text-muted-foreground font-normal">
+                  Identity fields are locked after report unlock so this job cannot be reused for a different loss.
+                </p>
+              )}
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
@@ -1068,6 +1082,12 @@ export default function JobDetailContent() {
         onOpenChange={setShareDialogOpen}
         jobId={id || ''}
         jobName={job.customer_name}
+      />
+
+      <JobEditDialog
+        open={editJobOpen}
+        onOpenChange={setEditJobOpen}
+        job={job}
       />
     </div>
   );

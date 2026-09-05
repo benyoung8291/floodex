@@ -303,6 +303,43 @@ Deno.serve(async (req) => {
           });
           break;
         }
+        if (session.mode === "payment" && session.metadata?.purpose === "job_report_unlock") {
+          const jobId = session.metadata?.jobId;
+          if (!jobId) {
+            log("warn", "checkout.completed", "Job unlock session missing jobId", {
+              eventId,
+              sessionId: session.id,
+              tenantId,
+            });
+            break;
+          }
+          const { data: unlocked, error: unlockError } = await supabase.rpc(
+            "apply_paid_job_report_unlock",
+            {
+              p_job_id: jobId,
+              p_tenant_id: tenantId,
+              p_stripe_session_id: session.id,
+            },
+          );
+          if (unlockError) {
+            log("error", "checkout.completed", "Paid job unlock failed", {
+              eventId,
+              sessionId: session.id,
+              tenantId,
+              jobId,
+              error: unlockError.message,
+            });
+            throw new Error(`Paid job unlock failed: ${unlockError.message}`);
+          }
+          log("info", "checkout.completed", "Job report unlocked", {
+            eventId,
+            sessionId: session.id,
+            tenantId,
+            jobId,
+            alreadyUnlocked: Boolean((unlocked as { report_unlocked_at?: string } | null)?.report_unlocked_at),
+          });
+          break;
+        }
         if (session.mode === "subscription" && session.subscription) {
           const stripe = createStripeClient(env);
           const sub = await stripe.subscriptions.retrieve(session.subscription);

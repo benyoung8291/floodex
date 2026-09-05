@@ -28,9 +28,9 @@ export default function PricingPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="FloodEx Pricing – Flood Restoration Software from $0/month | Free Tier Available"
-        description="FloodEx pricing starts free. Plans from $49 AUD/month for water damage restoration software. No contracts, 14-day free trial, 30-day money-back guarantee. Compare features across Free, Standard, Pro, and Enterprise plans."
-        keywords="flood restoration software pricing, water damage software cost, FloodEx pricing, restoration software plans, cheap restoration software, Encircle pricing alternative, free restoration software, water damage app pricing"
+        title="FloodEx Pricing – Free to use, AUD $29 per job report unlock"
+        description="FloodEx is free to use for jobs, readings, photos, and in-app report previews. Unlock a job to download PDFs for AUD $29. First unlock is free. Optional monthly plans remain available."
+        keywords="flood restoration software pricing, water damage software cost, FloodEx pricing, restoration software plans, pay per job report, cheap restoration software, Encircle pricing alternative, free restoration software, water damage app pricing"
         canonicalPath="/pricing"
         structuredData={generateBreadcrumbData([
           { name: 'Home', path: '/' },
@@ -43,12 +43,36 @@ export default function PricingPage() {
           <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-muted-foreground mb-4">Pricing</div>
         </motion.div>
         <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.5 }} className="text-[clamp(44px,7vw,88px)] font-black leading-[0.98] tracking-[-0.04em] text-foreground max-w-[850px] mb-7">
-          Simple pricing.<br />
-          <span className="bg-accent text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">Free to start.</span>
+          Free to use.<br />
+          <span className="bg-accent text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">$29 to export.</span>
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-muted-foreground max-w-[540px] leading-[1.7] font-medium mb-14">
-          Start free, upgrade when you're ready. Pay only for what you use. No hidden fees, no surprises.
+          Create jobs, log readings, capture photos, and preview reports in-app for free. Unlock a job to download PDFs for AUD $29. Your first unlock is free, and re-downloads of that job stay free forever.
         </motion.p>
+
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24, duration: 0.5 }} className="max-w-[560px] border rounded-3xl p-8 bg-foreground text-white mb-16 shadow-xl">
+          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-white/50 mb-3">Pay per job</div>
+          <div className="flex items-baseline gap-2 mb-3">
+            <span className="text-5xl font-black tracking-[-0.04em]">$29</span>
+            <span className="text-white/50 font-semibold">AUD one-time / job</span>
+          </div>
+          <ul className="space-y-2 text-sm text-white/70 mb-6">
+            <li>✓ Unlimited jobs, readings, photos, and in-app previews</li>
+            <li>✓ First job unlock free</li>
+            <li>✓ Re-download unlocked jobs forever</li>
+            <li>✓ No monthly subscription required</li>
+          </ul>
+          <Link to="/auth?tab=signup">
+            <button className="block w-full text-center py-[13px] rounded-full text-sm font-extrabold bg-accent text-white hover:opacity-85 border-none cursor-pointer">
+              Start free — first unlock included
+            </button>
+          </Link>
+        </motion.div>
+
+        <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-muted-foreground mb-4">Optional monthly plans</div>
+        <p className="text-sm text-muted-foreground max-w-[540px] mb-8">
+          Monthly plans are a future option for teams that want a bundled subscription. They are not required to use FloodEx.
+        </p>
 
         {isLoading ? (
           <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -104,9 +128,9 @@ export default function PricingPage() {
       <section className="mx-4 md:mx-8 rounded-[32px] bg-secondary px-6 md:px-12 py-12">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row flex-wrap justify-center items-center gap-8 lg:gap-16">
           {[
-            { icon: Shield, title: 'Money-Back Guarantee', desc: '30-day full refund' },
-            { icon: Clock, title: '14-Day Free Trial', desc: 'No credit card required' },
-            { icon: CreditCard, title: 'Cancel Anytime', desc: 'No long-term contracts' },
+            { icon: Shield, title: 'Free to use', desc: 'Jobs, readings, photos, previews' },
+            { icon: Clock, title: 'First unlock free', desc: 'Then $29 AUD per job' },
+            { icon: CreditCard, title: 'No subscription required', desc: 'Pay only when you export' },
           ].map((item) => (
             <div key={item.title} className="flex items-center gap-3">
               <item.icon className="h-7 w-7 text-primary" />
@@ -184,7 +208,7 @@ export default function PricingPage() {
               <Button variant="outline" className="rounded-full border-white/15 text-white/50 hover:bg-white/5 hover:text-white/70 text-base py-4 px-8">Contact us</Button>
             </Link>
             <Link to="/auth?tab=signup">
-              <Button className="rounded-full shadow-none border-none bg-accent text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free trial →</Button>
+              <Button className="rounded-full shadow-none border-none bg-accent text-white font-extrabold text-base py-4 px-8 hover:opacity-85">Start free →</Button>
             </Link>
           </div>
         </AnimateIn>

@@ -168,11 +168,19 @@ export default function LandingPage() {
         <AnimateIn>
           <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-muted-foreground mb-4">Pricing</div>
           <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-foreground mb-4">
-            Simple pricing.<br />Free to start.
+            Free to use.<br />$29 to export.
           </h2>
-          <p className="text-[17px] text-muted-foreground max-w-[480px] leading-[1.7] font-medium mb-14">
-            Start free, upgrade when you're ready. No hidden fees, no surprises.
+          <p className="text-[17px] text-muted-foreground max-w-[480px] leading-[1.7] font-medium mb-8">
+            Use FloodEx free for jobs, readings, photos, and in-app previews. Unlock a job PDF for AUD $29. First unlock is free.
           </p>
+          <div className="max-w-[480px] border rounded-3xl p-6 bg-foreground text-white mb-14">
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-4xl font-black">$29</span>
+              <span className="text-white/50 text-sm font-semibold">AUD one-time per job</span>
+            </div>
+            <p className="text-sm text-white/60">First unlock free · Re-downloads stay free · No monthly plan required</p>
+          </div>
+          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-muted-foreground mb-6">Optional monthly plans</div>
         </AnimateIn>
 
         {tiersLoading ? (
@@ -255,7 +263,7 @@ export default function LandingPage() {
               <Button variant="outline" className="rounded-full border-white/30 text-white font-bold hover:bg-white/10 text-base py-4 px-8">Log in</Button>
             </Link>
           </div>
-          <p className="mt-8 text-xs text-white/25 font-medium">No credit card required · 14-day free trial · Cancel anytime</p>
+          <p className="mt-8 text-xs text-white/25 font-medium">Free to use · First PDF unlock free · Then AUD $29 per job</p>
         </AnimateIn>
       </div>
     </MarketingLayout>

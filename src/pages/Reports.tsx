@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, 
   Calendar, 
@@ -21,15 +22,53 @@ import { ReportPreviewDialog, ReportType } from '@/components/reports/ReportPrev
 import { useJobs } from '@/hooks/useJobs';
 import { useTenant } from '@/hooks/useTenant';
 import { getHumidityRatioUnit, unitsFromTenant } from '@/lib/psychrometrics';
+import { JobUnlockBadge } from '@/components/jobs/JobUnlockBadge';
+
+const REPORT_TYPES = new Set<ReportType>([
+  'comprehensive',
+  'drying-log-3day',
+  'drying-log-custom',
+  'equipment',
+  'photos',
+  'psychrometric',
+  'cost-summary',
+]);
 
 export default function Reports() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [autoDownloadAfterUnlock, setAutoDownloadAfterUnlock] = useState(false);
 
   const { data: jobs, isLoading: jobsLoading } = useJobs();
   const { data: tenant } = useTenant();
   const humidityUnit = getHumidityRatioUnit(unitsFromTenant(tenant).humidity);
+
+  useEffect(() => {
+    const jobUnlock = searchParams.get('jobUnlock');
+    const returnedJobId = searchParams.get('jobId');
+    const returnedType = searchParams.get('reportType');
+    if (jobUnlock !== 'success' || !returnedJobId) return;
+    setSelectedJobId(returnedJobId);
+    if (returnedType && REPORT_TYPES.has(returnedType as ReportType)) {
+      setSelectedReport(returnedType as ReportType);
+    } else {
+      setSelectedReport('comprehensive');
+    }
+    setPreviewOpen(true);
+    setAutoDownloadAfterUnlock(true);
+  }, [searchParams]);
+
+  const handleUnlockHandled = () => {
+    setAutoDownloadAfterUnlock(false);
+    const next = new URLSearchParams(searchParams);
+    next.delete('jobUnlock');
+    next.delete('jobId');
+    next.delete('reportType');
+    next.delete('session_id');
+    setSearchParams(next, { replace: true });
+  };
 
   const handleReportClick = (reportType: ReportType) => {
     if (!selectedJobId) return;
@@ -43,7 +82,9 @@ export default function Reports() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Reports</h1>
-        <p className="text-muted-foreground">Generate and export job documentation</p>
+        <p className="text-muted-foreground">
+          Preview reports in-app for free. Download PDF unlocks a job for AUD $29 (first unlock free).
+        </p>
       </div>
 
       {/* Job Selector - Responsive layout */}
@@ -81,6 +122,8 @@ export default function Reports() {
               {' · '}{selectedJob.address}
               {selectedJob.city && `, ${selectedJob.city}`}
               {' · '}Day {selectedJob.days_drying} of drying
+              {' · '}
+              <JobUnlockBadge jobId={selectedJob.id} unlockedAt={selectedJob.report_unlocked_at} />
             </div>
           )}
         </CardContent>
@@ -157,6 +200,8 @@ export default function Reports() {
           onOpenChange={setPreviewOpen}
           reportType={selectedReport}
           jobId={selectedJobId}
+          autoDownloadAfterUnlock={autoDownloadAfterUnlock}
+          onUnlockHandled={handleUnlockHandled}
         />
       )}
     </div>

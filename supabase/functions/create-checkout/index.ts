@@ -70,13 +70,7 @@ Deno.serve(async (req) => {
     }
     const user = userData.user;
 
-    const { priceId, returnUrl, environment } = await req.json();
-    if (!priceId || typeof priceId !== "string" || !/^[a-zA-Z0-9_-]+$/.test(priceId)) {
-      return new Response(JSON.stringify({ error: "Invalid priceId" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const { priceId, jobId, returnUrl, environment } = await req.json();
     if (!returnUrl || typeof returnUrl !== "string") {
       return new Response(JSON.stringify({ error: "Invalid returnUrl" }), {
         status: 400,
@@ -84,6 +78,18 @@ Deno.serve(async (req) => {
       });
     }
     const env: StripeEnv = environment === "live" ? "live" : "sandbox";
+    const isJobUnlock =
+      typeof jobId === "string" &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
+
+    if (!isJobUnlock) {
+      if (!priceId || typeof priceId !== "string" || !/^[a-zA-Z0-9_-]+$/.test(priceId)) {
+        return new Response(JSON.stringify({ error: "Invalid priceId" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     // Get tenant info
     const { data: profile } = await supabase
@@ -99,22 +105,11 @@ Deno.serve(async (req) => {
     }
     const { data: tenant } = await supabase
       .from("tenants")
-      .select("id, name, contact_email")
+      .select("id, name, contact_email, billing_exempt")
       .eq("id", profile.tenant_id)
       .single();
 
     const stripe = createStripeClient(env);
-
-    // Resolve price by lookup key
-    const prices = await stripe.prices.list({ lookup_keys: [priceId], limit: 1 });
-    if (!prices.data?.length) {
-      return new Response(JSON.stringify({ error: "Price not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const stripePrice = prices.data[0];
-    const isRecurring = stripePrice.type === "recurring";
 
     const customerId = await resolveOrCreateCustomer(stripe, {
       email: tenant?.contact_email || user.email,
@@ -123,27 +118,97 @@ Deno.serve(async (req) => {
       tenantName: tenant?.name,
     });
 
-    const session = await stripe.checkout.sessions.create({
-      line_items: [{ price: stripePrice.id, quantity: 1 }],
-      mode: isRecurring ? "subscription" : "payment",
-      ui_mode: "embedded_page",
-      return_url: returnUrl,
-      customer: customerId,
-      metadata: {
-        userId: user.id,
-        tenantId: profile.tenant_id,
-        priceLookupKey: priceId,
-      },
-      ...(isRecurring && {
-        subscription_data: {
-          metadata: {
-            userId: user.id,
-            tenantId: profile.tenant_id,
-            priceLookupKey: priceId,
+    let session;
+    if (isJobUnlock) {
+      const { data: job } = await supabase
+        .from("jobs")
+        .select("id, tenant_id, customer_name, address, city, state, zip_code, report_unlocked_at")
+        .eq("id", jobId)
+        .eq("tenant_id", profile.tenant_id)
+        .maybeSingle();
+      if (!job) {
+        return new Response(JSON.stringify({ error: "Job not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (job.report_unlocked_at) {
+        return new Response(JSON.stringify({ error: "This job is already unlocked" }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (tenant?.billing_exempt) {
+        return new Response(JSON.stringify({ error: "This company can unlock reports without payment" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const location = [job.address, job.city, job.state, job.zip_code]
+        .filter((part) => typeof part === "string" && part.trim())
+        .join(", ");
+      const description = [job.customer_name, location].filter(Boolean).join(" — ").slice(0, 500);
+
+      session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: "aud",
+              unit_amount: 2900,
+              product_data: {
+                name: "FloodEx job report unlock",
+                description: description || "One-time unlock to download PDFs for this job",
+              },
+            },
+            quantity: 1,
           },
+        ],
+        mode: "payment",
+        ui_mode: "embedded_page",
+        return_url: returnUrl,
+        customer: customerId,
+        metadata: {
+          userId: user.id,
+          tenantId: profile.tenant_id,
+          jobId: job.id,
+          purpose: "job_report_unlock",
         },
-      }),
-    });
+      });
+    } else {
+      // Resolve price by lookup key
+      const prices = await stripe.prices.list({ lookup_keys: [priceId], limit: 1 });
+      if (!prices.data?.length) {
+        return new Response(JSON.stringify({ error: "Price not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const stripePrice = prices.data[0];
+      const isRecurring = stripePrice.type === "recurring";
+
+      session = await stripe.checkout.sessions.create({
+        line_items: [{ price: stripePrice.id, quantity: 1 }],
+        mode: isRecurring ? "subscription" : "payment",
+        ui_mode: "embedded_page",
+        return_url: returnUrl,
+        customer: customerId,
+        metadata: {
+          userId: user.id,
+          tenantId: profile.tenant_id,
+          priceLookupKey: priceId,
+        },
+        ...(isRecurring && {
+          subscription_data: {
+            metadata: {
+              userId: user.id,
+              tenantId: profile.tenant_id,
+              priceLookupKey: priceId,
+            },
+          },
+        }),
+      });
+    }
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

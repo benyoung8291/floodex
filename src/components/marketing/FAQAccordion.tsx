@@ -7,16 +7,16 @@ import {
 
 export const faqs = [
   {
-    question: "How does the 14-day free trial work?",
-    answer: "Start using FloodEx immediately with full access to all features. No credit card required. At the end of your trial, choose a plan that fits your needs or continue with our free tier.",
+    question: "Is FloodEx free to use?",
+    answer: "Yes. Creating jobs, chambers, readings, photos, equipment logs, and previewing reports in-app is free. You only pay when you need to get data out — downloading a PDF unlocks that job.",
   },
   {
-    question: "What happens if I exceed my monthly limits?",
-    answer: "We use a soft limit system—you can continue working without interruption. Overages are billed at the rates shown for your tier at the end of each billing period. We'll notify you when you're approaching your limits.",
+    question: "How much does a report unlock cost?",
+    answer: "AUD $29.00 one-time per job. Your first job unlock is free. Once a job is unlocked, you can re-download PDFs for that same job forever at no extra cost.",
   },
   {
-    question: "Can I change plans at any time?",
-    answer: "Absolutely! Upgrade or downgrade your plan anytime from your billing settings. When upgrading, you'll get immediate access to higher limits. When downgrading, changes take effect at your next billing cycle.",
+    question: "Can I change an unlocked job to a different customer?",
+    answer: "No. After unlock we lock identity fields (customer name, address, city, state, postcode, claim ID, and start date) so a paid report cannot be reused for a different loss. Readings, photos, equipment, and notes stay editable.",
   },
   {
     question: "Is my data secure?",
@@ -27,12 +27,12 @@ export const faqs = [
     answer: "Yes! Our Pro and Enterprise plans include team collaboration features. For large organizations with custom needs, contact us for a tailored solution with volume discounts and dedicated support.",
   },
   {
-    question: "What's included in the free tier?",
-    answer: "The free tier includes 2 jobs and 50 moisture readings per month—perfect for trying out FloodEx or for very small operations. All core features are included, just with lower limits.",
+    question: "What's included for free?",
+    answer: "Everything you need to run a job in FloodEx: unlimited jobs, moisture readings, photos, equipment tracking, and in-app report previews. You pay only when you unlock a job to download or export a PDF.",
   },
   {
     question: "Can I export my data?",
-    answer: "Yes, you can export all your job data, readings, photos, and reports at any time. We support PDF exports for reports and CSV/JSON for raw data.",
+    answer: "In-app report preview is always free. Downloading a clean PDF requires unlocking that job (AUD $29, first unlock free). After unlock, re-downloads of the same job stay free.",
   },
   {
     question: "Is there a mobile app?",
@@ -40,7 +40,7 @@ export const faqs = [
   },
   {
     question: "What makes FloodEx different from other restoration software?",
-    answer: "FloodEx is purpose-built for water damage restoration — not adapted from generic field service software. It features automatic g/kg calculations, psychrometric data, IICRC-compliant reports, and a mobile-first design for field use. Unlike Encircle ($250+/mo), FloodEx starts free with paid plans from $49 AUD/month.",
+    answer: "FloodEx is purpose-built for water damage restoration — not adapted from generic field service software. It features automatic g/kg calculations, psychrometric data, IICRC-compliant reports, and a mobile-first design for field use. Unlike Encircle ($250+/mo), FloodEx is free to use and PDFs unlock for AUD $29 per job.",
   },
   {
     question: "Does FloodEx generate IICRC-compliant reports?",
@@ -52,7 +52,7 @@ export const faqs = [
   },
   {
     question: "How does FloodEx compare to Encircle?",
-    answer: "FloodEx offers the same core features as Encircle — moisture tracking, photo documentation, IICRC-compliant reports, and team collaboration — at a fraction of the price. FloodEx starts free and plans begin at $49 AUD/month, compared to Encircle at $250+ USD/month. FloodEx is also Australian-built with local support.",
+    answer: "FloodEx offers the same core features as Encircle — moisture tracking, photo documentation, IICRC-compliant reports, and team collaboration — at a fraction of the price. FloodEx is free to use and job report unlocks are AUD $29, compared to Encircle at $250+ USD/month. FloodEx is also Australian-built with local support.",
   },
 ];
 

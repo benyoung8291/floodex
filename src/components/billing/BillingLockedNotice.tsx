@@ -13,8 +13,8 @@ interface BillingLockedNoticeProps {
 }
 
 /**
- * Explains why new jobs/readings are blocked and links to the fix.
- * Renders nothing while access is fine (or still loading).
+ * Only blocks when there is no tenant. Past-due monthly plans are a soft warning
+ * and no longer prevent creating jobs or logging readings.
  */
 export function BillingLockedNotice({ action, className }: BillingLockedNoticeProps) {
   const { data: access, isLoading } = useBillingAccess();
@@ -23,8 +23,6 @@ export function BillingLockedNotice({ action, className }: BillingLockedNoticePr
 
   const copy = billingBlockCopy(access.reason);
   if (!copy) return null;
-
-  const isPastDue = access.reason === 'past_due';
 
   return (
     <Card className={className}>
@@ -48,7 +46,7 @@ export function BillingLockedNotice({ action, className }: BillingLockedNoticePr
           <Button asChild className="min-h-[44px]">
             <Link to="/billing">
               <CreditCard className="w-4 h-4 mr-2" />
-              {isPastDue ? 'Update payment method' : 'View plans'}
+              View billing
             </Link>
           </Button>
           <Button asChild variant="outline" className="min-h-[44px]">
