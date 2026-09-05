@@ -1761,6 +1761,58 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _apply_job_report_unlock: {
+        Args: {
+          p_job_id: string
+          p_method: string
+          p_stripe_session_id?: string
+        }
+        Returns: {
+          address: string
+          affected_areas: string | null
+          affected_materials: string | null
+          city: string | null
+          claim_id: string | null
+          claim_summary: string | null
+          created_at: string
+          created_by: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          date_of_loss: string | null
+          days_drying: number
+          id: string
+          latitude: number | null
+          longitude: number | null
+          loss_class: string | null
+          loss_type: Database["public"]["Enums"]["water_category"]
+          notes: string | null
+          outdoor_gpp: number | null
+          outdoor_humidity: number | null
+          outdoor_reading_at: string | null
+          outdoor_temperature: number | null
+          report_unlock_fingerprint: string | null
+          report_unlock_method: string | null
+          report_unlock_stripe_session_id: string | null
+          report_unlocked_at: string | null
+          safety_completed: boolean
+          safety_completed_at: string | null
+          safety_completed_by: string | null
+          source_of_loss: string | null
+          start_date: string
+          state: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          tenant_id: string
+          updated_at: string
+          zip_code: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       accept_team_invitation: {
         Args: { p_token: string; p_user_id: string }
         Returns: Json
@@ -1771,11 +1823,99 @@ export type Database = {
           p_stripe_session_id: string
           p_tenant_id: string
         }
-        Returns: Json
+        Returns: {
+          address: string
+          affected_areas: string | null
+          affected_materials: string | null
+          city: string | null
+          claim_id: string | null
+          claim_summary: string | null
+          created_at: string
+          created_by: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          date_of_loss: string | null
+          days_drying: number
+          id: string
+          latitude: number | null
+          longitude: number | null
+          loss_class: string | null
+          loss_type: Database["public"]["Enums"]["water_category"]
+          notes: string | null
+          outdoor_gpp: number | null
+          outdoor_humidity: number | null
+          outdoor_reading_at: string | null
+          outdoor_temperature: number | null
+          report_unlock_fingerprint: string | null
+          report_unlock_method: string | null
+          report_unlock_stripe_session_id: string | null
+          report_unlocked_at: string | null
+          safety_completed: boolean
+          safety_completed_at: string | null
+          safety_completed_by: string | null
+          source_of_loss: string | null
+          start_date: string
+          state: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          tenant_id: string
+          updated_at: string
+          zip_code: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       claim_free_job_report_unlock: {
         Args: { p_job_id: string }
-        Returns: Json
+        Returns: {
+          address: string
+          affected_areas: string | null
+          affected_materials: string | null
+          city: string | null
+          claim_id: string | null
+          claim_summary: string | null
+          created_at: string
+          created_by: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          date_of_loss: string | null
+          days_drying: number
+          id: string
+          latitude: number | null
+          longitude: number | null
+          loss_class: string | null
+          loss_type: Database["public"]["Enums"]["water_category"]
+          notes: string | null
+          outdoor_gpp: number | null
+          outdoor_humidity: number | null
+          outdoor_reading_at: string | null
+          outdoor_temperature: number | null
+          report_unlock_fingerprint: string | null
+          report_unlock_method: string | null
+          report_unlock_stripe_session_id: string | null
+          report_unlocked_at: string | null
+          safety_completed: boolean
+          safety_completed_at: string | null
+          safety_completed_by: string | null
+          source_of_loss: string | null
+          start_date: string
+          state: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          tenant_id: string
+          updated_at: string
+          zip_code: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -1791,6 +1931,13 @@ export type Database = {
         Returns: Json
       }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       job_report_unlock_fingerprint: {
         Args: {
           p_address: string
@@ -1802,13 +1949,6 @@ export type Database = {
           p_zip_code: string
         }
         Returns: string
-      }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
       }
       move_to_dlq: {
         Args: {
@@ -1854,12 +1994,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1883,11 +2023,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1908,11 +2048,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1933,11 +2073,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1950,11 +2090,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
