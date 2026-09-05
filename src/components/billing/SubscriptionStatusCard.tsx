@@ -319,7 +319,7 @@ function StateBanner({
     return (
       <Banner tone="info" icon={Clock}>
         <strong>{trialDaysRemaining} day{trialDaysRemaining === 1 ? '' : 's'}</strong>{' '}
-        remaining in your trial. Choose a plan to keep access.
+        remaining on the optional trial clock. FloodEx stays free to use — you only pay to export a PDF.
       </Banner>
     );
   }
@@ -344,7 +344,7 @@ function StateBanner({
   if (state === 'past_due') {
     return (
       <Banner tone="destructive" icon={AlertTriangle}>
-        We couldn't charge your card. Update your payment method to avoid losing access. Stripe is automatically retrying.
+        We couldn't charge your optional monthly plan. You can keep using FloodEx. Update your card if you still want that subscription. Stripe is automatically retrying.
       </Banner>
     );
   }
@@ -352,7 +352,7 @@ function StateBanner({
   if (state === 'cancelled') {
     return (
       <Banner tone="muted" icon={XCircle}>
-        Your subscription has ended. Resubscribe to restore full access, or contact support if this looks wrong.
+        Your monthly subscription has ended. FloodEx stays free to use. Resubscribe only if you want an optional plan.
       </Banner>
     );
   }

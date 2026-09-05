@@ -122,7 +122,7 @@ export function PlanComparison() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-semibold">Available Plans</h2>
+        <h2 className="text-lg font-semibold text-muted-foreground">Monthly plans (optional)</h2>
         <Tabs value={interval} onValueChange={(v) => setInterval(v as BillingInterval)}>
           <TabsList>
             <TabsTrigger value="monthly">Monthly</TabsTrigger>

@@ -5,6 +5,7 @@ import { SubscriptionStatusCard } from '@/components/billing/SubscriptionStatusC
 import { UsageMeters } from '@/components/billing/UsageMeters';
 import { PlanComparison } from '@/components/billing/PlanComparison';
 import { PaymentTestModeBanner } from '@/components/billing/PaymentTestModeBanner';
+import { JobUnlockPricingCard } from '@/components/billing/JobUnlockPricingCard';
 
 export default function Billing() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,8 +17,12 @@ export default function Billing() {
     
     const success = searchParams.get('success');
     const canceled = searchParams.get('canceled');
+    const jobUnlock = searchParams.get('jobUnlock');
 
-    if (success === 'true') {
+    if (jobUnlock === 'success') {
+      toast.success('Payment received. Unlocking this job report…');
+      hasShownToast.current = true;
+    } else if (success === 'true') {
       toast.success('Subscription activated successfully!');
       hasShownToast.current = true;
       setSearchParams({});
@@ -36,16 +41,26 @@ export default function Billing() {
     <div className="space-y-6">
       <PaymentTestModeBanner />
       <div>
-        <h1 className="text-2xl font-bold">Billing & Usage</h1>
-        <p className="text-muted-foreground">Manage your subscription and monitor usage</p>
+        <h1 className="text-2xl font-bold">Billing & exports</h1>
+        <p className="text-muted-foreground">
+          Use FloodEx free. Pay <span className="text-foreground font-medium">AUD $29</span> once per job to download PDFs. The first unlock is free.
+        </p>
       </div>
+
+      <JobUnlockPricingCard />
 
       <div className="grid gap-6 md:grid-cols-2">
         <SubscriptionStatusCard onChangePlan={scrollToPlanComparison} />
         <UsageMeters />
       </div>
 
-      <div ref={planComparisonRef}>
+      <div ref={planComparisonRef} className="space-y-2">
+        <div>
+          <h2 className="text-lg font-semibold">Optional monthly plans</h2>
+          <p className="text-sm text-muted-foreground">
+            Monthly subscriptions are not required to use FloodEx. They remain available as a future option for teams that want a bundled plan.
+          </p>
+        </div>
         <PlanComparison />
       </div>
     </div>

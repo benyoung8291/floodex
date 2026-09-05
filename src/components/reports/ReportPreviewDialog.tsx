@@ -12,13 +12,33 @@ import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Download, Loader2, Calendar as CalendarIcon } from 'lucide-react';
+import { Download, Loader2, Calendar as CalendarIcon, Lock } from 'lucide-react';
 import { format, startOfDay, endOfDay } from 'date-fns';
 import { generatePDF } from '@/lib/pdfGenerator';
 import { formatDisplayDateKey } from '@/lib/datetime';
 import { computeReportPeriod } from '@/lib/reportPeriod';
 import { toast } from 'sonner';
 import { useJobReportData, JobReportData } from '@/hooks/useReportData';
+import {
+  jobReportUnlockQueryKey,
+  useClaimFreeJobReportUnlock,
+  useJobReportUnlockStatus,
+  waitForJobReportUnlock,
+} from '@/hooks/useJobReportUnlock';
+import { formatUnlockPriceAud } from '@/lib/jobReportUnlock';
+import { StripeEmbeddedCheckout } from '@/components/billing/StripeEmbeddedCheckout';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { isPaymentsConfigured } from '@/lib/stripe';
+import { useQueryClient } from '@tanstack/react-query';
 import { DryingLogReport } from './DryingLogReport';
 import { EquipmentReport } from './EquipmentReport';
 import { PhotoReport } from './PhotoReport';
@@ -35,6 +55,8 @@ interface ReportPreviewDialogProps {
   onOpenChange: (open: boolean) => void;
   reportType: ReportType;
   jobId: string;
+  autoDownloadAfterUnlock?: boolean;
+  onUnlockHandled?: () => void;
 }
 
 const REPORT_TITLES: Record<ReportType, string> = {
@@ -52,9 +74,18 @@ export function ReportPreviewDialog({
   onOpenChange, 
   reportType,
   jobId,
+  autoDownloadAfterUnlock = false,
+  onUnlockHandled,
 }: ReportPreviewDialogProps) {
   const reportRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
   const [generating, setGenerating] = useState(false);
+  const [confirmFreeOpen, setConfirmFreeOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [awaitingPaidUnlock, setAwaitingPaidUnlock] = useState(autoDownloadAfterUnlock);
+  const { data: unlockStatus, isLoading: unlockLoading } =
+    useJobReportUnlockStatus(open || autoDownloadAfterUnlock ? jobId : undefined);
+  const claimFree = useClaimFreeJobReportUnlock();
   
   // Options
   const [includeEquipment, setIncludeEquipment] = useState(true);
@@ -100,7 +131,7 @@ export function ReportPreviewDialog({
   const { data: costItems = [] } = useJobCostItems(reportType === 'cost-summary' ? jobId : undefined);
   const costSummary = useJobCostSummary(reportType === 'cost-summary' ? jobId : undefined);
 
-  const handleDownload = async () => {
+  const generateAndDownload = async () => {
     if (!data) {
       toast.error('Report data is not ready yet.');
       return;
@@ -142,6 +173,69 @@ export function ReportPreviewDialog({
       setGenerating(false);
     }
   };
+
+  const handleDownload = async () => {
+    if (unlockLoading) {
+      toast.error('Checking unlock status…');
+      return;
+    }
+    if (unlockStatus?.unlocked) {
+      await generateAndDownload();
+      return;
+    }
+    if ((unlockStatus?.freeUnlocksRemaining ?? 0) > 0) {
+      setConfirmFreeOpen(true);
+      return;
+    }
+    if (!isPaymentsConfigured()) {
+      toast.error('Payments are not configured in this environment.');
+      return;
+    }
+    setCheckoutOpen(true);
+  };
+
+  const handleClaimFree = async () => {
+    try {
+      await claimFree.mutateAsync(jobId);
+      toast.success('Job unlocked. Downloading PDF…');
+      setConfirmFreeOpen(false);
+      await generateAndDownload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not unlock this job');
+    }
+  };
+
+  useEffect(() => {
+    if (!autoDownloadAfterUnlock || !jobId || !data || !open) return;
+    let cancelled = false;
+    setAwaitingPaidUnlock(true);
+    (async () => {
+      try {
+        const status = await waitForJobReportUnlock(jobId);
+        if (cancelled) return;
+        await queryClient.invalidateQueries({ queryKey: jobReportUnlockQueryKey(jobId) });
+        await queryClient.invalidateQueries({ queryKey: ['job', jobId] });
+        if (!status.unlocked) return;
+        toast.success('Report unlocked. Downloading PDF…');
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        if (!cancelled) await generateAndDownload();
+      } catch (err) {
+        if (!cancelled) {
+          toast.error(err instanceof Error ? err.message : 'Unlock is still processing');
+        }
+      } finally {
+        if (!cancelled) {
+          setAwaitingPaidUnlock(false);
+          onUnlockHandled?.();
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Run when returning from Stripe Checkout once report data is ready.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoDownloadAfterUnlock, jobId, !!data, open]);
 
   const renderReport = (data: JobReportData) => {
     switch (reportType) {
@@ -213,6 +307,7 @@ export function ReportPreviewDialog({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 py-4 border-b">
@@ -435,29 +530,90 @@ export function ReportPreviewDialog({
           </div>
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleDownload} 
-            disabled={generating || isLoading || !data}
-            className="gap-2"
-          >
-            {generating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4" />
-                Download PDF
-              </>
-            )}
-          </Button>
+        <DialogFooter className="px-6 py-4 border-t flex-col sm:flex-row gap-3 sm:items-center">
+          <div className="flex-1 text-xs text-muted-foreground">
+            {unlockStatus?.unlocked
+              ? 'This job is unlocked. Re-downloads stay free.'
+              : (unlockStatus?.freeUnlocksRemaining ?? 0) > 0
+                ? 'Preview is free. Your first job unlock is complimentary.'
+                : `Preview is free. Download requires a ${formatUnlockPriceAud(unlockStatus?.priceAudCents)} unlock for this job.`}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDownload} 
+              disabled={generating || isLoading || !data || unlockLoading || awaitingPaidUnlock}
+              className="gap-2"
+            >
+              {generating || awaitingPaidUnlock ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {awaitingPaidUnlock ? 'Unlocking…' : 'Generating...'}
+                </>
+              ) : unlockStatus?.unlocked ? (
+                <>
+                  <Download className="h-4 w-4" />
+                  Download PDF
+                </>
+              ) : (unlockStatus?.freeUnlocksRemaining ?? 0) > 0 ? (
+                <>
+                  <Download className="h-4 w-4" />
+                  Unlock free & download
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" />
+                  Unlock · {formatUnlockPriceAud(unlockStatus?.priceAudCents)}
+                </>
+              )}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+      <AlertDialog open={confirmFreeOpen} onOpenChange={setConfirmFreeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unlock this job free?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Unlock this job free (1 of 1 free unlock). After unlock you can re-download PDFs for this job forever.
+              Customer name, address, and claim identity fields will be locked so this job cannot be reused for a different loss.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={claimFree.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleClaimFree();
+              }}
+              disabled={claimFree.isPending}
+            >
+              {claimFree.isPending ? 'Unlocking…' : 'Unlock this job free'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Unlock this job report · {formatUnlockPriceAud(unlockStatus?.priceAudCents)}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            One-time payment to download PDFs for this job. Re-downloads stay free after unlock.
+          </p>
+          {checkoutOpen && (
+            <StripeEmbeddedCheckout
+              jobId={jobId}
+              returnUrl={`${window.location.origin}/reports?jobUnlock=success&jobId=${encodeURIComponent(jobId)}&reportType=${encodeURIComponent(reportType)}&session_id={CHECKOUT_SESSION_ID}`}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

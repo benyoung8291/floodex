@@ -1179,6 +1179,10 @@ export type Database = {
           outdoor_humidity: number | null
           outdoor_reading_at: string | null
           outdoor_temperature: number | null
+          report_unlock_fingerprint: string | null
+          report_unlock_method: string | null
+          report_unlock_stripe_session_id: string | null
+          report_unlocked_at: string | null
           safety_completed: boolean
           safety_completed_at: string | null
           safety_completed_by: string | null
@@ -1214,6 +1218,10 @@ export type Database = {
           outdoor_humidity?: number | null
           outdoor_reading_at?: string | null
           outdoor_temperature?: number | null
+          report_unlock_fingerprint?: string | null
+          report_unlock_method?: string | null
+          report_unlock_stripe_session_id?: string | null
+          report_unlocked_at?: string | null
           safety_completed?: boolean
           safety_completed_at?: string | null
           safety_completed_by?: string | null
@@ -1249,6 +1257,10 @@ export type Database = {
           outdoor_humidity?: number | null
           outdoor_reading_at?: string | null
           outdoor_temperature?: number | null
+          report_unlock_fingerprint?: string | null
+          report_unlock_method?: string | null
+          report_unlock_stripe_session_id?: string | null
+          report_unlocked_at?: string | null
           safety_completed?: boolean
           safety_completed_at?: string | null
           safety_completed_by?: string | null
@@ -1592,6 +1604,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          free_report_unlocks_used: number
           humidity_ratio_unit: string
           id: string
           logo_url: string | null
@@ -1616,6 +1629,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          free_report_unlocks_used?: number
           humidity_ratio_unit?: string
           id?: string
           logo_url?: string | null
@@ -1640,6 +1654,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          free_report_unlocks_used?: number
           humidity_ratio_unit?: string
           id?: string
           logo_url?: string | null
@@ -1750,6 +1765,18 @@ export type Database = {
         Args: { p_token: string; p_user_id: string }
         Returns: Json
       }
+      apply_paid_job_report_unlock: {
+        Args: {
+          p_job_id: string
+          p_stripe_session_id: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
+      claim_free_job_report_unlock: {
+        Args: { p_job_id: string }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1759,7 +1786,23 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_job_report_unlock_status: {
+        Args: { p_job_id: string }
+        Returns: Json
+      }
       get_user_tenant_id: { Args: { _user_id: string }; Returns: string }
+      job_report_unlock_fingerprint: {
+        Args: {
+          p_address: string
+          p_city: string
+          p_claim_id: string
+          p_customer_name: string
+          p_start_date: string
+          p_state: string
+          p_zip_code: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
