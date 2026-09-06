@@ -183,26 +183,40 @@ export function useResendInvitation() {
   });
 }
 
+export interface ValidatedInvitation {
+  id: string;
+  email: string;
+  role: AppRole;
+  status: string;
+  expires_at: string;
+  tenant_name: string | null;
+  tenants: { name: string | null } | null;
+}
+
 export function useValidateInvitation(token: string | null) {
   return useQuery({
     queryKey: ['invitation', token],
-    queryFn: async () => {
+    queryFn: async (): Promise<ValidatedInvitation | null> => {
       if (!token) return null;
 
-      const { data, error } = await supabase
-        .from('team_invitations')
-        .select('*, tenants(name)')
-        .eq('token', token)
-        .eq('status', 'pending')
-        .gt('expires_at', new Date().toISOString())
-        .single();
+      // Token-scoped lookup: the database only returns the invitation that
+      // exactly matches this token (no blanket listing of invitations).
+      const { data, error } = await supabase.rpc('get_invitation_by_token', {
+        p_token: token,
+      });
 
       if (error) {
         console.error('Invitation validation error:', error);
         return null;
       }
 
-      return data;
+      if (!data) return null;
+
+      const invitation = data as unknown as Omit<ValidatedInvitation, 'tenants'>;
+      return {
+        ...invitation,
+        tenants: { name: invitation.tenant_name ?? null },
+      };
     },
     enabled: !!token,
   });
