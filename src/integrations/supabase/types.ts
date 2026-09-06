@@ -1926,6 +1926,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_invitation_by_token: { Args: { p_token: string }; Returns: Json }
       get_job_report_unlock_status: {
         Args: { p_job_id: string }
         Returns: Json
