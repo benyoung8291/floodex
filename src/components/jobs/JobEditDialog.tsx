@@ -258,10 +258,11 @@ export function JobEditDialog({ open, onOpenChange, job }: JobEditDialogProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={updateJob.isPending}>
+              <Button type="submit" disabled={updateJob.isPending || frozen}>
                 {updateJob.isPending ? 'Saving…' : 'Save changes'}
               </Button>
             </DialogFooter>
+
           </form>
         </Form>
       </DialogContent>
