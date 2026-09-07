@@ -77,8 +77,28 @@ export function TenantJobsTable({ tenantId, jobs, isLoading, billing }: Props) {
   const reopen = useAdminReopenJobEdits(tenantId);
   const [grantJob, setGrantJob] = useState<AdminTenantJob | null>(null);
   const [reopenJob, setReopenJob] = useState<AdminTenantJob | null>(null);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<'all' | 'locked' | 'frozen'>('all');
 
   const unlimited = Boolean(billing?.unlimitedActive);
+
+  const isFrozen = (job: AdminTenantJob) =>
+    !unlimited &&
+    !!job.report_edit_locked_at &&
+    new Date(job.report_edit_locked_at).getTime() <= Date.now();
+
+  const visibleJobs = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return (jobs ?? []).filter((job) => {
+      if (filter === 'locked' && job.report_unlocked_at) return false;
+      if (filter === 'frozen' && !isFrozen(job)) return false;
+      if (!term) return true;
+      return (
+        job.customer_name.toLowerCase().includes(term) ||
+        job.address.toLowerCase().includes(term)
+      );
+    });
+  }, [jobs, search, filter, unlimited]);
 
   const handleGrant = async () => {
     if (!grantJob) return;
