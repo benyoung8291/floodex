@@ -9,16 +9,7 @@ verify_jwt = false
 [functions.create-checkout]
 verify_jwt = false
 
-[functions.create-portal-session]
-verify_jwt = false
-
 [functions.payments-webhook]
-verify_jwt = false
-
-[functions.cancel-subscription]
-verify_jwt = false
-
-[functions.update-subscription]
 verify_jwt = false
 
 
