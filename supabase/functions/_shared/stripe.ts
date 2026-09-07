@@ -1,18 +1,15 @@
-// Minimal Stripe REST client routed through the Lovable connector gateway.
-// The "API key" stored in STRIPE_*_API_KEY is a gateway connection identifier,
-// NOT a real Stripe secret key — never call api.stripe.com directly.
+// Minimal Stripe REST client using the project's own Stripe account.
+// STRIPE_SECRET_KEY is the account's real secret key — call api.stripe.com
+// directly, never through the Lovable connector gateway.
 
 export type StripeEnv = "sandbox" | "live";
 
-const GATEWAY_BASE = "https://connector-gateway.lovable.dev/stripe/v1";
+const API_BASE = "https://api.stripe.com/v1";
 
-function getCreds(env: StripeEnv) {
-  const lovable = Deno.env.get("LOVABLE_API_KEY");
-  if (!lovable) throw new Error("LOVABLE_API_KEY is not configured");
-  const keyName = env === "live" ? "STRIPE_LIVE_API_KEY" : "STRIPE_SANDBOX_API_KEY";
-  const connKey = Deno.env.get(keyName);
-  if (!connKey) throw new Error(`${keyName} is not configured`);
-  return { lovable, connKey };
+function getKey(): string {
+  const key = Deno.env.get("STRIPE_SECRET_KEY");
+  if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
+  return key;
 }
 
 // Encode params in Stripe's flat form: foo[bar][0]=baz
@@ -35,16 +32,14 @@ function encode(obj: any, prefix = ""): string[] {
   return out;
 }
 
-async function request(env: StripeEnv, method: string, path: string, body?: any, query?: any) {
-  const { lovable, connKey } = getCreds(env);
-  let url = `${GATEWAY_BASE}${path}`;
+async function request(method: string, path: string, body?: any, query?: any) {
+  let url = `${API_BASE}${path}`;
   if (query) {
     const qs = encode(query).join("&");
     if (qs) url += `?${qs}`;
   }
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${lovable}`,
-    "X-Connection-Api-Key": connKey,
+    Authorization: `Bearer ${getKey()}`,
     "Stripe-Version": "2026-03-25.dahlia",
   };
   let payload: string | undefined;
@@ -61,35 +56,35 @@ async function request(env: StripeEnv, method: string, path: string, body?: any,
   return data;
 }
 
-export function createStripeClient(env: StripeEnv) {
+export function createStripeClient(_env?: StripeEnv) {
   return {
     customers: {
       search: (q: { query: string; limit?: number }) =>
-        request(env, "GET", "/customers/search", undefined, q),
+        request("GET", "/customers/search", undefined, q),
       list: (q: { email?: string; limit?: number }) =>
-        request(env, "GET", "/customers", undefined, q),
-      create: (body: any) => request(env, "POST", "/customers", body),
-      update: (id: string, body: any) => request(env, "POST", `/customers/${id}`, body),
+        request("GET", "/customers", undefined, q),
+      create: (body: any) => request("POST", "/customers", body),
+      update: (id: string, body: any) => request("POST", `/customers/${id}`, body),
     },
     prices: {
       list: (q: { lookup_keys?: string[]; limit?: number }) =>
-        request(env, "GET", "/prices", undefined, q),
+        request("GET", "/prices", undefined, q),
     },
     checkout: {
       sessions: {
-        create: (body: any) => request(env, "POST", "/checkout/sessions", body),
-        retrieve: (id: string) => request(env, "GET", `/checkout/sessions/${id}`),
+        create: (body: any) => request("POST", "/checkout/sessions", body),
+        retrieve: (id: string) => request("GET", `/checkout/sessions/${id}`),
       },
     },
     billingPortal: {
       sessions: {
-        create: (body: any) => request(env, "POST", "/billing_portal/sessions", body),
+        create: (body: any) => request("POST", "/billing_portal/sessions", body),
       },
     },
     subscriptions: {
-      retrieve: (id: string) => request(env, "GET", `/subscriptions/${id}`),
-      update: (id: string, body: any) => request(env, "POST", `/subscriptions/${id}`, body),
-      cancel: (id: string) => request(env, "DELETE", `/subscriptions/${id}`),
+      retrieve: (id: string) => request("GET", `/subscriptions/${id}`),
+      update: (id: string, body: any) => request("POST", `/subscriptions/${id}`, body),
+      cancel: (id: string) => request("DELETE", `/subscriptions/${id}`),
     },
     webhooks: {
       // Stripe-style HMAC verification with replay protection.
@@ -139,6 +134,5 @@ export function createStripeClient(env: StripeEnv) {
         if (diff !== 0) throw new Error("Webhook signature mismatch");
       },
     },
-
   };
 }
