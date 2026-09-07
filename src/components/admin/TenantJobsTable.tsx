@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -21,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Gift, Unlock, RotateCcw } from 'lucide-react';
+import { Gift, Unlock, RotateCcw, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -76,8 +77,28 @@ export function TenantJobsTable({ tenantId, jobs, isLoading, billing }: Props) {
   const reopen = useAdminReopenJobEdits(tenantId);
   const [grantJob, setGrantJob] = useState<AdminTenantJob | null>(null);
   const [reopenJob, setReopenJob] = useState<AdminTenantJob | null>(null);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<'all' | 'locked' | 'frozen'>('all');
 
   const unlimited = Boolean(billing?.unlimitedActive);
+
+  const isFrozen = (job: AdminTenantJob) =>
+    !unlimited &&
+    !!job.report_edit_locked_at &&
+    new Date(job.report_edit_locked_at).getTime() <= Date.now();
+
+  const visibleJobs = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return (jobs ?? []).filter((job) => {
+      if (filter === 'locked' && job.report_unlocked_at) return false;
+      if (filter === 'frozen' && !isFrozen(job)) return false;
+      if (!term) return true;
+      return (
+        job.customer_name.toLowerCase().includes(term) ||
+        job.address.toLowerCase().includes(term)
+      );
+    });
+  }, [jobs, search, filter, unlimited]);
 
   const handleGrant = async () => {
     if (!grantJob) return;
@@ -137,7 +158,41 @@ export function TenantJobsTable({ tenantId, jobs, isLoading, billing }: Props) {
 
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by customer or address..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <div className="flex gap-2">
+          {([
+            { value: 'all', label: 'All jobs' },
+            { value: 'locked', label: 'Locked reports' },
+            { value: 'frozen', label: 'Frozen' },
+          ] as const).map((option) => (
+            <Button
+              key={option.value}
+              size="sm"
+              variant={filter === option.value ? 'default' : 'outline'}
+              onClick={() => setFilter(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {visibleJobs.length === 0 && (
+        <p className="text-center text-muted-foreground py-8">
+          No jobs match this search or filter
+        </p>
+      )}
+
+      <div className={visibleJobs.length === 0 ? 'hidden' : 'overflow-x-auto'}>
         <Table>
           <TableHeader>
             <TableRow>
@@ -151,12 +206,10 @@ export function TenantJobsTable({ tenantId, jobs, isLoading, billing }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {jobs.map((job) => {
+            {visibleJobs.map((job) => {
               const unlock = unlockLabel(job);
-              const frozen =
-                !unlimited &&
-                !!job.report_edit_locked_at &&
-                new Date(job.report_edit_locked_at).getTime() <= Date.now();
+              const frozen = isFrozen(job);
+
 
               return (
                 <TableRow key={job.id}>

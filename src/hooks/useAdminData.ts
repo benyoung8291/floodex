@@ -15,6 +15,7 @@ export interface TenantWithStats {
   job_count: number;
   reading_count: number;
   tier_name: string | null;
+  free_unlocks_remaining: number;
 }
 
 export interface PlatformStats {
@@ -118,6 +119,7 @@ export function useAdminTenants(search?: string, statusFilter?: string) {
           created_at,
           stripe_customer_id,
           stripe_subscription_id,
+          free_report_unlocks_used,
           subscription_tiers (name)
         `)
         .order('created_at', { ascending: false });
@@ -181,6 +183,7 @@ export function useAdminTenants(search?: string, statusFilter?: string) {
         job_count: jobCountMap.get(t.id) || 0,
         reading_count: readingCountMap.get(t.id) || 0,
         tier_name: (t.subscription_tiers as any)?.name || null,
+        free_unlocks_remaining: Math.max(0, 1 - Number((t as any).free_report_unlocks_used ?? 0)),
       })) || [];
     },
   });
@@ -225,6 +228,10 @@ export function useAdminTenantDetail(tenantId: string | undefined) {
         job_count: jobCount || 0,
         reading_count: readingCount || 0,
         tier_name: (tenant.subscription_tiers as any)?.name || null,
+        free_unlocks_remaining: Math.max(
+          0,
+          1 - Number((tenant as any).free_report_unlocks_used ?? 0),
+        ),
       };
     },
     enabled: !!tenantId,
