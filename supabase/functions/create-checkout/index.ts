@@ -1,10 +1,15 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
 
+// Stripe price for the one-time AUD $29 job report unlock
+// Product: prod_VDLx0wqEkXzbT9 ("FloodEx Job Report Unlock")
+const JOB_REPORT_UNLOCK_PRICE_ID = "price_1UCvF69KBgTtt8xbvUIJYR5b";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
