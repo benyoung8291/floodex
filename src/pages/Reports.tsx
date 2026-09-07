@@ -83,7 +83,7 @@ export default function Reports() {
       <div>
         <h1 className="text-2xl font-bold">Reports</h1>
         <p className="text-muted-foreground">
-          Preview reports in-app for free. Download PDF unlocks a job for AUD $29 (first unlock free).
+          Job data is free. Unlock a job to preview and download the full PDF for AUD $29 (first unlock free).
         </p>
       </div>
 

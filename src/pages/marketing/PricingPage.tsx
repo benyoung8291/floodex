@@ -14,7 +14,7 @@ export default function PricingPage() {
     <MarketingLayout>
       <SEOHead
         title="FloodEx Pricing – Free to use, $29 per report or $250/mo unlimited"
-        description="FloodEx is free to use for jobs, readings, photos, and in-app report previews. Unlock a job report for AUD $29 (first unlock free), or go Unlimited for AUD $250 per month."
+        description="FloodEx is free to use for jobs, readings, and photos. Unlock a job report for AUD $29 (first unlock free) to preview and download the PDF, or go Unlimited for AUD $250 per month."
         keywords="flood restoration software pricing, water damage software cost, FloodEx pricing, restoration software plans, pay per job report, cheap restoration software, Encircle pricing alternative, free restoration software, water damage app pricing"
         canonicalPath="/pricing"
         structuredData={generateBreadcrumbData([
@@ -32,7 +32,7 @@ export default function PricingPage() {
           <span className="bg-accent text-white px-3 py-1 inline-block rounded-xl -rotate-1 my-1">$29 to export.</span>
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }} className="text-[clamp(16px,1.8vw,20px)] text-muted-foreground max-w-[540px] leading-[1.7] font-medium mb-14">
-          Create jobs, log readings, capture photos, and preview reports in-app for free. Unlock a job to download PDFs for AUD $29. Your first unlock is free, and re-downloads of that job stay free forever.
+          Create jobs, log readings, and capture photos for free. Unlock a job to preview and download PDFs for AUD $29. Your first unlock is free, and re-downloads of that job stay free forever.
         </motion.p>
 
         <div className="grid gap-6 md:grid-cols-2 max-w-[900px] mb-16">
@@ -43,7 +43,7 @@ export default function PricingPage() {
               <span className="text-white/50 font-semibold">AUD one-time / job</span>
             </div>
             <ul className="space-y-2 text-sm text-white/70 mb-6">
-              <li>✓ Unlimited jobs, readings, photos, and in-app previews</li>
+              <li>✓ Unlimited jobs, readings, and photos</li>
               <li>✓ First job unlock free</li>
               <li>✓ Re-download unlocked jobs forever</li>
               <li>✓ 28 days of editing after each unlock</li>
@@ -84,7 +84,7 @@ export default function PricingPage() {
       <section className="mx-4 md:mx-8 rounded-[32px] bg-secondary px-6 md:px-12 py-12">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row flex-wrap justify-center items-center gap-8 lg:gap-16">
           {[
-            { icon: Shield, title: 'Free to use', desc: 'Jobs, readings, photos, previews' },
+            { icon: Shield, title: 'Free to use', desc: 'Jobs, readings, and photos' },
             { icon: Clock, title: 'First unlock free', desc: 'Then $29 AUD per job' },
             { icon: CreditCard, title: 'Or go Unlimited', desc: 'AUD $250/mo, unlimited reports' },
           ].map((item) => (
@@ -113,7 +113,7 @@ export default function PricingPage() {
             'Mud maps and floor plans',
             'Digital forms and signatures',
             'Cost items and estimates',
-            'In-app report previews',
+            'Job data and field workflows',
             'Unlimited team members',
           ].map((item) => (
             <StaggerItem key={item}>

@@ -8,7 +8,7 @@ import {
 export const faqs = [
   {
     question: "Is FloodEx free to use?",
-    answer: "Yes. Creating jobs, chambers, readings, photos, equipment logs, and previewing reports in-app is free. You only pay when you need to get data out — downloading a PDF unlocks that job.",
+    answer: "Yes. Creating jobs, chambers, readings, photos, and equipment logs is free. Full report preview and PDF download unlock that job.",
   },
   {
     question: "How much does a report unlock cost?",
@@ -28,11 +28,11 @@ export const faqs = [
   },
   {
     question: "What's included for free?",
-    answer: "Everything you need to run a job in FloodEx: unlimited jobs, moisture readings, photos, equipment tracking, and in-app report previews. You pay only when you unlock a job to download or export a PDF.",
+    answer: "Everything you need to run a job in FloodEx: unlimited jobs, moisture readings, photos, and equipment tracking. You pay only when you unlock a job to preview the full report and download or export a PDF.",
   },
   {
     question: "Can I export my data?",
-    answer: "In-app report preview is always free. Downloading a clean PDF requires unlocking that job (AUD $29, first unlock free). After unlock, re-downloads of the same job stay free.",
+    answer: "Job data stays in-app for free. Full report preview and a clean PDF require unlocking that job (AUD $29, first unlock free). After unlock, re-downloads of the same job stay free.",
   },
   {
     question: "Is there a mobile app?",
