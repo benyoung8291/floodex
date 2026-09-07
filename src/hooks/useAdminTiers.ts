@@ -1,207 +1,86 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { UNLIMITED_PLAN_PRODUCT_LOOKUP_KEY } from '@/lib/jobReportUnlock';
 
-async function logAuditEvent(
-  action: string,
-  entityId: string | null,
-  details: Record<string, unknown> = {}
-) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  
-  await (supabase.from('admin_audit_logs') as any).insert({
-    user_id: user.id,
-    action,
-    entity_type: 'subscription_tier',
-    entity_id: entityId,
-    details,
-  });
+export interface PricingOverview {
+  /** Unlimited plan row from the pricing table (source of truth for its price). */
+  unlimitedMonthlyPrice: number | null;
+  unlimitedStripePriceId: string | null;
+  unlimitedStripeProductId: string | null;
+  /** Companies currently on Unlimited. */
+  unlimitedActive: number;
+  /** Of those, how many are set to cancel at the end of the period. */
+  unlimitedCancelling: number;
+  unlimitedPastDue: number;
+  /** Report unlocks. */
+  paidUnlocksTotal: number;
+  paidUnlocksThisMonth: number;
+  freeUnlocksUsed: number;
+  exemptUnlocks: number;
+  totalCompanies: number;
 }
 
-export interface SubscriptionTier {
-  id: string;
-  name: string;
-  monthly_price: number;
-  yearly_price: number;
-  jobs_included: number;
-  readings_included: number;
-  overage_price_per_job: number;
-  overage_price_per_reading: number;
-  monthly_lookup_key: string | null;
-  yearly_lookup_key: string | null;
-  is_free_tier: boolean;
-  is_active: boolean;
-  sort_order: number;
-  stripe_product_id: string | null;
-  stripe_price_id: string | null;
-  created_at: string;
-  updated_at: string;
+function startOfMonthIso(): string {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
 
-export interface TierWithStats extends SubscriptionTier {
-  tenant_count: number;
-  mrr: number;
-}
-
-export interface TierFormData {
-  name: string;
-  monthly_price: number;
-  yearly_price: number;
-  jobs_included: number;
-  readings_included: number;
-  overage_price_per_job: number;
-  overage_price_per_reading: number;
-  monthly_lookup_key: string | null;
-  yearly_lookup_key: string | null;
-  is_free_tier: boolean;
-  is_active: boolean;
-  sort_order: number;
-}
-
-
-export function useAdminTiers() {
+export function usePricingOverview() {
   return useQuery({
-    queryKey: ['admin-subscription-tiers'],
-    queryFn: async () => {
-      // Fetch tiers
-      const { data: tiers, error: tiersError } = await supabase
-        .from('subscription_tiers')
-        .select('*')
-        .order('sort_order');
+    queryKey: ['admin', 'pricing-overview'],
+    staleTime: 30_000,
+    queryFn: async (): Promise<PricingOverview> => {
+      const monthStart = startOfMonthIso();
 
-      if (tiersError) throw tiersError;
+      const [tierRes, subsRes, jobsRes, tenantsRes] = await Promise.all([
+        supabase
+          .from('subscription_tiers')
+          .select('monthly_price, stripe_price_id, stripe_product_id, monthly_lookup_key')
+          .eq('monthly_lookup_key', `${UNLIMITED_PLAN_PRODUCT_LOOKUP_KEY}_monthly`)
+          .maybeSingle(),
+        supabase
+          .from('subscriptions')
+          .select('tenant_id, status, cancel_at_period_end, product_lookup_key')
+          .eq('product_lookup_key', UNLIMITED_PLAN_PRODUCT_LOOKUP_KEY),
+        supabase
+          .from('jobs')
+          .select('report_unlock_method, report_unlocked_at')
+          .not('report_unlocked_at', 'is', null),
+        supabase.from('tenants').select('id, free_report_unlocks_used'),
+      ]);
 
-      // Fetch tenant counts per tier
-      const { data: tenantCounts, error: countError } = await supabase
-        .from('tenants')
-        .select('subscription_tier_id');
+      if (tierRes.error) throw tierRes.error;
+      if (subsRes.error) throw subsRes.error;
+      if (jobsRes.error) throw jobsRes.error;
+      if (tenantsRes.error) throw tenantsRes.error;
 
-      if (countError) throw countError;
+      const subs = subsRes.data ?? [];
+      const active = subs.filter((s) => s.status === 'active' || s.status === 'trialing');
+      const jobs = jobsRes.data ?? [];
+      const tenants = tenantsRes.data ?? [];
 
-      // Calculate counts and MRR for each tier
-      const tiersWithStats: TierWithStats[] = tiers.map((tier) => {
-        let tenantCount: number;
-
-        if (tier.is_free_tier) {
-          // Count tenants with this tier ID OR null (unassigned = free)
-          tenantCount = tenantCounts.filter(
-            (t) => t.subscription_tier_id === tier.id || t.subscription_tier_id === null
-          ).length;
-        } else {
-          tenantCount = tenantCounts.filter(
-            (t) => t.subscription_tier_id === tier.id
-          ).length;
-        }
-
-        return {
-          ...tier,
-          tenant_count: tenantCount,
-          mrr: tenantCount * Number(tier.monthly_price),
-        };
-      });
-
-      return tiersWithStats;
+      return {
+        unlimitedMonthlyPrice:
+          tierRes.data?.monthly_price == null ? null : Number(tierRes.data.monthly_price),
+        unlimitedStripePriceId: tierRes.data?.stripe_price_id ?? null,
+        unlimitedStripeProductId: tierRes.data?.stripe_product_id ?? null,
+        unlimitedActive: active.length,
+        unlimitedCancelling: active.filter((s) => s.cancel_at_period_end).length,
+        unlimitedPastDue: subs.filter((s) => s.status === 'past_due').length,
+        paidUnlocksTotal: jobs.filter((j) => j.report_unlock_method === 'paid').length,
+        paidUnlocksThisMonth: jobs.filter(
+          (j) =>
+            j.report_unlock_method === 'paid' &&
+            j.report_unlocked_at != null &&
+            j.report_unlocked_at >= monthStart,
+        ).length,
+        freeUnlocksUsed: tenants.reduce(
+          (sum, t) => sum + Number(t.free_report_unlocks_used ?? 0),
+          0,
+        ),
+        exemptUnlocks: jobs.filter((j) => j.report_unlock_method === 'exempt').length,
+        totalCompanies: tenants.length,
+      };
     },
   });
-}
-
-export function useCreateTier() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: TierFormData) => {
-      const { data: tier, error } = await supabase
-        .from('subscription_tiers')
-        .insert({
-          name: data.name,
-          monthly_price: data.monthly_price,
-          yearly_price: data.yearly_price,
-          jobs_included: data.jobs_included,
-          readings_included: data.readings_included,
-          overage_price_per_job: data.overage_price_per_job,
-          overage_price_per_reading: data.overage_price_per_reading,
-          monthly_lookup_key: data.monthly_lookup_key || null,
-          yearly_lookup_key: data.yearly_lookup_key || null,
-          is_free_tier: data.is_free_tier,
-          is_active: data.is_active,
-          sort_order: data.sort_order,
-        })
-        .select()
-        .single();
-
-
-      if (error) throw error;
-      return tier;
-    },
-    onSuccess: (tier) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
-      logAuditEvent('tier_created', tier.id, { name: tier.name, monthly_price: tier.monthly_price });
-      toast.success('Tier created successfully');
-    },
-    onError: (error) => {
-      toast.error(`Failed to create tier: ${error.message}`);
-    },
-  });
-}
-
-export function useUpdateTier() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<TierFormData> }) => {
-      const { data: tier, error } = await supabase
-        .from('subscription_tiers')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return tier;
-    },
-    onSuccess: (tier, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
-      logAuditEvent('tier_updated', variables.id, { changes: variables.data });
-      toast.success('Tier updated successfully');
-    },
-    onError: (error) => {
-      toast.error(`Failed to update tier: ${error.message}`);
-    },
-  });
-}
-
-export function useToggleTierStatus() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { data: tier, error } = await supabase
-        .from('subscription_tiers')
-        .update({ is_active })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return tier;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-subscription-tiers'] });
-      logAuditEvent('tier_status_changed', variables.id, { is_active: variables.is_active });
-      toast.success(`Tier ${variables.is_active ? 'activated' : 'deactivated'}`);
-    },
-    onError: (error) => {
-      toast.error(`Failed to toggle tier status: ${error.message}`);
-    },
-  });
-}
-
-// Stripe products are now managed by Lovable's built-in payments — no manual sync needed.
-export function useSyncTierToStripe() {
-  return {
-    mutate: (_tier?: unknown) => toast.info('Products are managed automatically by Lovable Payments.'),
-    mutateAsync: async (_tier?: unknown) => {},
-    isPending: false,
-  };
 }
