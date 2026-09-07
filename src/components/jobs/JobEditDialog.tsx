@@ -99,8 +99,17 @@ export function JobEditDialog({ open, onOpenChange, job }: JobEditDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
+        {frozen && (
+          <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
+            This job is now read-only. Its {JOB_EDIT_WINDOW_DAYS}-day editing window after unlock
+            has closed — you can still view and download the report. Go Unlimited (AUD $250/month)
+            to keep every job editable.
+          </div>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
             <FormField
               control={form.control}
               name="customer_name"
