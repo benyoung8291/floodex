@@ -1867,6 +1867,14 @@ export type Database = {
         }[]
       }
       admin_activity_stats: { Args: never; Returns: Json }
+      admin_grant_job_report_unlock: {
+        Args: { p_job_id: string }
+        Returns: Json
+      }
+      admin_reopen_job_report_edits: {
+        Args: { p_job_id: string }
+        Returns: Json
+      }
       apply_paid_job_report_unlock: {
         Args: {
           p_job_id: string
