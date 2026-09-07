@@ -22,7 +22,14 @@ import {
 import { useAdminTenantDetail, useTenantUsers, useTenantJobs } from '@/hooks/useAdminData';
 import { useAdminActivity } from '@/hooks/useAdminActivity';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
+import { TenantJobsTable, type AdminTenantJob } from '@/components/admin/TenantJobsTable';
+import { useAdminTenantBilling } from '@/hooks/useAdminJobUnlock';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  JOB_REPORT_UNLOCK_PRICE_AUD,
+  UNLIMITED_PLAN_PRICE_AUD,
+  formatAud,
+} from '@/lib/jobReportUnlock';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Table,
@@ -66,6 +73,7 @@ export default function AdminTenantDetail() {
   const { data: tenant, isLoading: tenantLoading } = useAdminTenantDetail(tenantId);
   const { data: users, isLoading: usersLoading } = useTenantUsers(tenantId);
   const { data: jobs, isLoading: jobsLoading } = useTenantJobs(tenantId);
+  const { data: billing } = useAdminTenantBilling(tenantId);
   const {
     data: tenantActivity,
     isLoading: activityLoading,
