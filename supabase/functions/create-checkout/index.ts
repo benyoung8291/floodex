@@ -148,14 +148,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
-          price_data: {
-            currency: "aud",
-            unit_amount: 2900,
-            product_data: {
-              name: "FloodEx job report unlock",
-              description: description || "One-time unlock to download PDFs for this job",
-            },
-          },
+          price: JOB_REPORT_UNLOCK_PRICE_ID,
           quantity: 1,
         },
       ],
@@ -163,6 +156,17 @@ Deno.serve(async (req) => {
       ui_mode: "embedded_page",
       return_url: returnUrl,
       customer: customerId,
+      payment_intent_data: {
+        description: description
+          ? `Job report unlock — ${description}`
+          : "One-time unlock to download PDFs for this job",
+        metadata: {
+          userId: user.id,
+          tenantId: profile.tenant_id,
+          jobId: job.id,
+          purpose: "job_report_unlock",
+        },
+      },
       metadata: {
         userId: user.id,
         tenantId: profile.tenant_id,
@@ -170,6 +174,7 @@ Deno.serve(async (req) => {
         purpose: "job_report_unlock",
       },
     });
+
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
