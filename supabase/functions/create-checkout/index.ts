@@ -1,10 +1,15 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
 
+// Stripe price for the one-time AUD $29 job report unlock
+// Product: prod_VDLx0wqEkXzbT9 ("FloodEx Job Report Unlock")
+const JOB_REPORT_UNLOCK_PRICE_ID = "price_1UCvF69KBgTtt8xbvUIJYR5b";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -148,14 +153,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
-          price_data: {
-            currency: "aud",
-            unit_amount: 2900,
-            product_data: {
-              name: "FloodEx job report unlock",
-              description: description || "One-time unlock to download PDFs for this job",
-            },
-          },
+          price: JOB_REPORT_UNLOCK_PRICE_ID,
           quantity: 1,
         },
       ],
@@ -163,6 +161,17 @@ Deno.serve(async (req) => {
       ui_mode: "embedded_page",
       return_url: returnUrl,
       customer: customerId,
+      payment_intent_data: {
+        description: description
+          ? `Job report unlock — ${description}`
+          : "One-time unlock to download PDFs for this job",
+        metadata: {
+          userId: user.id,
+          tenantId: profile.tenant_id,
+          jobId: job.id,
+          purpose: "job_report_unlock",
+        },
+      },
       metadata: {
         userId: user.id,
         tenantId: profile.tenant_id,
@@ -170,6 +179,7 @@ Deno.serve(async (req) => {
         purpose: "job_report_unlock",
       },
     });
+
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
