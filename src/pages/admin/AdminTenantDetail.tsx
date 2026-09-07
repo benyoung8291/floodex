@@ -16,9 +16,12 @@ import {
   Calendar,
   CreditCard,
   Clock,
-  Eye
+  Eye,
+  Activity
 } from 'lucide-react';
 import { useAdminTenantDetail, useTenantUsers, useTenantJobs } from '@/hooks/useAdminData';
+import { useAdminActivity } from '@/hooks/useAdminActivity';
+import { ActivityFeed } from '@/components/admin/ActivityFeed';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
@@ -63,6 +66,11 @@ export default function AdminTenantDetail() {
   const { data: tenant, isLoading: tenantLoading } = useAdminTenantDetail(tenantId);
   const { data: users, isLoading: usersLoading } = useTenantUsers(tenantId);
   const { data: jobs, isLoading: jobsLoading } = useTenantJobs(tenantId);
+  const {
+    data: tenantActivity,
+    isLoading: activityLoading,
+    error: activityError,
+  } = useAdminActivity({ tenantId: tenantId ?? null, limit: 100 });
 
   const handleImpersonate = () => {
     if (tenant) {
@@ -179,6 +187,7 @@ export default function AdminTenantDetail() {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="users">Users ({tenant.user_count})</TabsTrigger>
           <TabsTrigger value="jobs">Jobs ({tenant.job_count})</TabsTrigger>
           <TabsTrigger value="billing">Billing</TabsTrigger>
@@ -366,6 +375,25 @@ export default function AdminTenantDetail() {
                   <p className="font-mono text-sm">{tenant.stripe_subscription_id || '-'}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="activity">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ActivityFeed
+                events={tenantActivity}
+                isLoading={activityLoading}
+                error={activityError}
+                showTenant={false}
+              />
             </CardContent>
           </Card>
         </TabsContent>

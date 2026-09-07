@@ -1844,6 +1844,29 @@ export type Database = {
         Args: { p_token: string; p_user_id: string }
         Returns: Json
       }
+      admin_activity_feed: {
+        Args: {
+          p_event_types?: string[]
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_since?: string
+          p_tenant_id?: string
+        }
+        Returns: {
+          actor_id: string
+          actor_name: string
+          entity_id: string
+          event_type: string
+          job_id: string
+          job_label: string
+          occurred_at: string
+          summary: string
+          tenant_id: string
+          tenant_name: string
+        }[]
+      }
+      admin_activity_stats: { Args: never; Returns: Json }
       apply_paid_job_report_unlock: {
         Args: {
           p_job_id: string
