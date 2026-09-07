@@ -13,7 +13,7 @@ import { LossTypeStep } from '@/components/jobs/LossTypeStep';
 import { ClaimInfoStep } from '@/components/jobs/ClaimInfoStep';
 import { SafetyCheckStep } from '@/components/jobs/SafetyCheckStep';
 import { useCreateJob } from '@/hooks/useCreateJob';
-import { useTenant } from '@/hooks/useTenant';
+import { useHasOverrideCode, verifySupervisorOverride } from '@/hooks/useSupervisorOverride';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react';
@@ -65,7 +65,7 @@ export default function JobCreate() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const createJob = useCreateJob();
-  const { data: tenant } = useTenant();
+  const { data: hasOverrideCode } = useHasOverrideCode();
 
   const { isTenantAdmin, isSupervisor } = useAuth();
 
@@ -140,8 +140,7 @@ export default function JobCreate() {
   );
   const canBypassCritical = (() => {
     if (!hasCriticalHazards) return true;
-    const stored = tenant?.supervisor_override_code;
-    if (stored) return supervisorOverrideCode === stored;
+    if (hasOverrideCode) return !!supervisorOverrideCode?.trim();
     if (isTenantAdmin || isSupervisor) return !!supervisorAuthorized;
     return false;
   })();
@@ -149,10 +148,10 @@ export default function JobCreate() {
   const onSubmit = async (data: JobFormData) => {
     const critical = data.safetyChecks.some((c) => c.isPresent && c.requiresStopWork);
     if (critical) {
-      const stored = tenant?.supervisor_override_code;
-      if (stored) {
-        if (data.supervisorOverrideCode !== stored) {
-          toast.error('Enter the supervisor override code to create this job.');
+      if (hasOverrideCode) {
+        const ok = await verifySupervisorOverride(data.supervisorOverrideCode ?? '');
+        if (!ok) {
+          toast.error('That supervisor override code is not correct.');
           return;
         }
       } else if (!(isTenantAdmin || isSupervisor) || !data.supervisorAuthorized) {

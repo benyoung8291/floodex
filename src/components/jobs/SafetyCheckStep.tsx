@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertTriangle, Zap, Skull, Bug, Building2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTenant } from '@/hooks/useTenant';
+import { useHasOverrideCode } from '@/hooks/useSupervisorOverride';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface SafetyCheckStepProps {
@@ -52,7 +52,7 @@ const hazards = [
 ];
 
 export function SafetyCheckStep({ form }: SafetyCheckStepProps) {
-  const { data: tenant } = useTenant();
+  const { data: hasOverrideCode } = useHasOverrideCode();
   const { isTenantAdmin, isSupervisor } = useAuth();
   const safetyChecks = form.watch('safetyChecks') || [];
   const overrideCode = form.watch('supervisorOverrideCode') || '';
@@ -102,7 +102,7 @@ export function SafetyCheckStep({ form }: SafetyCheckStepProps) {
           <p className="text-sm text-muted-foreground">
             Critical hazards block job creation until a supervisor override is recorded.
           </p>
-          {tenant?.supervisor_override_code ? (
+          {hasOverrideCode ? (
             <div className="space-y-2">
               <Label htmlFor="supervisor-override-code" className="text-sm text-foreground">
                 Supervisor override code

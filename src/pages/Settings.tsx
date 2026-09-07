@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Building2, Thermometer, Shield, Eye, EyeOff, FileText, Package } from 'lucide-react';
 import { useTenant, useUpdateTenant } from '@/hooks/useTenant';
+import { useHasOverrideCode, useSetOverrideCode } from '@/hooks/useSupervisorOverride';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { LogoUpload } from '@/components/settings/LogoUpload';
@@ -46,6 +47,8 @@ export default function Settings() {
   const { data: tenant, isLoading } = useTenant();
   const { mutate: updateTenant, isPending } = useUpdateTenant();
   const { isTenantAdmin } = useAuth();
+  const { data: hasOverrideCode } = useHasOverrideCode();
+  const { mutate: setOverrideCode } = useSetOverrideCode();
   const [showOverrideCode, setShowOverrideCode] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
@@ -76,7 +79,7 @@ export default function Settings() {
         address: tenant.address || '',
         temperature_unit: (tenant.temperature_unit as 'F' | 'C') || 'C',
         humidity_ratio_unit: (tenant.humidity_ratio_unit as 'GPP' | 'g/kg') || 'g/kg',
-        supervisor_override_code: tenant.supervisor_override_code || '',
+        supervisor_override_code: '',
         report_header_text: tenant.report_header_text || '',
         report_footer_text: tenant.report_footer_text || '',
         report_certification_text: tenant.report_certification_text || '',
@@ -88,6 +91,11 @@ export default function Settings() {
   }, [tenant, form]);
 
   const onSubmit = (data: SettingsFormData) => {
+    const code = data.supervisor_override_code?.trim();
+    if (code) {
+      setOverrideCode(code);
+      form.setValue('supervisor_override_code', '');
+    }
     updateTenant({
       name: data.name,
       contact_email: data.contact_email || null,
@@ -95,7 +103,6 @@ export default function Settings() {
       address: data.address || null,
       temperature_unit: data.temperature_unit,
       humidity_ratio_unit: data.humidity_ratio_unit,
-      supervisor_override_code: data.supervisor_override_code || null,
       logo_url: logoUrl,
       report_header_text: data.report_header_text || null,
       report_footer_text: data.report_footer_text || null,
@@ -327,7 +334,7 @@ export default function Settings() {
                             {...field} 
                             type={showOverrideCode ? 'text' : 'password'}
                             disabled={isPending}
-                            placeholder="Enter override code"
+                            placeholder={hasOverrideCode ? 'Enter a new code to replace the current one' : 'Enter override code'}
                             className="pr-10"
                           />
                           <Button
@@ -346,7 +353,9 @@ export default function Settings() {
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Required when technicians encounter critical safety hazards that need supervisor approval to proceed
+                        {hasOverrideCode
+                          ? 'A code is set. For security it is never shown again — enter a new one to replace it.'
+                          : 'Required when technicians encounter critical safety hazards that need supervisor approval to proceed'}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
