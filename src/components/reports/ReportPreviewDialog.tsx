@@ -25,8 +25,17 @@ import {
   useJobReportUnlockStatus,
   waitForJobReportUnlock,
 } from '@/hooks/useJobReportUnlock';
-import { formatUnlockPriceAud } from '@/lib/jobReportUnlock';
+import {
+  formatUnlockPriceAud,
+  JOB_EDIT_WINDOW_DAYS,
+  JOB_REPORT_UNLOCK_PRICE_AUD_CENTS,
+  reportPreviewFooterCopy,
+  shouldRenderFullReportPreview,
+  type JobReportUnlockStatus,
+} from '@/lib/jobReportUnlock';
 import { StripeEmbeddedCheckout } from '@/components/billing/StripeEmbeddedCheckout';
+import { useLockedReportPrintGuard } from '@/hooks/useLockedReportPrintGuard';
+import { LockedReportTeaser } from './LockedReportTeaser';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -78,14 +87,19 @@ export function ReportPreviewDialog({
   onUnlockHandled,
 }: ReportPreviewDialogProps) {
   const reportRef = useRef<HTMLDivElement>(null);
+  const unlockStatusRef = useRef<JobReportUnlockStatus | undefined>(undefined);
   const queryClient = useQueryClient();
   const [generating, setGenerating] = useState(false);
   const [confirmFreeOpen, setConfirmFreeOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [awaitingPaidUnlock, setAwaitingPaidUnlock] = useState(autoDownloadAfterUnlock);
+  const [pendingDownload, setPendingDownload] = useState(false);
   const { data: unlockStatus, isLoading: unlockLoading } =
     useJobReportUnlockStatus(open || autoDownloadAfterUnlock ? jobId : undefined);
   const claimFree = useClaimFreeJobReportUnlock();
+  const reportUnlocked = shouldRenderFullReportPreview(unlockStatus);
+  unlockStatusRef.current = unlockStatus;
+  useLockedReportPrintGuard(open && !reportUnlocked);
   
   // Options
   const [includeEquipment, setIncludeEquipment] = useState(true);
@@ -116,6 +130,7 @@ export function ReportPreviewDialog({
   useEffect(() => {
     if (!open) {
       setUserPickedRange(false);
+      setPendingDownload(false);
       return;
     }
     setDateRange(computeReportPeriod(reportType));
@@ -132,6 +147,10 @@ export function ReportPreviewDialog({
   const costSummary = useJobCostSummary(reportType === 'cost-summary' ? jobId : undefined);
 
   const generateAndDownload = async () => {
+    if (!unlockStatusRef.current?.unlocked) {
+      toast.error('Unlock this job to download the PDF.');
+      return;
+    }
     if (!data) {
       toast.error('Report data is not ready yet.');
       return;
@@ -180,7 +199,7 @@ export function ReportPreviewDialog({
       return;
     }
     if (unlockStatus?.unlocked) {
-      await generateAndDownload();
+      setPendingDownload(true);
       return;
     }
     if ((unlockStatus?.freeUnlocksRemaining ?? 0) > 0) {
@@ -197,9 +216,23 @@ export function ReportPreviewDialog({
   const handleClaimFree = async () => {
     try {
       await claimFree.mutateAsync(jobId);
+      queryClient.setQueryData(
+        jobReportUnlockQueryKey(jobId),
+        (prev: JobReportUnlockStatus | undefined) => ({
+          unlocked: true,
+          method: prev?.unlimited ? 'exempt' : 'free',
+          freeUnlocksRemaining: prev?.unlimited ? Math.max(prev.freeUnlocksRemaining, 1) : 0,
+          priceAudCents: prev?.priceAudCents ?? JOB_REPORT_UNLOCK_PRICE_AUD_CENTS,
+          unlimited: Boolean(prev?.unlimited),
+          editsAllowed: prev?.editsAllowed ?? true,
+          editWindowDays: prev?.editWindowDays ?? JOB_EDIT_WINDOW_DAYS,
+          editLockedAt: prev?.editLockedAt ?? null,
+          editDaysRemaining: prev?.editDaysRemaining ?? null,
+        }),
+      );
       toast.success('Job unlocked. Downloading PDF…');
       setConfirmFreeOpen(false);
-      await generateAndDownload();
+      setPendingDownload(true);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not unlock this job');
     }
@@ -216,9 +249,9 @@ export function ReportPreviewDialog({
         await queryClient.invalidateQueries({ queryKey: jobReportUnlockQueryKey(jobId) });
         await queryClient.invalidateQueries({ queryKey: ['job', jobId] });
         if (!status.unlocked) return;
+        queryClient.setQueryData(jobReportUnlockQueryKey(jobId), status);
         toast.success('Report unlocked. Downloading PDF…');
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        if (!cancelled) await generateAndDownload();
+        if (!cancelled) setPendingDownload(true);
       } catch (err) {
         if (!cancelled) {
           toast.error(err instanceof Error ? err.message : 'Unlock is still processing');
@@ -236,6 +269,35 @@ export function ReportPreviewDialog({
     // Run when returning from Stripe Checkout once report data is ready.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoDownloadAfterUnlock, jobId, !!data, open]);
+
+  useEffect(() => {
+    if (!pendingDownload || !open || !reportUnlocked || !data) return;
+    let cancelled = false;
+
+    (async () => {
+      for (let i = 0; i < 40; i++) {
+        if (reportRef.current) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        if (cancelled) return;
+      }
+      if (cancelled) return;
+      if (!reportRef.current) {
+        toast.error('Preview is not ready. Try Download PDF again.');
+        setPendingDownload(false);
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      if (cancelled) return;
+      await generateAndDownload();
+      if (!cancelled) setPendingDownload(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // generateAndDownload closes over current data/reportRef; rerun when unlock mounts the report.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingDownload, open, reportUnlocked, !!data]);
 
   const renderReport = (data: JobReportData) => {
     switch (reportType) {
@@ -318,7 +380,7 @@ export function ReportPreviewDialog({
           {/* Preview area */}
           <ScrollArea className="flex-1 bg-muted/50">
             <div className="p-4 flex justify-center">
-              {isLoading ? (
+              {isLoading || unlockLoading ? (
                 <div className="flex items-center gap-2 py-20">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   <span className="text-muted-foreground">Loading report data...</span>
@@ -327,8 +389,19 @@ export function ReportPreviewDialog({
                 <div className="py-20 text-center text-destructive">
                   Failed to load report data. Please try again.
                 </div>
-              ) : data ? (
+              ) : !reportUnlocked ? (
                 <div className="shadow-lg">
+                  <LockedReportTeaser
+                    job={data?.job}
+                    reportTitle={REPORT_TITLES[reportType]}
+                    companyName={data?.tenant?.name}
+                    unlockStatus={unlockStatus}
+                    onUnlock={handleDownload}
+                    unlockBusy={generating || isLoading || !data || unlockLoading || awaitingPaidUnlock || pendingDownload || claimFree.isPending}
+                  />
+                </div>
+              ) : data ? (
+                <div className="shadow-lg" data-testid="unlocked-report-preview" data-floodex-report="full">
                   {renderReport(data)}
                 </div>
               ) : null}
@@ -532,11 +605,7 @@ export function ReportPreviewDialog({
 
         <DialogFooter className="px-6 py-4 border-t flex-col sm:flex-row gap-3 sm:items-center">
           <div className="flex-1 text-xs text-muted-foreground">
-            {unlockStatus?.unlocked
-              ? 'This job is unlocked. Re-downloads stay free.'
-              : (unlockStatus?.freeUnlocksRemaining ?? 0) > 0
-                ? 'Preview is free. Your first job unlock is complimentary.'
-                : `Preview is free. Download requires a ${formatUnlockPriceAud(unlockStatus?.priceAudCents)} unlock for this job.`}
+            {reportPreviewFooterCopy(unlockStatus)}
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -544,10 +613,10 @@ export function ReportPreviewDialog({
             </Button>
             <Button 
               onClick={handleDownload} 
-              disabled={generating || isLoading || !data || unlockLoading || awaitingPaidUnlock}
+              disabled={generating || isLoading || !data || unlockLoading || awaitingPaidUnlock || pendingDownload}
               className="gap-2"
             >
-              {generating || awaitingPaidUnlock ? (
+              {generating || awaitingPaidUnlock || pendingDownload ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   {awaitingPaidUnlock ? 'Unlocking…' : 'Generating...'}

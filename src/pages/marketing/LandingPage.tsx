@@ -168,7 +168,7 @@ export default function LandingPage() {
             Free to use.<br />$29 to export.
           </h2>
           <p className="text-[17px] text-muted-foreground max-w-[480px] leading-[1.7] font-medium mb-8">
-            Use FloodEx free for jobs, readings, photos, and in-app previews. Unlock a job PDF for AUD $29. First unlock is free.
+            Use FloodEx free for jobs, readings, and photos. Unlock a job to preview and download the PDF for AUD $29. First unlock is free.
           </p>
           <div className="max-w-[480px] border rounded-3xl p-6 bg-foreground text-white mb-14">
             <div className="flex items-baseline gap-2 mb-2">

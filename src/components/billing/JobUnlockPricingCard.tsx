@@ -32,8 +32,8 @@ export function JobUnlockPricingCard() {
             <Badge variant="secondary">AUD</Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-2">
-            Everything in FloodEx is free to use — jobs, chambers, readings, photos, and in-app report previews.
-            You only pay when you download or export a PDF.
+            Everything in FloodEx is free to use — jobs, chambers, readings, and photos.
+            Full report preview and PDF download unlock per job.
           </p>
         </div>
 

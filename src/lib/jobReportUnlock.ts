@@ -73,6 +73,32 @@ export function isJobIdentityLocked(job: {
   return Boolean(job?.report_unlocked_at);
 }
 
+/** Full in-app report HTML is only mounted after the job is unlocked. */
+export function shouldRenderFullReportPreview(
+  status: JobReportUnlockStatus | null | undefined,
+): boolean {
+  return Boolean(status?.unlocked);
+}
+
+/** Footer copy for the report preview dialog. */
+export function reportPreviewFooterCopy(
+  status: JobReportUnlockStatus | null | undefined,
+): string {
+  if (!status) {
+    return 'Job data is free. Full report preview unlocks with download.';
+  }
+  if (status.unlocked) {
+    return 'This job is unlocked. Re-downloads stay free.';
+  }
+  if (status.unlimited) {
+    return 'Job data is free. Full report preview unlocks with download. Unlimited includes complimentary unlocks.';
+  }
+  if (status.freeUnlocksRemaining > 0) {
+    return 'Job data is free. Full report preview unlocks with download. Your first job unlock is complimentary.';
+  }
+  return `Job data is free. Full report preview unlocks with download. Download requires a ${formatUnlockPriceAud(status.priceAudCents)} unlock for this job.`;
+}
+
 /**
  * A job becomes read-only once its 28-day post-unlock editing window closes,
  * unless the company is on the Unlimited plan.

@@ -272,3 +272,35 @@ html {
     @apply scale-[0.98];
   }
 }
+
+/* Locked report preview: print must not yield the full report or job page. */
+.locked-report-print-sheet {
+  display: none;
+}
+
+@media print {
+  body.floodex-report-locked * {
+    visibility: hidden !important;
+  }
+
+  body.floodex-report-locked .locked-report-print-sheet,
+  body.floodex-report-locked .locked-report-print-sheet * {
+    visibility: visible !important;
+  }
+
+  body.floodex-report-locked .locked-report-print-sheet {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    padding: 2.5rem;
+    background: white;
+    color: black;
+    font-family: Arial, sans-serif;
+  }
+
+  body.floodex-report-locked .locked-report-print-sheet h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+}
