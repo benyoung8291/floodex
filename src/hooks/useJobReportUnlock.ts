@@ -23,13 +23,17 @@ export interface UnlimitedSubscriptionState {
 
 /** Current company's Unlimited ($250/month) subscription state. */
 export function useUnlimitedSubscription() {
+  const { effectiveTenantId } = useAuth();
+
   return useQuery({
-    queryKey: unlimitedSubscriptionQueryKey,
+    queryKey: [...unlimitedSubscriptionQueryKey, effectiveTenantId],
     staleTime: 30_000,
+    enabled: !!effectiveTenantId,
     queryFn: async (): Promise<UnlimitedSubscriptionState> => {
       const { data, error } = await supabase
         .from('subscriptions')
         .select('status, cancel_at_period_end, current_period_end')
+        .eq('tenant_id', effectiveTenantId!)
         .eq('product_lookup_key', UNLIMITED_PLAN_PRODUCT_LOOKUP_KEY)
         .order('created_at', { ascending: false })
         .limit(1)
