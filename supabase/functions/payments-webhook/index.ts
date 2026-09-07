@@ -17,23 +17,11 @@ function log(level: LogLevel, scope: string, message: string, ctx: Record<string
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
-  const url = new URL(req.url);
-  const rawEnv = url.searchParams.get("env");
-  if (rawEnv !== "sandbox" && rawEnv !== "live") {
-    log("error", "request", "Invalid env query parameter", { rawEnv });
-    return new Response(JSON.stringify({ received: true, ignored: "invalid env" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-  const env: StripeEnv = rawEnv;
+  const env: StripeEnv = "live";
 
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
-  const secret =
-    env === "live"
-      ? Deno.env.get("PAYMENTS_LIVE_WEBHOOK_SECRET")
-      : Deno.env.get("PAYMENTS_SANDBOX_WEBHOOK_SECRET");
+  const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
   if (!signature || !secret) {
     log("error", "verify", "Missing signature or webhook secret", {
