@@ -49,18 +49,31 @@ Deno.serve(async (req) => {
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("tenant_id", profile.tenant_id)
+      .eq("environment", env)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (!subscription?.stripe_customer_id) {
-      return json({ error: "No billing account yet — subscribe first" }, 404);
+    let customerId = subscription?.stripe_customer_id ?? null;
+
+    if (!customerId) {
+      const { data: tenant } = await supabase
+        .from("tenants")
+        .select("stripe_customer_id")
+        .eq("id", profile.tenant_id)
+        .maybeSingle();
+      customerId = tenant?.stripe_customer_id ?? null;
+    }
+
+    if (!customerId) {
+      return json({ error: "No billing account yet — make a payment first" }, 404);
     }
 
     const stripe = createStripeClient(env);
     const session = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
+      customer: customerId,
       return_url: returnUrl,
+      ...(PORTAL_CONFIGURATION_ID ? { configuration: PORTAL_CONFIGURATION_ID } : {}),
     });
 
     return json({ url: session.url });
