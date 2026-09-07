@@ -24,7 +24,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useUpdateJob } from '@/hooks/useUpdateJob';
-import { isJobIdentityLocked } from '@/lib/jobReportUnlock';
+import { useUnlimitedSubscription } from '@/hooks/useJobReportUnlock';
+import {
+  isJobIdentityLocked,
+  isJobFrozen,
+  JOB_EDIT_WINDOW_DAYS,
+} from '@/lib/jobReportUnlock';
+
 import type { Tables } from '@/integrations/supabase/types';
 
 const schema = z.object({
