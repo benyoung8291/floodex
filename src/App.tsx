@@ -34,6 +34,7 @@ const Team = lazy(() => import("./pages/Team"));
 const Billing = lazy(() => import("./pages/Billing"));
 const Settings = lazy(() => import("./pages/Settings"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminActivity = lazy(() => import("./pages/admin/AdminActivity"));
 const AdminTenants = lazy(() => import("./pages/admin/AdminTenants"));
 const AdminTenantDetail = lazy(() => import("./pages/admin/AdminTenantDetail"));
 const AdminTiers = lazy(() => import("./pages/admin/AdminTiers"));
@@ -112,6 +113,7 @@ const App = () => (
 
               {/* Super admin routes */}
               <Route path="/admin" element={<ProtectedRoute requiredRoles={['super_admin']}><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
+              <Route path="/admin/activity" element={<ProtectedRoute requiredRoles={['super_admin']}><AdminLayout><AdminActivity /></AdminLayout></ProtectedRoute>} />
               <Route path="/admin/tenants" element={<ProtectedRoute requiredRoles={['super_admin']}><AdminLayout><AdminTenants /></AdminLayout></ProtectedRoute>} />
               <Route path="/admin/tenants/:tenantId" element={<ProtectedRoute requiredRoles={['super_admin']}><AdminLayout><AdminTenantDetail /></AdminLayout></ProtectedRoute>} />
               <Route path="/admin/tiers" element={<ProtectedRoute requiredRoles={['super_admin']}><AdminLayout><AdminTiers /></AdminLayout></ProtectedRoute>} />

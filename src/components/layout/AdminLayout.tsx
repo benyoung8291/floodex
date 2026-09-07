@@ -9,6 +9,7 @@ import {
   LogOut,
   Shield,
   ChevronLeft,
+  Activity,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,6 +21,7 @@ interface AdminLayoutProps {
 
 const navItems = [
   { path: '/admin', label: 'Overview', icon: LayoutDashboard },
+  { path: '/admin/activity', label: 'Activity', icon: Activity },
   { path: '/admin/tenants', label: 'Tenants', icon: Building2 },
   { path: '/admin/tiers', label: 'Pricing', icon: CreditCard },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
