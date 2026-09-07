@@ -12,7 +12,7 @@ export const faqs = [
   },
   {
     question: "How much does a report unlock cost?",
-    answer: "AUD $29.00 one-time per job. Your first job unlock is free. Once a job is unlocked, you can re-download PDFs for that same job forever at no extra cost.",
+    answer: "AUD $29.00 one-time per job. Your first job unlock is free. Once a job is unlocked, you can re-download PDFs for that same job forever at no extra cost, and you have 28 days to keep editing it. If you run a lot of jobs, the Unlimited plan is AUD $250 per month for unlimited report downloads with no edit freeze.",
   },
   {
     question: "Can I change an unlocked job to a different customer?",

@@ -218,7 +218,7 @@ export default function LandingPage() {
               <Button variant="outline" className="rounded-full border-white/30 text-white font-bold hover:bg-white/10 text-base py-4 px-8">Log in</Button>
             </Link>
           </div>
-          <p className="mt-8 text-xs text-white/25 font-medium">Free to use · First PDF unlock free · Then AUD $29 per job</p>
+          <p className="mt-8 text-xs text-white/25 font-medium">Free to use · First PDF unlock free · Then AUD $29 per job · Unlimited AUD $250/mo</p>
         </AnimateIn>
       </div>
     </MarketingLayout>

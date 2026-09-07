@@ -13,8 +13,8 @@ export default function PricingPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="FloodEx Pricing – Free to use, AUD $29 per job report unlock"
-        description="FloodEx is free to use for jobs, readings, photos, and in-app report previews. Unlock a job to download PDFs for AUD $29. First unlock is free. Optional monthly plans remain available."
+        title="FloodEx Pricing – Free to use, $29 per report or $250/mo unlimited"
+        description="FloodEx is free to use for jobs, readings, photos, and in-app report previews. Unlock a job report for AUD $29 (first unlock free), or go Unlimited for AUD $250 per month."
         keywords="flood restoration software pricing, water damage software cost, FloodEx pricing, restoration software plans, pay per job report, cheap restoration software, Encircle pricing alternative, free restoration software, water damage app pricing"
         canonicalPath="/pricing"
         structuredData={generateBreadcrumbData([
@@ -86,7 +86,7 @@ export default function PricingPage() {
           {[
             { icon: Shield, title: 'Free to use', desc: 'Jobs, readings, photos, previews' },
             { icon: Clock, title: 'First unlock free', desc: 'Then $29 AUD per job' },
-            { icon: CreditCard, title: 'No subscription required', desc: 'Pay only when you export' },
+            { icon: CreditCard, title: 'Or go Unlimited', desc: 'AUD $250/mo, unlimited reports' },
           ].map((item) => (
             <div key={item.title} className="flex items-center gap-3">
               <item.icon className="h-7 w-7 text-primary" />
