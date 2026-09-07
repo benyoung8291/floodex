@@ -18,7 +18,7 @@ export const JOB_IDENTITY_LOCK_FIELDS = [
   'start_date',
 ] as const;
 
-export type JobReportUnlockMethod = 'free' | 'paid' | 'exempt';
+export type JobReportUnlockMethod = 'free' | 'paid' | 'exempt' | 'comped';
 
 export interface JobReportUnlockStatus {
   unlocked: boolean;
