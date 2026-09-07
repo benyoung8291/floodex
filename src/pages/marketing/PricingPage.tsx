@@ -69,60 +69,8 @@ export default function PricingPage() {
           </Link>
         </motion.div>
 
-        <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-muted-foreground mb-4">Optional monthly plans</div>
-        <p className="text-sm text-muted-foreground max-w-[540px] mb-8">
-          Monthly plans are a future option for teams that want a bundled subscription. They are not required to use FloodEx.
-        </p>
-
-        {isLoading ? (
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-[400px] rounded-3xl bg-secondary animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 max-w-[960px]">
-            {sortedTiers.map((tier) => {
-              const isFeatured = tier.name.toLowerCase() === 'pro';
-              return (
-                <StaggerItem key={tier.id} className="min-w-0">
-                  <div className={`border rounded-3xl p-6 lg:p-8 flex flex-col relative h-full min-w-0 overflow-visible transition-shadow hover:shadow-lg ${
-                    isFeatured
-                      ? "bg-foreground border-foreground/80 shadow-xl"
-                      : "bg-white border-border/50"
-                  }`}>
-                    {isFeatured && (
-                      <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 bg-accent text-white text-[11px] font-black px-4 py-[3px] rounded-full whitespace-nowrap uppercase tracking-[0.04em]">Most popular</div>
-                    )}
-                    <div className={`text-2xl font-black tracking-tight mb-[6px] ${isFeatured ? "text-white" : "text-foreground"}`}>{tier.name}</div>
-                    <div className="flex items-baseline gap-[3px] mb-[6px] whitespace-nowrap overflow-visible shrink-0">
-                      <span className={`text-4xl xl:text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-white" : ""}`}>${tier.monthly_price}</span>
-                      <span className={`text-[15px] font-semibold shrink-0 ${isFeatured ? "text-white/40" : "text-muted-foreground"}`}>/ month</span>
-                    </div>
-                    <div className={`text-[13px] font-medium leading-[1.65] mb-6 pb-6 border-b ${isFeatured ? "text-white/40 border-white/10" : "text-muted-foreground border-border/40"}`}>
-                      {tier.jobs_included} jobs · {tier.readings_included.toLocaleString()} readings/mo
-                    </div>
-                    <ul className="flex-1 flex flex-col gap-[9px] mb-6">
-                      {['Unlimited photos', 'PDF reports', 'Photo annotations'].map((f) => (
-                        <li key={f} className={`text-[13px] font-semibold flex items-start gap-2 ${isFeatured ? "text-white/55" : "text-foreground/70"}`}>
-                          <span className={`font-black shrink-0 ${isFeatured ? "text-accent" : "text-primary"}`}>✓</span>{f}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link to="/auth?tab=signup">
-                      <button className={`block w-full text-center py-[13px] rounded-full text-sm font-extrabold cursor-pointer transition-all ${
-                        isFeatured
-                          ? "bg-accent text-white hover:opacity-85 border-none"
-                          : "bg-transparent border border-border/50 text-foreground hover:bg-secondary"
-                      }`}>Start free trial</button>
-                    </Link>
-                  </div>
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
-        )}
       </section>
+
 
       {/* Trust Badges */}
       <section className="mx-4 md:mx-8 rounded-[32px] bg-secondary px-6 md:px-12 py-12">

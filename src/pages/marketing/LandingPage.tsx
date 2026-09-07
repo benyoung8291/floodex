@@ -180,55 +180,13 @@ export default function LandingPage() {
             </div>
             <p className="text-sm text-white/60">First unlock free · Re-downloads stay free · No monthly plan required</p>
           </div>
-          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-muted-foreground mb-6">Optional monthly plans</div>
         </AnimateIn>
-
-        {tiersLoading ? (
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-96 rounded-3xl bg-secondary animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 max-w-[960px]">
-            {sortedTiers.map((tier) => {
-              const isFeatured = tier.name.toLowerCase() === 'pro';
-              return (
-                <StaggerItem key={tier.id} className="min-w-0">
-                  <div className={`border rounded-3xl p-6 lg:p-8 flex flex-col relative h-full min-w-0 overflow-visible transition-shadow hover:shadow-lg ${
-                    isFeatured
-                      ? "bg-foreground border-foreground/80 shadow-xl"
-                      : "bg-white border-border/50"
-                  }`}>
-                    {isFeatured && (
-                      <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 bg-accent text-white text-[11px] font-black px-4 py-[3px] rounded-full whitespace-nowrap uppercase tracking-[0.04em]">Most popular</div>
-                    )}
-                    <div className={`text-2xl font-black tracking-tight mb-[6px] ${isFeatured ? "text-white" : "text-foreground"}`}>{tier.name}</div>
-                    <div className="flex items-baseline gap-[3px] mb-[6px] whitespace-nowrap overflow-visible shrink-0">
-                      <span className={`text-4xl xl:text-5xl font-black tracking-[-0.04em] leading-none ${isFeatured ? "text-white" : ""}`}>${tier.monthly_price}</span>
-                      <span className={`text-[15px] font-semibold shrink-0 ${isFeatured ? "text-white/40" : "text-muted-foreground"}`}>/ month</span>
-                    </div>
-                    <div className={`text-[13px] font-medium leading-[1.65] mb-6 pb-6 border-b ${isFeatured ? "text-white/40 border-white/10" : "text-muted-foreground border-border/40"}`}>
-                      {tier.jobs_included} jobs · {tier.readings_included.toLocaleString()} readings/mo
-                    </div>
-                    <Link to="/auth?tab=signup" className="mt-auto">
-                      <button className={`block w-full text-center py-[13px] rounded-full text-sm font-extrabold cursor-pointer transition-all ${
-                        isFeatured
-                          ? "bg-accent text-white hover:opacity-85 border-none"
-                          : "bg-transparent border border-border/50 text-foreground hover:bg-secondary"
-                      }`}>Start free trial</button>
-                    </Link>
-                  </div>
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
-        )}
         <AnimateIn>
-          <div className="mt-10 text-center">
+          <div className="mt-2">
             <Link to="/pricing" className="text-sm text-primary font-bold hover:underline">View full pricing details →</Link>
           </div>
         </AnimateIn>
+
       </section>
 
       {/* FAQ */}
