@@ -228,6 +228,10 @@ export function useAdminTenantDetail(tenantId: string | undefined) {
         job_count: jobCount || 0,
         reading_count: readingCount || 0,
         tier_name: (tenant.subscription_tiers as any)?.name || null,
+        free_unlocks_remaining: Math.max(
+          0,
+          1 - Number((tenant as any).free_report_unlocks_used ?? 0),
+        ),
       };
     },
     enabled: !!tenantId,
