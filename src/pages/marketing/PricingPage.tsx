@@ -91,44 +91,33 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Feature Comparison Table */}
-      {sortedTiers.length > 0 && (
-        <section className="px-4 md:px-8 py-20 md:py-28 max-w-6xl mx-auto">
-          <AnimateIn>
-            <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-foreground mb-14">Compare all features</h2>
-          </AnimateIn>
-          <div className="overflow-x-auto -mx-4 px-4">
-            <table className="w-full min-w-[600px]">
-              <thead>
-                <tr className="border-b border-border/40">
-                  <th className="text-left py-4 px-3 font-extrabold text-sm text-foreground">Feature</th>
-                  {sortedTiers.map((tier) => (
-                    <th key={tier.id} className={`text-center py-4 px-2 font-extrabold text-sm ${tier.name.toLowerCase() === 'pro' ? "text-primary" : "text-foreground"}`}>
-                      {tier.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {featureMatrix.map((row, i) => (
-                  <tr key={i} className="hover:bg-secondary/50 transition-colors">
-                    <td className="py-3 px-3 text-sm text-foreground font-medium">{row.feature}</td>
-                    {row.values.map((value, j) => (
-                      <td key={j} className="text-center py-3 px-2">
-                        {typeof value === 'boolean' ? (
-                          value ? <Check className="h-5 w-5 text-primary mx-auto" /> : <X className="h-5 w-5 text-muted-foreground/30 mx-auto" />
-                        ) : (
-                          <span className="text-sm font-mono text-foreground">{value}</span>
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      {/* What's included */}
+      <section className="px-4 md:px-8 py-20 md:py-28 max-w-6xl mx-auto">
+        <AnimateIn>
+          <h2 className="text-[clamp(34px,4.5vw,56px)] font-black leading-[1.0] tracking-[-0.04em] text-foreground mb-14">Everything is included</h2>
+        </AnimateIn>
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            'Unlimited jobs and losses',
+            'Unlimited moisture readings',
+            'Unlimited photos and annotations',
+            'Drying chambers and equipment tracking',
+            'Mud maps and floor plans',
+            'Digital forms and signatures',
+            'Cost items and estimates',
+            'In-app report previews',
+            'Unlimited team members',
+          ].map((item) => (
+            <StaggerItem key={item}>
+              <div className="flex items-start gap-3 rounded-2xl border border-border/50 bg-white p-5 h-full">
+                <Check className="h-5 w-5 text-primary shrink-0 mt-[2px]" />
+                <span className="text-sm font-semibold text-foreground">{item}</span>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      </section>
+
 
       {/* FAQ */}
       <section className="mx-4 md:mx-8 rounded-[32px] bg-secondary px-6 md:px-12 py-20 md:py-28">
