@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileDown, Gift, RefreshCw } from 'lucide-react';
+import { FileDown, Gift, Lock, RefreshCw } from 'lucide-react';
 import { useTenant } from '@/hooks/useTenant';
-import { formatUnlockPriceAud } from '@/lib/jobReportUnlock';
+import { formatUnlockPriceAud, JOB_EDIT_WINDOW_DAYS } from '@/lib/jobReportUnlock';
+
 
 export function JobUnlockPricingCard() {
   const { data: tenant } = useTenant();
