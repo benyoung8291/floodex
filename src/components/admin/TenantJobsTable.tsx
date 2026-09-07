@@ -206,12 +206,10 @@ export function TenantJobsTable({ tenantId, jobs, isLoading, billing }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {jobs.map((job) => {
+            {visibleJobs.map((job) => {
               const unlock = unlockLabel(job);
-              const frozen =
-                !unlimited &&
-                !!job.report_edit_locked_at &&
-                new Date(job.report_edit_locked_at).getTime() <= Date.now();
+              const frozen = isFrozen(job);
+
 
               return (
                 <TableRow key={job.id}>
