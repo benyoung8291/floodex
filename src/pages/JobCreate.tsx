@@ -65,7 +65,7 @@ export default function JobCreate() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const createJob = useCreateJob();
-  const { data: tenant } = useTenant();
+  const { data: hasOverrideCode } = useHasOverrideCode();
 
   const { isTenantAdmin, isSupervisor } = useAuth();
 
