@@ -121,6 +121,7 @@ export default function AdminTenants() {
                     <TableHead>Tenant</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Plan</TableHead>
+                    <TableHead>Free unlock</TableHead>
                     <TableHead className="text-center">
                       <Users className="w-4 h-4 inline mr-1" />
                       Users
@@ -139,7 +140,11 @@ export default function AdminTenants() {
                 </TableHeader>
                 <TableBody>
                   {tenants.map(tenant => (
-                    <TableRow key={tenant.id}>
+                    <TableRow
+                      key={tenant.id}
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/admin/tenants/${tenant.id}`)}
+                    >
                       <TableCell>
                         <div>
                           <p className="font-medium">{tenant.name}</p>
@@ -152,7 +157,12 @@ export default function AdminTenants() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{tenant.tier_name || 'Free'}</span>
+                        <span className="text-sm">{tenant.tier_name || 'Pay per job'}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {tenant.free_unlocks_remaining > 0 ? 'Available' : 'Used'}
+                        </span>
                       </TableCell>
                       <TableCell className="text-center">
                         <span className="font-medium">{tenant.user_count}</span>
@@ -168,7 +178,7 @@ export default function AdminTenants() {
                           {format(new Date(tenant.created_at), 'MMM d, yyyy')}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
