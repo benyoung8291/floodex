@@ -7,7 +7,6 @@ import { HeroSection } from '@/components/marketing/HeroSection';
 import { AnimateIn, StaggerContainer, StaggerItem, ScaleIn } from '@/components/marketing/AnimateIn';
 import { FAQAccordion, faqs as faqData } from '@/components/marketing/FAQAccordion';
 import { AppMockup } from '@/components/marketing/AppMockup';
-import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import {
   Droplets, Camera, FileText, Users, Activity, Thermometer,
   ClipboardCheck, Calculator, Check, Zap, Shield, Smartphone,
@@ -31,8 +30,6 @@ const whyReasons = [
 
 export default function LandingPage() {
   const { user } = useAuth();
-  const { data: tiers, isLoading: tiersLoading } = useSubscriptionTiers();
-  const sortedTiers = tiers?.sort((a, b) => a.monthly_price - b.monthly_price) || [];
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
