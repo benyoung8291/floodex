@@ -56,7 +56,10 @@ interface JobEditDialogProps {
 
 export function JobEditDialog({ open, onOpenChange, job }: JobEditDialogProps) {
   const updateJob = useUpdateJob();
+  const { data: subscription } = useUnlimitedSubscription();
   const identityLocked = isJobIdentityLocked(job);
+  const frozen = isJobFrozen(job, { unlimited: subscription?.active });
+
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
