@@ -1600,6 +1600,32 @@ export type Database = {
           },
         ]
       }
+      tenant_security_settings: {
+        Row: {
+          override_code_hash: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          override_code_hash?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          override_code_hash?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_security_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           address: string | null
@@ -1621,7 +1647,6 @@ export type Database = {
           stripe_subscription_id: string | null
           subscription_status: Database["public"]["Enums"]["subscription_status"]
           subscription_tier_id: string | null
-          supervisor_override_code_hash: string | null
           temperature_unit: string
           trial_ends_at: string | null
           updated_at: string
@@ -1646,7 +1671,6 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           subscription_tier_id?: string | null
-          supervisor_override_code_hash?: string | null
           temperature_unit?: string
           trial_ends_at?: string | null
           updated_at?: string
@@ -1671,7 +1695,6 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           subscription_tier_id?: string | null
-          supervisor_override_code_hash?: string | null
           temperature_unit?: string
           trial_ends_at?: string | null
           updated_at?: string
