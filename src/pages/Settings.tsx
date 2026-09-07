@@ -334,7 +334,7 @@ export default function Settings() {
                             {...field} 
                             type={showOverrideCode ? 'text' : 'password'}
                             disabled={isPending}
-                            placeholder="Enter override code"
+                            placeholder={hasOverrideCode ? 'Enter a new code to replace the current one' : 'Enter override code'}
                             className="pr-10"
                           />
                           <Button
@@ -353,7 +353,9 @@ export default function Settings() {
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Required when technicians encounter critical safety hazards that need supervisor approval to proceed
+                        {hasOverrideCode
+                          ? 'A code is set. For security it is never shown again — enter a new one to replace it.'
+                          : 'Required when technicians encounter critical safety hazards that need supervisor approval to proceed'}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
