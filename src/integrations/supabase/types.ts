@@ -1179,6 +1179,7 @@ export type Database = {
           outdoor_humidity: number | null
           outdoor_reading_at: string | null
           outdoor_temperature: number | null
+          report_edit_locked_at: string | null
           report_unlock_fingerprint: string | null
           report_unlock_method: string | null
           report_unlock_stripe_session_id: string | null
@@ -1218,6 +1219,7 @@ export type Database = {
           outdoor_humidity?: number | null
           outdoor_reading_at?: string | null
           outdoor_temperature?: number | null
+          report_edit_locked_at?: string | null
           report_unlock_fingerprint?: string | null
           report_unlock_method?: string | null
           report_unlock_stripe_session_id?: string | null
@@ -1257,6 +1259,7 @@ export type Database = {
           outdoor_humidity?: number | null
           outdoor_reading_at?: string | null
           outdoor_temperature?: number | null
+          report_edit_locked_at?: string | null
           report_unlock_fingerprint?: string | null
           report_unlock_method?: string | null
           report_unlock_stripe_session_id?: string | null
@@ -1791,6 +1794,7 @@ export type Database = {
           outdoor_humidity: number | null
           outdoor_reading_at: string | null
           outdoor_temperature: number | null
+          report_edit_locked_at: string | null
           report_unlock_fingerprint: string | null
           report_unlock_method: string | null
           report_unlock_stripe_session_id: string | null
@@ -1847,6 +1851,7 @@ export type Database = {
           outdoor_humidity: number | null
           outdoor_reading_at: string | null
           outdoor_temperature: number | null
+          report_edit_locked_at: string | null
           report_unlock_fingerprint: string | null
           report_unlock_method: string | null
           report_unlock_stripe_session_id: string | null
@@ -1895,6 +1900,7 @@ export type Database = {
           outdoor_humidity: number | null
           outdoor_reading_at: string | null
           outdoor_temperature: number | null
+          report_edit_locked_at: string | null
           report_unlock_fingerprint: string | null
           report_unlock_method: string | null
           report_unlock_stripe_session_id: string | null
@@ -1939,6 +1945,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      job_edits_allowed: { Args: { _job_id: string }; Returns: boolean }
       job_report_unlock_fingerprint: {
         Args: {
           p_address: string
@@ -1969,6 +1976,7 @@ export type Database = {
         }[]
       }
       tenant_billing_active: { Args: { _tenant_id: string }; Returns: boolean }
+      tenant_has_unlimited: { Args: { _tenant_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "super_admin" | "tenant_admin" | "supervisor" | "technician"
