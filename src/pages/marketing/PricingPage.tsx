@@ -13,8 +13,8 @@ export default function PricingPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="FloodEx Pricing – Free to use, AUD $29 per job report unlock"
-        description="FloodEx is free to use for jobs, readings, photos, and in-app report previews. Unlock a job to download PDFs for AUD $29. First unlock is free. Optional monthly plans remain available."
+        title="FloodEx Pricing – Free to use, $29 per report or $250/mo unlimited"
+        description="FloodEx is free to use for jobs, readings, photos, and in-app report previews. Unlock a job report for AUD $29 (first unlock free), or go Unlimited for AUD $250 per month."
         keywords="flood restoration software pricing, water damage software cost, FloodEx pricing, restoration software plans, pay per job report, cheap restoration software, Encircle pricing alternative, free restoration software, water damage app pricing"
         canonicalPath="/pricing"
         structuredData={generateBreadcrumbData([
@@ -35,24 +35,47 @@ export default function PricingPage() {
           Create jobs, log readings, capture photos, and preview reports in-app for free. Unlock a job to download PDFs for AUD $29. Your first unlock is free, and re-downloads of that job stay free forever.
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24, duration: 0.5 }} className="max-w-[560px] border rounded-3xl p-8 bg-foreground text-white mb-16 shadow-xl">
-          <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-white/50 mb-3">Pay per job</div>
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-5xl font-black tracking-[-0.04em]">$29</span>
-            <span className="text-white/50 font-semibold">AUD one-time / job</span>
-          </div>
-          <ul className="space-y-2 text-sm text-white/70 mb-6">
-            <li>✓ Unlimited jobs, readings, photos, and in-app previews</li>
-            <li>✓ First job unlock free</li>
-            <li>✓ Re-download unlocked jobs forever</li>
-            <li>✓ No monthly subscription required</li>
-          </ul>
-          <Link to="/auth?tab=signup">
-            <button className="block w-full text-center py-[13px] rounded-full text-sm font-extrabold bg-accent text-white hover:opacity-85 border-none cursor-pointer">
-              Start free — first unlock included
-            </button>
-          </Link>
-        </motion.div>
+        <div className="grid gap-6 md:grid-cols-2 max-w-[900px] mb-16">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24, duration: 0.5 }} className="border rounded-3xl p-8 bg-foreground text-white shadow-xl">
+            <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-white/50 mb-3">Pay per job</div>
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-5xl font-black tracking-[-0.04em]">$29</span>
+              <span className="text-white/50 font-semibold">AUD one-time / job</span>
+            </div>
+            <ul className="space-y-2 text-sm text-white/70 mb-6">
+              <li>✓ Unlimited jobs, readings, photos, and in-app previews</li>
+              <li>✓ First job unlock free</li>
+              <li>✓ Re-download unlocked jobs forever</li>
+              <li>✓ 28 days of editing after each unlock</li>
+              <li>✓ No monthly subscription required</li>
+            </ul>
+            <Link to="/auth?tab=signup">
+              <button className="block w-full text-center py-[13px] rounded-full text-sm font-extrabold bg-accent text-white hover:opacity-85 border-none cursor-pointer">
+                Start free — first unlock included
+              </button>
+            </Link>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="border-2 border-primary rounded-3xl p-8 bg-card shadow-xl">
+            <div className="text-xs font-extrabold uppercase tracking-[0.12em] text-muted-foreground mb-3">Unlimited</div>
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-5xl font-black tracking-[-0.04em]">$250</span>
+              <span className="text-muted-foreground font-semibold">AUD / month</span>
+            </div>
+            <ul className="space-y-2 text-sm text-muted-foreground mb-6">
+              <li>✓ Unlimited job report downloads</li>
+              <li>✓ No per-job unlock fees</li>
+              <li>✓ Every job stays editable — no 28-day freeze</li>
+              <li>✓ Cancel any time</li>
+            </ul>
+            <Link to="/auth?tab=signup">
+              <button className="block w-full text-center py-[13px] rounded-full text-sm font-extrabold bg-primary text-primary-foreground hover:opacity-85 border-none cursor-pointer">
+                Go Unlimited
+              </button>
+            </Link>
+          </motion.div>
+        </div>
+
 
       </section>
 
@@ -63,7 +86,7 @@ export default function PricingPage() {
           {[
             { icon: Shield, title: 'Free to use', desc: 'Jobs, readings, photos, previews' },
             { icon: Clock, title: 'First unlock free', desc: 'Then $29 AUD per job' },
-            { icon: CreditCard, title: 'No subscription required', desc: 'Pay only when you export' },
+            { icon: CreditCard, title: 'Or go Unlimited', desc: 'AUD $250/mo, unlimited reports' },
           ].map((item) => (
             <div key={item.title} className="flex items-center gap-3">
               <item.icon className="h-7 w-7 text-primary" />

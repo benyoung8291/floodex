@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileDown, Gift, RefreshCw } from 'lucide-react';
+import { FileDown, Gift, Lock, RefreshCw } from 'lucide-react';
 import { useTenant } from '@/hooks/useTenant';
-import { formatUnlockPriceAud } from '@/lib/jobReportUnlock';
+import { formatUnlockPriceAud, JOB_EDIT_WINDOW_DAYS } from '@/lib/jobReportUnlock';
+
 
 export function JobUnlockPricingCard() {
   const { data: tenant } = useTenant();
@@ -43,7 +44,16 @@ export function JobUnlockPricingCard() {
             <RefreshCw className="w-4 h-4 mt-0.5 text-primary shrink-0" />
             <span>Once a job is unlocked, re-download PDFs for that same job forever free.</span>
           </li>
+          <li className="flex items-start gap-2">
+            <Lock className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+            <span>
+              After an unlock you have {JOB_EDIT_WINDOW_DAYS} days to keep editing that job. After
+              that it becomes read-only (still viewable and downloadable) so a paid job can’t be
+              reused for a new loss.
+            </span>
+          </li>
         </ul>
+
       </CardContent>
     </Card>
   );

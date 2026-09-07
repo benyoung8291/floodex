@@ -24,7 +24,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useUpdateJob } from '@/hooks/useUpdateJob';
-import { isJobIdentityLocked } from '@/lib/jobReportUnlock';
+import { useUnlimitedSubscription } from '@/hooks/useJobReportUnlock';
+import {
+  isJobIdentityLocked,
+  isJobFrozen,
+  JOB_EDIT_WINDOW_DAYS,
+} from '@/lib/jobReportUnlock';
+
 import type { Tables } from '@/integrations/supabase/types';
 
 const schema = z.object({
@@ -50,7 +56,10 @@ interface JobEditDialogProps {
 
 export function JobEditDialog({ open, onOpenChange, job }: JobEditDialogProps) {
   const updateJob = useUpdateJob();
+  const { data: subscription } = useUnlimitedSubscription();
   const identityLocked = isJobIdentityLocked(job);
+  const frozen = isJobFrozen(job, { unlimited: subscription?.active });
+
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -99,8 +108,17 @@ export function JobEditDialog({ open, onOpenChange, job }: JobEditDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
+        {frozen && (
+          <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
+            This job is now read-only. Its {JOB_EDIT_WINDOW_DAYS}-day editing window after unlock
+            has closed — you can still view and download the report. Go Unlimited (AUD $250/month)
+            to keep every job editable.
+          </div>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
             <FormField
               control={form.control}
               name="customer_name"
@@ -258,10 +276,11 @@ export function JobEditDialog({ open, onOpenChange, job }: JobEditDialogProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={updateJob.isPending}>
+              <Button type="submit" disabled={updateJob.isPending || frozen}>
                 {updateJob.isPending ? 'Saving…' : 'Save changes'}
               </Button>
             </DialogFooter>
+
           </form>
         </Form>
       </DialogContent>
