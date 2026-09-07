@@ -22,7 +22,14 @@ import {
 import { useAdminTenantDetail, useTenantUsers, useTenantJobs } from '@/hooks/useAdminData';
 import { useAdminActivity } from '@/hooks/useAdminActivity';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
+import { TenantJobsTable, type AdminTenantJob } from '@/components/admin/TenantJobsTable';
+import { useAdminTenantBilling } from '@/hooks/useAdminJobUnlock';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  JOB_REPORT_UNLOCK_PRICE_AUD,
+  UNLIMITED_PLAN_PRICE_AUD,
+  formatAud,
+} from '@/lib/jobReportUnlock';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Table,
@@ -66,6 +73,7 @@ export default function AdminTenantDetail() {
   const { data: tenant, isLoading: tenantLoading } = useAdminTenantDetail(tenantId);
   const { data: users, isLoading: usersLoading } = useTenantUsers(tenantId);
   const { data: jobs, isLoading: jobsLoading } = useTenantJobs(tenantId);
+  const { data: billing } = useAdminTenantBilling(tenantId);
   const {
     data: tenantActivity,
     isLoading: activityLoading,
@@ -301,47 +309,27 @@ export default function AdminTenantDetail() {
         <TabsContent value="jobs">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Recent Jobs</CardTitle>
+              <CardTitle className="text-base">Jobs &amp; Report Access</CardTitle>
             </CardHeader>
-            <CardContent>
-              {jobsLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
-                </div>
-              ) : jobs && jobs.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Address</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Created</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {jobs.map(job => (
-                      <TableRow key={job.id}>
-                        <TableCell>
-                          <p className="font-medium">{job.customer_name}</p>
-                        </TableCell>
-                        <TableCell>
-                          <p className="text-sm text-muted-foreground">{job.address}</p>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{job.status}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-muted-foreground">
-                            {format(new Date(job.created_at), 'MMM d, yyyy')}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">No jobs found</p>
-              )}
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <Badge variant={billing?.unlimitedActive ? 'default' : 'outline'}>
+                  {billing?.unlimitedActive
+                    ? `Unlimited · ${formatAud(UNLIMITED_PLAN_PRICE_AUD)}/mo`
+                    : `Pay per job · ${formatAud(JOB_REPORT_UNLOCK_PRICE_AUD)}`}
+                </Badge>
+                <span className="text-muted-foreground">
+                  {billing
+                    ? `${billing.freeUnlocksRemaining} complimentary unlock${billing.freeUnlocksRemaining === 1 ? '' : 's'} remaining`
+                    : 'Loading allowance…'}
+                </span>
+              </div>
+              <TenantJobsTable
+                tenantId={tenantId}
+                jobs={jobs as AdminTenantJob[] | undefined}
+                isLoading={jobsLoading}
+                billing={billing}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -358,26 +346,46 @@ export default function AdminTenantDetail() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="p-4 rounded-lg bg-muted/50">
                   <p className="text-sm text-muted-foreground mb-1">Current Plan</p>
-                  <p className="font-semibold">{tenant.tier_name || 'Free'}</p>
+                  <p className="font-semibold">
+                    {billing?.unlimitedActive
+                      ? `Unlimited — ${formatAud(UNLIMITED_PLAN_PRICE_AUD)}/month`
+                      : `Pay per job — ${formatAud(JOB_REPORT_UNLOCK_PRICE_AUD)} per report`}
+                  </p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50">
-                  <p className="text-sm text-muted-foreground mb-1">Status</p>
-                  <Badge variant={getStatusBadgeVariant(tenant.subscription_status)}>
-                    {tenant.subscription_status}
+                  <p className="text-sm text-muted-foreground mb-1">Subscription Status</p>
+                  <Badge variant={getStatusBadgeVariant(billing?.unlimitedStatus || 'none')}>
+                    {billing?.unlimitedStatus || 'no subscription'}
                   </Badge>
+                  {billing?.cancelAtPeriodEnd && billing.currentPeriodEnd && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Cancels {format(new Date(billing.currentPeriodEnd), 'MMM d, yyyy')}
+                    </p>
+                  )}
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50">
+                  <p className="text-sm text-muted-foreground mb-1">Complimentary Unlocks Left</p>
+                  <p className="font-semibold">{billing?.freeUnlocksRemaining ?? '-'}</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50">
+                  <p className="text-sm text-muted-foreground mb-1">Renews / Ends</p>
+                  <p className="font-semibold">
+                    {billing?.currentPeriodEnd
+                      ? format(new Date(billing.currentPeriodEnd), 'MMM d, yyyy')
+                      : '-'}
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/50 md:col-span-2">
                   <p className="text-sm text-muted-foreground mb-1">Stripe Customer</p>
-                  <p className="font-mono text-sm">{tenant.stripe_customer_id || '-'}</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <p className="text-sm text-muted-foreground mb-1">Stripe Subscription</p>
-                  <p className="font-mono text-sm">{tenant.stripe_subscription_id || '-'}</p>
+                  <p className="font-mono text-sm">
+                    {billing?.stripeCustomerId || tenant.stripe_customer_id || '-'}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="activity">
           <Card>
