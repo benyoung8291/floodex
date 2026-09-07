@@ -17,8 +17,6 @@ import { useTenant } from '@/hooks/useTenant';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react';
-import { useBillingAccess } from '@/hooks/useBillingAccess';
-import { BillingLockedNotice } from '@/components/billing/BillingLockedNotice';
 
 
 const safetyCheckSchema = z.object({
@@ -68,7 +66,6 @@ export default function JobCreate() {
   const [currentStep, setCurrentStep] = useState(0);
   const createJob = useCreateJob();
   const { data: tenant } = useTenant();
-  const { data: billingAccess, isLoading: billingLoading } = useBillingAccess();
 
   const { isTenantAdmin, isSupervisor } = useAuth();
 
@@ -220,20 +217,6 @@ export default function JobCreate() {
   };
 
   const isLastStep = currentStep === steps.length - 1;
-
-  if (!billingLoading && billingAccess && !billingAccess.canWrite) {
-    return (
-      <div className="flex h-full min-h-0 flex-1 flex-col bg-background">
-        <div className="max-w-lg mx-auto w-full px-4 py-6 space-y-4">
-          <Button type="button" variant="ghost" onClick={() => navigate(-1)} className="min-h-[44px]">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <BillingLockedNotice action="Creating a new loss" />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background">

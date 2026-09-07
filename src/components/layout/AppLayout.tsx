@@ -6,8 +6,6 @@ import { MobileBottomNav } from './MobileBottomNav';
 import { TopHeader } from './TopHeader';
 import { CaptureFAB } from './CaptureFAB';
 import { CommandPalette, useCommandPalette } from './CommandPalette';
-import { UsageWarningBanner } from '@/components/billing/UsageWarningBanner';
-import { TrialBanner } from '@/components/billing/TrialBanner';
 import { ImpersonationBanner } from '@/components/admin/ImpersonationBanner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -19,7 +17,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const isMobile = useIsMobile();
   const location = useLocation();
-  const { user, isTenantAdmin, isImpersonating } = useAuth();
+  const { isImpersonating } = useAuth();
   const palette = useCommandPalette();
 
   // Wizard routes keep their own Cancel/Back/Next — hide overlapping chrome
@@ -39,12 +37,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         isJobWizard ? "min-h-0 overflow-hidden" : "min-h-dvh",
         isImpersonating && "pt-10"
       )}>
-        {user && isTenantAdmin && !isImpersonating && (
-          <>
-            <TrialBanner />
-            <UsageWarningBanner />
-          </>
-        )}
+
+
 
         <TopHeader onOpenSearch={() => palette.setOpen(true)} />
 
