@@ -41,7 +41,9 @@ export function parseJobReportUnlockStatus(raw: unknown): JobReportUnlockStatus 
   return {
     unlocked: Boolean(data.unlocked),
     method:
-      method === 'free' || method === 'paid' || method === 'exempt' ? method : null,
+      method === 'free' || method === 'paid' || method === 'exempt' || method === 'comped'
+        ? method
+        : null,
     freeUnlocksRemaining: Number(data.freeUnlocksRemaining ?? 0),
     priceAudCents: Number(data.priceAudCents ?? JOB_REPORT_UNLOCK_PRICE_AUD_CENTS),
     unlimited: Boolean(data.unlimited),
