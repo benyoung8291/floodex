@@ -1,6 +1,10 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { createStripeClient, type StripeEnv } from "../_shared/stripe.ts";
 
+// Live customer portal configuration: card updates, invoice history,
+// billing details, and cancel-at-period-end.
+const LIVE_PORTAL_CONFIGURATION_ID = "bpc_1UCw6t9KBgTtt8xb9iMwlI0A";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
