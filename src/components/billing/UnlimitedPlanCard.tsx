@@ -22,6 +22,12 @@ export function UnlimitedPlanCard() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const active = subscription?.active ?? false;
 
+  const openPortal = () =>
+    portal.mutate(undefined, {
+      onError: (error) =>
+        toast.error(error instanceof Error ? error.message : 'Could not open billing'),
+    });
+
   const renewal = subscription?.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd).toLocaleDateString('en-AU', {
         day: 'numeric',
@@ -61,36 +67,54 @@ export function UnlimitedPlanCard() {
           </li>
         </ul>
 
-        {active && renewal && (
-          <p className="text-sm text-muted-foreground">
-            {subscription?.cancelAtPeriodEnd
-              ? `Cancels on ${renewal}.`
-              : `Renews on ${renewal}.`}
-          </p>
+        {active && subscription?.cancelAtPeriodEnd && renewal && (
+          <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm space-y-1">
+            <p className="font-medium">Your plan ends on {renewal}.</p>
+            <p className="text-muted-foreground">
+              Until then nothing changes. After that date, reports you already unlocked stay
+              viewable and downloadable, and new reports go back to {formatAud(29)} each. You can
+              resume any time before {renewal}.
+            </p>
+          </div>
+        )}
+
+        {active && !subscription?.cancelAtPeriodEnd && renewal && (
+          <p className="text-sm text-muted-foreground">Renews on {renewal}.</p>
+        )}
+
+        {subscription?.status === 'past_due' && (
+          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+            Your last payment didn’t go through. Update your card to keep Unlimited active.
+          </div>
         )}
 
         {!isPaymentsConfigured() ? (
           <p className="text-sm text-muted-foreground">
             Card payments aren’t available yet on this site.
           </p>
-        ) : active ? (
-          <Button
-            variant="outline"
-            onClick={() =>
-              portal.mutate(undefined, {
-                onError: (error) =>
-                  toast.error(error instanceof Error ? error.message : 'Could not open billing'),
-              })
-            }
-            disabled={portal.isPending}
-          >
-            {portal.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Manage plan
-          </Button>
+        ) : active || subscription?.status === 'past_due' ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={subscription?.cancelAtPeriodEnd ? 'default' : 'outline'}
+              onClick={openPortal}
+              disabled={portal.isPending}
+            >
+              {portal.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {subscription?.cancelAtPeriodEnd ? 'Resume plan' : 'Manage plan'}
+            </Button>
+            <Button variant="ghost" onClick={openPortal} disabled={portal.isPending}>
+              Update card &amp; invoices
+            </Button>
+          </div>
         ) : (
-          <Button onClick={() => setCheckoutOpen(true)} disabled={isLoading}>
-            Go Unlimited — {formatAud(UNLIMITED_PLAN_PRICE_AUD)}/month
-          </Button>
+          <div className="space-y-2">
+            <Button onClick={() => setCheckoutOpen(true)} disabled={isLoading}>
+              Go Unlimited — {formatAud(UNLIMITED_PLAN_PRICE_AUD)}/month
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Cancel, change your card, or download invoices any time from the billing portal.
+            </p>
+          </div>
         )}
       </CardContent>
 

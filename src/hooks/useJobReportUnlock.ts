@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { getStripeEnvironment } from '@/lib/stripe';
 import {
   parseJobReportUnlockStatus,
@@ -22,13 +23,17 @@ export interface UnlimitedSubscriptionState {
 
 /** Current company's Unlimited ($250/month) subscription state. */
 export function useUnlimitedSubscription() {
+  const { effectiveTenantId } = useAuth();
+
   return useQuery({
-    queryKey: unlimitedSubscriptionQueryKey,
+    queryKey: [...unlimitedSubscriptionQueryKey, effectiveTenantId],
     staleTime: 30_000,
+    enabled: !!effectiveTenantId,
     queryFn: async (): Promise<UnlimitedSubscriptionState> => {
       const { data, error } = await supabase
         .from('subscriptions')
         .select('status, cancel_at_period_end, current_period_end')
+        .eq('tenant_id', effectiveTenantId!)
         .eq('product_lookup_key', UNLIMITED_PLAN_PRODUCT_LOOKUP_KEY)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -130,6 +135,7 @@ export async function waitForJobReportUnlock(
 
 /** Polls until the Unlimited subscription shows as active after checkout. */
 export async function waitForUnlimitedSubscription(
+  tenantId: string,
   opts: { attempts?: number; delayMs?: number } = {},
 ): Promise<boolean> {
   const attempts = opts.attempts ?? 15;
@@ -139,6 +145,7 @@ export async function waitForUnlimitedSubscription(
     const { data } = await supabase
       .from('subscriptions')
       .select('status')
+      .eq('tenant_id', tenantId)
       .eq('product_lookup_key', UNLIMITED_PLAN_PRODUCT_LOOKUP_KEY)
       .in('status', ['active', 'trialing'])
       .limit(1)

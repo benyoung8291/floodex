@@ -156,6 +156,25 @@ Deno.serve(async (req) => {
         const tenantId = session.metadata?.tenantId;
         const jobId = session.metadata?.jobId;
 
+        // Remember the Stripe customer for this company so they can always open
+        // the billing portal (receipts, card details) even without a subscription.
+        const sessionCustomerId =
+          typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+        if (tenantId && sessionCustomerId) {
+          const { error: customerError } = await supabase
+            .from("tenants")
+            .update({ stripe_customer_id: sessionCustomerId })
+            .eq("id", tenantId)
+            .is("stripe_customer_id", null);
+          if (customerError) {
+            log("warn", "checkout.completed", "Could not store tenant stripe_customer_id", {
+              eventId,
+              tenantId,
+              error: customerError.message,
+            });
+          }
+        }
+
         if (purpose !== "job_report_unlock") {
           log("info", "checkout.completed", "Unhandled checkout purpose — skipping", {
             eventId,

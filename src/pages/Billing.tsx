@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import { PaymentTestModeBanner } from '@/components/billing/PaymentTestModeBanner';
 import { JobUnlockPricingCard } from '@/components/billing/JobUnlockPricingCard';
 import { UnlimitedPlanCard } from '@/components/billing/UnlimitedPlanCard';
@@ -13,6 +14,7 @@ import {
 export default function Billing() {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const { effectiveTenantId } = useAuth();
   const hasShownToast = useRef(false);
 
   useEffect(() => {
@@ -23,15 +25,15 @@ export default function Billing() {
       hasShownToast.current = true;
     }
 
-    if (searchParams.get('subscription') === 'success') {
+    if (searchParams.get('subscription') === 'success' && effectiveTenantId) {
       hasShownToast.current = true;
       toast.success('Payment received. Activating your Unlimited plan…');
-      void waitForUnlimitedSubscription().then((active) => {
+      void waitForUnlimitedSubscription(effectiveTenantId).then((active) => {
         queryClient.invalidateQueries({ queryKey: unlimitedSubscriptionQueryKey });
         if (active) toast.success('Unlimited plan is active.');
       });
     }
-  }, [searchParams, queryClient]);
+  }, [searchParams, queryClient, effectiveTenantId]);
 
   return (
     <div className="space-y-6">

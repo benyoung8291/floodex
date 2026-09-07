@@ -1,14 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileDown, Gift, Lock, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FileDown, Gift, Loader2, Lock, RefreshCw, Receipt } from 'lucide-react';
+import { toast } from 'sonner';
 import { useTenant } from '@/hooks/useTenant';
+import { useBillingPortal } from '@/hooks/useJobReportUnlock';
 import { formatUnlockPriceAud, JOB_EDIT_WINDOW_DAYS } from '@/lib/jobReportUnlock';
+import { isPaymentsConfigured } from '@/lib/stripe';
 
 
 export function JobUnlockPricingCard() {
   const { data: tenant } = useTenant();
+  const portal = useBillingPortal();
   const used = tenant?.free_report_unlocks_used ?? 0;
   const freeRemaining = tenant?.billing_exempt ? 1 : Math.max(0, 1 - used);
+  const hasBillingAccount = Boolean(tenant?.stripe_customer_id);
 
   return (
     <Card>
@@ -54,6 +60,25 @@ export function JobUnlockPricingCard() {
           </li>
         </ul>
 
+        {isPaymentsConfigured() && hasBillingAccount && (
+          <Button
+            variant="outline"
+            onClick={() =>
+              portal.mutate(undefined, {
+                onError: (error) =>
+                  toast.error(error instanceof Error ? error.message : 'Could not open billing'),
+              })
+            }
+            disabled={portal.isPending}
+          >
+            {portal.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Receipt className="w-4 h-4 mr-2" />
+            )}
+            Receipts &amp; payment details
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
