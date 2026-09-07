@@ -50,7 +50,7 @@ export const SignupEmail = ({
           ) by clicking the button below:
         </Text>
         <Button className="dm-btn" style={button} href={confirmationUrl}>
-          Verify Email
+          Confirm my email
         </Button>
         <Text style={footer}>
           If you didn't create an account, you can safely ignore this email.
