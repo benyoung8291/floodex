@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import { PaymentTestModeBanner } from '@/components/billing/PaymentTestModeBanner';
 import { JobUnlockPricingCard } from '@/components/billing/JobUnlockPricingCard';
 import { UnlimitedPlanCard } from '@/components/billing/UnlimitedPlanCard';
