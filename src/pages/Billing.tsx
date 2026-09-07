@@ -14,6 +14,7 @@ import {
 export default function Billing() {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const { effectiveTenantId } = useAuth();
   const hasShownToast = useRef(false);
 
   useEffect(() => {
@@ -24,15 +25,15 @@ export default function Billing() {
       hasShownToast.current = true;
     }
 
-    if (searchParams.get('subscription') === 'success') {
+    if (searchParams.get('subscription') === 'success' && effectiveTenantId) {
       hasShownToast.current = true;
       toast.success('Payment received. Activating your Unlimited plan…');
-      void waitForUnlimitedSubscription().then((active) => {
+      void waitForUnlimitedSubscription(effectiveTenantId).then((active) => {
         queryClient.invalidateQueries({ queryKey: unlimitedSubscriptionQueryKey });
         if (active) toast.success('Unlimited plan is active.');
       });
     }
-  }, [searchParams, queryClient]);
+  }, [searchParams, queryClient, effectiveTenantId]);
 
   return (
     <div className="space-y-6">
