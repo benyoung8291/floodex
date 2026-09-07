@@ -1621,7 +1621,7 @@ export type Database = {
           stripe_subscription_id: string | null
           subscription_status: Database["public"]["Enums"]["subscription_status"]
           subscription_tier_id: string | null
-          supervisor_override_code: string | null
+          supervisor_override_code_hash: string | null
           temperature_unit: string
           trial_ends_at: string | null
           updated_at: string
@@ -1646,7 +1646,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           subscription_tier_id?: string | null
-          supervisor_override_code?: string | null
+          supervisor_override_code_hash?: string | null
           temperature_unit?: string
           trial_ends_at?: string | null
           updated_at?: string
@@ -1671,7 +1671,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
           subscription_tier_id?: string | null
-          supervisor_override_code?: string | null
+          supervisor_override_code_hash?: string | null
           temperature_unit?: string
           trial_ends_at?: string | null
           updated_at?: string
@@ -1975,8 +1975,13 @@ export type Database = {
           read_ct: number
         }[]
       }
-      tenant_billing_active: { Args: { _tenant_id: string }; Returns: boolean }
+      set_supervisor_override_code: {
+        Args: { _code: string }
+        Returns: boolean
+      }
+      tenant_has_override_code: { Args: never; Returns: boolean }
       tenant_has_unlimited: { Args: { _tenant_id: string }; Returns: boolean }
+      verify_supervisor_override: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
       app_role: "super_admin" | "tenant_admin" | "supervisor" | "technician"
