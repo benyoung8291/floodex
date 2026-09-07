@@ -135,6 +135,7 @@ export async function waitForJobReportUnlock(
 
 /** Polls until the Unlimited subscription shows as active after checkout. */
 export async function waitForUnlimitedSubscription(
+  tenantId: string,
   opts: { attempts?: number; delayMs?: number } = {},
 ): Promise<boolean> {
   const attempts = opts.attempts ?? 15;
@@ -144,6 +145,7 @@ export async function waitForUnlimitedSubscription(
     const { data } = await supabase
       .from('subscriptions')
       .select('status')
+      .eq('tenant_id', tenantId)
       .eq('product_lookup_key', UNLIMITED_PLAN_PRODUCT_LOOKUP_KEY)
       .in('status', ['active', 'trialing'])
       .limit(1)
