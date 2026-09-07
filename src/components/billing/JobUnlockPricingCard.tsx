@@ -60,6 +60,25 @@ export function JobUnlockPricingCard() {
           </li>
         </ul>
 
+        {isPaymentsConfigured() && hasBillingAccount && (
+          <Button
+            variant="outline"
+            onClick={() =>
+              portal.mutate(undefined, {
+                onError: (error) =>
+                  toast.error(error instanceof Error ? error.message : 'Could not open billing'),
+              })
+            }
+            disabled={portal.isPending}
+          >
+            {portal.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Receipt className="w-4 h-4 mr-2" />
+            )}
+            Receipts &amp; payment details
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
