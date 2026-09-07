@@ -158,7 +158,41 @@ export function TenantJobsTable({ tenantId, jobs, isLoading, billing }: Props) {
 
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by customer or address..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <div className="flex gap-2">
+          {([
+            { value: 'all', label: 'All jobs' },
+            { value: 'locked', label: 'Locked reports' },
+            { value: 'frozen', label: 'Frozen' },
+          ] as const).map((option) => (
+            <Button
+              key={option.value}
+              size="sm"
+              variant={filter === option.value ? 'default' : 'outline'}
+              onClick={() => setFilter(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {visibleJobs.length === 0 && (
+        <p className="text-center text-muted-foreground py-8">
+          No jobs match this search or filter
+        </p>
+      )}
+
+      <div className={visibleJobs.length === 0 ? 'hidden' : 'overflow-x-auto'}>
         <Table>
           <TableHeader>
             <TableRow>
