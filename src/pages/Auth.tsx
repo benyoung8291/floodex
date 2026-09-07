@@ -167,8 +167,7 @@ export default function Auth() {
           toast.error(error.message);
         }
       } else {
-        setConfirmationEmail(validated.email);
-        setShowEmailConfirmation(true);
+        toast.success('Account created — welcome to FloodEx!');
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
