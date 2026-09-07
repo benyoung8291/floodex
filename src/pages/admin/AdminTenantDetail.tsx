@@ -66,6 +66,11 @@ export default function AdminTenantDetail() {
   const { data: tenant, isLoading: tenantLoading } = useAdminTenantDetail(tenantId);
   const { data: users, isLoading: usersLoading } = useTenantUsers(tenantId);
   const { data: jobs, isLoading: jobsLoading } = useTenantJobs(tenantId);
+  const {
+    data: tenantActivity,
+    isLoading: activityLoading,
+    error: activityError,
+  } = useAdminActivity({ tenantId: tenantId ?? null, limit: 100 });
 
   const handleImpersonate = () => {
     if (tenant) {
