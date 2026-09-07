@@ -4,26 +4,11 @@ import { MarketingLayout } from '@/components/marketing/MarketingLayout';
 import { SEOHead, generateBreadcrumbData } from '@/components/marketing/SEOHead';
 import { AnimateIn, StaggerContainer, StaggerItem } from '@/components/marketing/AnimateIn';
 import { FAQAccordion } from '@/components/marketing/FAQAccordion';
-import { useSubscriptionTiers } from '@/hooks/useSubscriptionTiers';
 import { motion } from 'framer-motion';
-import { Check, X, Shield, Clock, CreditCard } from 'lucide-react';
+import { Check, Shield, Clock, CreditCard } from 'lucide-react';
 
 export default function PricingPage() {
-  const { data: tiers, isLoading } = useSubscriptionTiers();
-  const sortedTiers = tiers?.sort((a, b) => a.monthly_price - b.monthly_price) || [];
 
-  const featureMatrix = [
-    { feature: 'Jobs per month', values: sortedTiers.map(t => String(t.jobs_included)) },
-    { feature: 'Moisture readings', values: sortedTiers.map(t => t.readings_included.toLocaleString()) },
-    { feature: 'Unlimited photos', values: sortedTiers.map(() => true) },
-    { feature: 'Photo annotations', values: sortedTiers.map(() => true) },
-    { feature: 'PDF reports', values: sortedTiers.map(() => true) },
-    { feature: 'Team members', values: ['1', '3', '10', 'Unlimited'] },
-    { feature: 'Equipment tracking', values: [false, true, true, true] },
-    { feature: 'Cost estimates', values: [false, true, true, true] },
-    { feature: 'Custom branding', values: [false, false, true, true] },
-    { feature: 'Priority support', values: [false, false, true, true] },
-  ];
 
   return (
     <MarketingLayout>
