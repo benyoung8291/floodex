@@ -17,7 +17,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const isMobile = useIsMobile();
   const location = useLocation();
-  const { user, isTenantAdmin, isImpersonating } = useAuth();
+  const { isImpersonating } = useAuth();
   const palette = useCommandPalette();
 
   // Wizard routes keep their own Cancel/Back/Next — hide overlapping chrome
