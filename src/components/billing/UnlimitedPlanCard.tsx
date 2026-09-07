@@ -22,6 +22,12 @@ export function UnlimitedPlanCard() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const active = subscription?.active ?? false;
 
+  const openPortal = () =>
+    portal.mutate(undefined, {
+      onError: (error) =>
+        toast.error(error instanceof Error ? error.message : 'Could not open billing'),
+    });
+
   const renewal = subscription?.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd).toLocaleDateString('en-AU', {
         day: 'numeric',
